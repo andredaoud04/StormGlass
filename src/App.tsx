@@ -23,6 +23,7 @@ import {
   getBaseFoodRate,
 } from './data/gameData';
 import { loadProfile, saveProfile } from './services/storage';
+import { getGameScale } from './logic/viewport';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
@@ -49,6 +50,21 @@ import {
 } from 'lucide-react';
 
 export default function App() {
+  const [viewportScale, setViewportScale] = useState(() => typeof window === 'undefined' ? 1 : getGameScale(window.innerWidth, window.visualViewport?.height ?? window.innerHeight));
+  useEffect(() => {
+    const updateScale = () => setViewportScale(getGameScale(
+      window.visualViewport?.width ?? window.innerWidth,
+      window.visualViewport?.height ?? window.innerHeight,
+    ));
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    window.visualViewport?.addEventListener('resize', updateScale);
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      window.visualViewport?.removeEventListener('resize', updateScale);
+    };
+  }, []);
+
   const [profile, setProfile] = useState<PlayerProfile>(() => loadProfile());
   const [activeTab, setActiveTab] = useState<'battle' | 'upgrades' | 'dungeons' | 'cards' | 'shop'>('battle');
   const [showHomeModal, setShowHomeModal] = useState(false);
@@ -1181,10 +1197,11 @@ export default function App() {
   const combatTheme = getCombatTheme(enemyAgeId, battleType);
   const currentStageEnemyAgeId = getAgeByIndex(profile.opponentStage - 1).id;
   const currentBattleBackground = getBattleBackgroundImage(currentStageEnemyAgeId);
+  const idleTheme = getCombatTheme(currentStageEnemyAgeId, 'campaign');
   return (
-    <div className="flex justify-center h-[100dvh] min-h-0 bg-black text-slate-100 font-sans">
+    <div className="fixed left-0 top-0 w-screen h-[100dvh] flex items-center justify-center overflow-hidden bg-black text-slate-100 font-sans">
       {/* Mobile-first portrait viewport matching user's design */}
-      <div className="w-full max-w-[420px] h-[100dvh] min-h-0 flex flex-col bg-stone-950 border-x-2 border-stone-800 shadow-2xl relative overflow-hidden">
+      <div className="w-[420px] h-[900px] shrink-0 flex flex-col bg-stone-950 border-x-2 border-stone-800 shadow-2xl relative overflow-hidden" style={{ transform: `scale(${viewportScale})`, transformOrigin: 'center center' }}>
         {/* --- GLOBAL IDLE HEADER (Single line, strictly no wrapping, compact) --- */}
         {!inBattle && (
           <header className="flex items-center justify-between px-2.5 py-1.5 bg-stone-950 border-b-2 border-stone-800 select-none z-30 shrink-0">
@@ -1231,7 +1248,7 @@ export default function App() {
         {/* --- MAIN CONTENT AREA --- */}
         {inBattle ? (
           /* ACTIVE COMBAT VIEW: Top Header -> Expansive Battlefield -> Bottom ThemedWall */
-          <div className="flex-1 flex flex-col justify-between h-full overflow-hidden select-none">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden select-none">
             {/* 1. In-Battle Top Header */}
             <BattleHeader
               battleStageNumber={profile.opponentStage}
@@ -1307,18 +1324,18 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30 pointer-events-none" />
 
                 {/* Bases Outposts on the Battlefield (Player on Left, Enemy on Right) matching battle scene */}
-                <div className="absolute left-0 right-0 top-[19%] h-[18%] pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-0">
+                <div className="absolute left-0 right-0 bottom-[26%] h-[32%] pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-0">
                   <BaseOutpostSprite
                     side="player"
                     hpText={`Lvl ${profile.baseLevel}`}
                     hpPercent={1}
-          theme={combatTheme}
+                    theme={idleTheme}
                   />
                   <BaseOutpostSprite
                     side="enemy"
                     hpText={`Stage ${profile.opponentStage}`}
                     hpPercent={1}
-                    theme={combatTheme}
+                    theme={idleTheme}
                   />
                 </div>
 
