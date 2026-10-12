@@ -43,7 +43,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[280px] overflow-hidden select-none bg-slate-950 flex flex-col justify-end">
+    <div className="relative w-full h-full min-h-0 overflow-hidden select-none bg-slate-950 flex flex-col justify-end">
       {/* 16-bit Pixel Art Background Landscape */}
       <img
         src={getBattleBackgroundImage(enemyAge)}
