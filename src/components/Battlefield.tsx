@@ -73,7 +73,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
       )}
 
       {/* Bases Outposts Container (Left: Player, Right: Enemy) matching reference image layout */}
-      <div className="absolute inset-0 pointer-events-none z-10 flex justify-between items-start px-2 sm:px-4 pt-4 sm:pt-6">
+      <div className="absolute inset-0 pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-3 sm:pb-4">
         {/* Player Base (Left Outpost with Blue Heraldic Banner) */}
         <BaseOutpostSprite
           side="player"
