@@ -10,6 +10,9 @@ export const INITIAL_PROFILE: PlayerProfile = {
   runePoints: 1,
   lastDailyClaimDate: null,
   lastDailyKeyRefillDate: null,
+  lastDailySpinDate: null,
+  claimedMissionIds: [],
+  legendsClaimedChapterIds: [],
 
   armyAge: 'stone',
   opponentStage: 1,
@@ -59,6 +62,10 @@ export function loadProfile(): PlayerProfile {
       runes: { ...(parsed.runes || {}) },
       heroRanks: { ...(parsed.heroRanks || {}) },
       clearedEnemyStages: Array.isArray(parsed.clearedEnemyStages) ? parsed.clearedEnemyStages : [],
+      claimedMissionIds: Array.isArray(parsed.claimedMissionIds) ? parsed.claimedMissionIds : [],
+      legendsClaimedChapterIds: Array.isArray(parsed.legendsClaimedChapterIds)
+        ? parsed.legendsClaimedChapterIds
+        : Array.from({ length: Math.max(0, Math.min(3, Number(parsed.legendsChapter || 1) - 1)) }, (_, i) => i + 1),
       unlockedTroopIds: Array.isArray(parsed.unlockedTroopIds) ? parsed.unlockedTroopIds : ['stone_clubber'],
     };
 
