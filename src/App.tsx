@@ -96,6 +96,8 @@ export default function App() {
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(null);
   const battleActiveRef = useRef(false);
   const battleSettledRef = useRef(false);
+  const unitsForVictoryRef = useRef<BattleUnit[]>([]);
+  const heroUsedThisBattleRef = useRef(false);
 
   // Passive Card bonuses
   const cardDmgBonus = Object.entries(profile.cards).reduce((acc, [cId, state]) => {
@@ -183,6 +185,7 @@ export default function App() {
       battleActiveRef.current = true;
       battleSettledRef.current = false;
       bossSpawnedRef.current = false;
+      heroUsedThisBattleRef.current = false;
       lastEnemySpawnRef.current = Date.now();
       const playerAgeDef = getAgeDef(profile.armyAge);
       let targetEnemyAgeDef = getAgeByIndex(profile.opponentStage - 1);
@@ -292,11 +295,12 @@ export default function App() {
 
   // --- DEPLOY HERO ---
   const handleDeployHero = useCallback(() => {
-    if (sessionStats.heroUsed || !profile.equippedHeroId) return;
+    if (!inBattle || isPaused || battleResult || heroUsedThisBattleRef.current || sessionStats.heroUsed || !profile.equippedHeroId || !profile.heroesUnlocked.includes(profile.equippedHeroId)) return;
 
     const heroDef = HEROES.find((h) => h.id === profile.equippedHeroId);
     if (!heroDef) return;
 
+    heroUsedThisBattleRef.current = true;
     sound.playHeroDeploy();
     setSessionStats((prev) => ({ ...prev, heroUsed: true }));
 
@@ -329,12 +333,12 @@ export default function App() {
     };
 
     setUnits((prev) => [...prev, heroUnit]);
-  }, [sessionStats.heroUsed, profile.equippedHeroId, profile.armyAge, cardHpBonus, runeHpBonus, cardDmgBonus, runeDmgBonus]);
+  }, [inBattle, isPaused, battleResult, sessionStats.heroUsed, profile.equippedHeroId, profile.heroesUnlocked, profile.armyAge, cardHpBonus, runeHpBonus, cardDmgBonus, runeDmgBonus]);
 
   // --- SKILL ACTIVATION ---
   const handleActivateSkill = useCallback(
     (skillId: 'stasis' | 'volley' | 'rally') => {
-      if (sessionStats.skillCooldowns[skillId] > 0) return;
+      if (!inBattle || isPaused || battleResult || !profile.equippedSkills.includes(skillId) || !profile.skills[skillId]?.unlocked || sessionStats.skillCooldowns[skillId] > 0) return;
 
       const skillState = profile.skills[skillId];
       const level = skillState?.level || 1;
@@ -392,7 +396,7 @@ export default function App() {
         }));
       }
     },
-    [sessionStats.skillCooldowns, profile.skills, profile.armyAge]
+    [inBattle, isPaused, battleResult, sessionStats.skillCooldowns, profile.equippedSkills, profile.skills, profile.armyAge]
   );
 
   // --- ENEMY SPAWNER ---
@@ -478,6 +482,8 @@ export default function App() {
 
     return () => clearInterval(timer);
   }, [inBattle, isPaused, battleResult, enemyAgeId, battleType, profile.timeline]);
+
+  useEffect(() => { unitsForVictoryRef.current = units; }, [units]);
 
   // --- COMBAT TICK LOOP ---
   const lastTimeRef = useRef<number>(performance.now());
@@ -803,7 +809,7 @@ export default function App() {
         );
 
         // Result check
-        const bossCleared = battleType !== 'bosses' || (bossSpawnedRef.current && !units.some((u) => u.side === 'enemy' && u.role === 'boss' && u.hp > 0));
+        const bossCleared = battleType !== 'bosses' || (bossSpawnedRef.current && !unitsForVictoryRef.current.some((u) => u.side === 'enemy' && u.role === 'boss' && u.hp > 0));
         if (enemyBaseHp <= 0 && !battleResult && battleType !== 'rush' && bossCleared) {
           sound.playVictory();
           setBattleResult('victory');
@@ -818,11 +824,14 @@ export default function App() {
 
     animId = requestAnimationFrame(gameTick);
     return () => cancelAnimationFrame(animId);
-  }, [inBattle, isPaused, battleResult, foodRate, battleType, enemyBaseHp, playerBaseHp, units]);
+  }, [inBattle, isPaused, battleResult, foodRate, battleType, enemyBaseHp, playerBaseHp]);
 
   // --- VICTORY CLAIM ---
   const handleVictoryClaim = useCallback(() => {
-    const earnedGold = sessionStats.goldEarnedInBattle;
+    if (battleSettledRef.current || battleResult !== 'victory') return;
+    battleSettledRef.current = true;
+    battleActiveRef.current = false;
+    const earnedGold = Math.round((sessionStats.goldEarnedInBattle + (battleType === 'campaign' ? 10 : 0)) * (1 + cardCoinBonus + runeCoinBonus));
 
     if (battleType === 'campaign') {
       setProfile((prev) => {
@@ -833,7 +842,7 @@ export default function App() {
 
         return {
           ...prev,
-          gold: prev.gold + earnedGold + 10,
+          gold: prev.gold + earnedGold,
           opponentStage: Math.min(6, prev.opponentStage + 1),
           clearedEnemyStages: cleared,
         };
@@ -881,7 +890,7 @@ export default function App() {
 
     setInBattle(false);
     setBattleResult(null);
-  }, [battleType, sessionStats.goldEarnedInBattle]);
+  }, [battleType, battleResult, sessionStats.goldEarnedInBattle, cardCoinBonus, runeCoinBonus]);
 
   // --- SURVIVAL CONTINUE / CASHOUT ---
   const handleContinueSurvival = useCallback(() => {
@@ -891,6 +900,9 @@ export default function App() {
   }, [battleResult, battleType, sessionStats.survivalWave, playerBaseHp, startBattle]);
 
   const handleCashoutSurvival = useCallback(() => {
+    if (battleSettledRef.current || battleResult !== 'victory' || battleType !== 'survival') return;
+    battleSettledRef.current = true;
+    battleActiveRef.current = false;
     const wavesWon = sessionStats.survivalWave;
     const gemsAwarded = wavesWon * 20;
     const runesAwarded = Math.floor(wavesWon / 2);
@@ -905,17 +917,20 @@ export default function App() {
 
     setInBattle(false);
     setBattleResult(null);
-  }, [sessionStats.survivalWave]);
+  }, [sessionStats.survivalWave, battleResult, battleType]);
 
   // --- DEFEAT ACKNOWLEDGE ---
   const handleDefeatAcknowledge = useCallback(() => {
-    const earnedGold = sessionStats.goldEarnedInBattle;
+    if (battleSettledRef.current || battleResult !== 'defeat') return;
+    battleSettledRef.current = true;
+    battleActiveRef.current = false;
+    const earnedGold = battleType === 'campaign' ? Math.round(sessionStats.goldEarnedInBattle * (1 + cardCoinBonus + runeCoinBonus)) : 0;
     if (earnedGold > 0) {
       setProfile((prev) => ({ ...prev, gold: prev.gold + earnedGold }));
     }
     setInBattle(false);
     setBattleResult(null);
-  }, [sessionStats.goldEarnedInBattle]);
+  }, [sessionStats.goldEarnedInBattle, battleResult, battleType, cardCoinBonus, runeCoinBonus]);
 
   const cancelRetreat = () => {
     setShowRetreatConfirm(false);
@@ -924,8 +939,11 @@ export default function App() {
 
   // --- RETREAT / SURRENDER ---
   const handleRetreat = useCallback(() => {
+    if (battleSettledRef.current || !battleActiveRef.current) return;
+    battleSettledRef.current = true;
+    battleActiveRef.current = false;
     sound.playDefeat();
-    const earnedGold = sessionStats.goldEarnedInBattle;
+    const earnedGold = battleType === 'campaign' ? Math.round(sessionStats.goldEarnedInBattle * (1 + cardCoinBonus + runeCoinBonus)) : 0;
     if (earnedGold > 0) {
       setProfile((prev) => ({ ...prev, gold: prev.gold + earnedGold }));
     }
@@ -933,7 +951,7 @@ export default function App() {
     setIsPaused(false);
     setShowRetreatConfirm(false);
     setBattleResult(null);
-  }, [sessionStats.goldEarnedInBattle]);
+  }, [sessionStats.goldEarnedInBattle, battleType, cardCoinBonus, runeCoinBonus]);
 
   // --- UPGRADES ---
   const handleUpgradeFood = () => {
@@ -1514,7 +1532,16 @@ export default function App() {
             isVictory={battleResult === 'victory'}
             battleType={battleType}
             sessionStats={sessionStats}
-            onRetry={() => startBattle(battleType)}
+            onRetry={() => {
+                if (battleResult !== 'defeat') return;
+                if (battleType !== 'campaign' && battleType !== 'hell' && battleType !== 'legends' && profile.keys < 1) {
+                  handleDefeatAcknowledge();
+                  setActiveTab('dungeons');
+                  return;
+                }
+                handleDefeatAcknowledge();
+                startBattle(battleType, { chapterId: sessionStats.legendsChapterId, freeLegendsRetry: battleType === 'legends' });
+              }}
             onContinue={battleType === 'survival' ? handleContinueSurvival : handleVictoryClaim}
             onOpenUpgrades={() => {
               handleDefeatAcknowledge();
