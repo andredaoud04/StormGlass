@@ -1182,9 +1182,9 @@ export default function App() {
   const currentStageEnemyAgeId = getAgeByIndex(profile.opponentStage - 1).id;
   const currentBattleBackground = getBattleBackgroundImage(currentStageEnemyAgeId);
   return (
-    <div className="flex justify-center h-[100dvh] bg-black text-slate-100 font-sans">
+    <div className="flex justify-center h-[100dvh] min-h-0 bg-black text-slate-100 font-sans">
       {/* Mobile-first portrait viewport matching user's design */}
-      <div className="w-full max-w-[420px] h-[100dvh] flex flex-col bg-stone-950 border-x-2 border-stone-800 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-[420px] h-[100dvh] min-h-0 flex flex-col bg-stone-950 border-x-2 border-stone-800 shadow-2xl relative overflow-hidden">
         {/* --- GLOBAL IDLE HEADER (Single line, strictly no wrapping, compact) --- */}
         {!inBattle && (
           <header className="flex items-center justify-between px-2.5 py-1.5 bg-stone-950 border-b-2 border-stone-800 select-none z-30 shrink-0">
@@ -1285,11 +1285,11 @@ export default function App() {
           </div>
         ) : (
           /* IDLE / MENU SCREENS */
-          <div className="flex-1 flex flex-col overflow-hidden relative">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
             {activeTab === 'battle' && (
               /* IDLE HOME SCREEN (Matches battlefield environment) */
               <div
-                className="relative flex-1 flex flex-col justify-between overflow-hidden select-none bg-slate-950"
+                className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden select-none bg-slate-950"
                 style={{
                   backgroundImage: `url(${currentBattleBackground})`,
                   backgroundSize: 'cover',
@@ -1366,7 +1366,7 @@ export default function App() {
                 </div>
 
                 {/* --- LARGE BATTLE CTA BUTTON (Matches Image 2 exactly) --- */}
-                <div className="relative z-20 flex flex-col items-center mb-5 px-6">
+                <div className="relative z-20 flex flex-col items-center mb-3 px-6">
                   <button
                     onClick={() => startBattle('campaign')}
                     className="relative w-56 sm:w-64 h-14 sm:h-16 rounded-2xl bg-gradient-to-b from-blue-400 via-blue-600 to-blue-700 border-4 border-stone-950 shadow-[0_5px_0_#1e3a8a,0_10px_20px_rgba(0,0,0,0.7)] hover:brightness-110 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a] transition-all flex items-center justify-center gap-2.5 sm:gap-3"
@@ -1431,7 +1431,7 @@ export default function App() {
 
         {/* --- BOTTOM NAVIGATION BAR --- */}
         {!inBattle && (
-          <nav className="relative z-30 flex items-center justify-around py-2 px-1.5 bg-stone-950 border-t-4 border-stone-800 select-none shadow-2xl shrink-0">
+          <nav className="relative z-30 flex items-center justify-around py-2 px-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] bg-stone-950 border-t-4 border-stone-800 select-none shadow-2xl shrink-0">
             {/* Dungeons: visible at all times; individual mode unlocks are handled in DungeonsView. */}
               <button
                 onClick={() => setActiveTab('dungeons')}
