@@ -1307,7 +1307,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30 pointer-events-none" />
 
                 {/* Bases Outposts on the Battlefield (Player on Left, Enemy on Right) matching battle scene */}
-                <div className="absolute inset-0 pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-3 sm:pb-4">
+                <div className="absolute left-0 right-0 bottom-[26%] h-[32%] pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-0">
                   <BaseOutpostSprite
                     side="player"
                     hpText={`Lvl ${profile.baseLevel}`}
