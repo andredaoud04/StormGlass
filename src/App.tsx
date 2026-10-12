@@ -1182,9 +1182,9 @@ export default function App() {
   const currentStageEnemyAgeId = getAgeByIndex(profile.opponentStage - 1).id;
   const currentBattleBackground = getBattleBackgroundImage(currentStageEnemyAgeId);
   return (
-    <div className="flex justify-center min-h-screen bg-black text-slate-100 font-sans">
+    <div className="flex justify-center h-[100dvh] bg-black text-slate-100 font-sans">
       {/* Mobile-first portrait viewport matching user's design */}
-      <div className="w-full max-w-[420px] min-h-screen h-screen flex flex-col bg-stone-950 border-x-2 border-stone-800 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-[420px] h-[100dvh] flex flex-col bg-stone-950 border-x-2 border-stone-800 shadow-2xl relative overflow-hidden">
         {/* --- GLOBAL IDLE HEADER (Single line, strictly no wrapping, compact) --- */}
         {!inBattle && (
           <header className="flex items-center justify-between px-2.5 py-1.5 bg-stone-950 border-b-2 border-stone-800 select-none z-30 shrink-0">
