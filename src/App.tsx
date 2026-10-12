@@ -23,6 +23,7 @@ import {
   getBaseFoodRate,
 } from './data/gameData';
 import { loadProfile, saveProfile } from './services/storage';
+import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
 import { Battlefield } from './components/Battlefield';
@@ -177,9 +178,7 @@ export default function App() {
       }
     ) => {
       if (battleActiveRef.current && !battleResult) return;
-      const needsKey = (type === 'rush' || type === 'legends' || type === 'bosses' || type === 'survival')
-        && !(type === 'survival' && (options?.survivalWave || 1) > 1)
-        && !(type === 'legends' && options?.freeLegendsRetry);
+      const needsKey = dungeonEntryKeyCost(type, options) === 1;
       if (needsKey && profile.keys < 1) return;
       if (needsKey) setProfile((prev) => prev.keys > 0 ? { ...prev, keys: prev.keys - 1 } : prev);
       battleActiveRef.current = true;
@@ -836,7 +835,7 @@ export default function App() {
     if (battleSettledRef.current || battleResult !== 'victory') return;
     battleSettledRef.current = true;
     battleActiveRef.current = false;
-    const earnedGold = Math.round((sessionStats.goldEarnedInBattle + (battleType === 'campaign' ? 10 : 0)) * (1 + cardCoinBonus + runeCoinBonus));
+    const earnedGold = battleType === 'campaign' ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus, true) : 0;
 
     if (battleType === 'campaign') {
       setProfile((prev) => {
@@ -860,17 +859,7 @@ export default function App() {
 
       }));
     } else if (battleType === 'legends') {
-      setProfile((prev) => {
-        const chapter = sessionStats.legendsChapterId || prev.legendsChapter;
-        if (chapter < 1 || chapter > 4) return prev;
-        const firstClear = !prev.legendsClaimedChapterIds.includes(chapter);
-        return {
-          ...prev,
-          runePoints: prev.runePoints + (firstClear ? 1 : 0),
-          legendsChapter: Math.min(4, Math.max(prev.legendsChapter, chapter + 1)),
-          legendsClaimedChapterIds: firstClear ? [...prev.legendsClaimedChapterIds, chapter] : prev.legendsClaimedChapterIds,
-        };
-      });
+      setProfile((prev) => settleLegendsFirstClear(prev, sessionStats.legendsChapterId || prev.legendsChapter));
     } else if (battleType === 'bosses') {
       setProfile((prev) => {
         const skillKeys: ('stasis' | 'volley' | 'rally')[] = ['stasis', 'volley', 'rally'];
@@ -934,7 +923,7 @@ export default function App() {
     if (battleSettledRef.current || battleResult !== 'defeat') return;
     battleSettledRef.current = true;
     battleActiveRef.current = false;
-    const earnedGold = battleType === 'campaign' ? Math.round(sessionStats.goldEarnedInBattle * (1 + cardCoinBonus + runeCoinBonus)) : 0;
+    const earnedGold = battleType === 'campaign' ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus) : 0;
     if (earnedGold > 0) {
       setProfile((prev) => ({ ...prev, gold: prev.gold + earnedGold }));
     }
@@ -953,7 +942,7 @@ export default function App() {
     battleSettledRef.current = true;
     battleActiveRef.current = false;
     sound.playDefeat();
-    const earnedGold = battleType === 'campaign' ? Math.round(sessionStats.goldEarnedInBattle * (1 + cardCoinBonus + runeCoinBonus)) : 0;
+    const earnedGold = battleType === 'campaign' ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus) : 0;
     if (earnedGold > 0) {
       setProfile((prev) => ({ ...prev, gold: prev.gold + earnedGold }));
     }
