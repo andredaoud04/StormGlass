@@ -1248,7 +1248,7 @@ export default function App() {
             />
 
             {/* 2. Expansive Battlefield (Takes remaining vertical space, side-view) */}
-            <div className="flex-1 w-full relative overflow-hidden flex flex-col justify-end">
+            <div className="flex-1 min-h-0 w-full relative overflow-hidden flex flex-col justify-end">
               <Battlefield
                 playerAge={profile.armyAge}
                 enemyAge={enemyAgeId}
@@ -1307,7 +1307,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30 pointer-events-none" />
 
                 {/* Bases Outposts on the Battlefield (Player on Left, Enemy on Right) matching battle scene */}
-                <div className="absolute inset-0 pointer-events-none z-10 flex justify-between items-start px-2 sm:px-4 pt-16 sm:pt-20">
+                <div className="absolute inset-0 pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-3 sm:pb-4">
                   <BaseOutpostSprite
                     side="player"
                     hpText={`Lvl ${profile.baseLevel}`}
