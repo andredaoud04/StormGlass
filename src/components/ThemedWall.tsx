@@ -60,13 +60,22 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
             <button
               onClick={onDeployHero}
               disabled={heroUsed}
+              title={equippedHero.name}
+              aria-label={`Deploy ${equippedHero.name}`}
               className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border-4 flex items-center justify-center transition-all ${
                 heroUsed
                   ? 'border-stone-700 bg-stone-900 opacity-50 cursor-not-allowed'
                   : 'border-amber-400 bg-gradient-to-b from-blue-700 via-stone-900 to-amber-950 shadow-[0_0_14px_rgba(245,158,11,0.6)] hover:scale-105 active:scale-95 cursor-pointer'
               }`}
             >
-              <UnitSprite unitId="crusader_champion" size={38} />
+              {equippedHero.id === 'crusader_champion' ? (
+                <UnitSprite unitId={equippedHero.id} size={38} />
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-0.5" aria-hidden="true">
+                  <Crown className="w-5 h-5 text-amber-200" />
+                  <span className="font-pixel text-[5px] text-amber-100">{equippedHero.id === 'iron_marshal' ? 'IRON' : 'NOVA'}</span>
+                </div>
+              )}
               {/* Golden Status / Readiness Bar underneath */}
               <div className="absolute -bottom-2 w-9 sm:w-11 h-2 bg-stone-950 rounded-full border border-stone-700 p-0.5 overflow-hidden shadow">
                 <div
@@ -153,7 +162,7 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
               return (
                 <div
                   key={`empty-unit-${slotIdx}`}
-                  className="h-18 sm:h-20 rounded-xl border-2 border-stone-800 bg-stone-950/80 flex items-center justify-center shadow-inner"
+                  className="h-[84px] sm:h-[92px] rounded-xl border-2 border-stone-800 bg-stone-950/80 flex items-center justify-center shadow-inner"
                 >
                   <Plus className="w-5 h-5 text-stone-600" />
                 </div>
@@ -168,7 +177,7 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
                 key={unit.id}
                 onClick={() => onDeployUnit(unit)}
                 disabled={!canAfford}
-                className={`relative h-18 sm:h-20 rounded-xl border-2 flex flex-col items-center justify-between p-1 transition-all overflow-hidden cursor-pointer ${
+                className={`relative h-[84px] sm:h-[92px] rounded-xl border-2 flex flex-col items-center justify-between p-1 transition-all overflow-hidden cursor-pointer ${
                   canAfford
                     ? 'border-blue-500 bg-gradient-to-b from-blue-900/70 via-blue-950/90 to-stone-950 shadow-[0_4px_10px_rgba(37,99,235,0.35)] hover:border-blue-400 active:scale-95'
                     : 'border-stone-800 bg-stone-950/80 opacity-60 cursor-not-allowed'
@@ -266,28 +275,28 @@ function getThemeBarricadeStyles(theme: EnvironmentTheme) {
   switch (theme) {
     case 'medieval':
       return {
-        wallBg: 'bg-stone-900',
+        wallBg: 'bg-gradient-to-b from-stone-800 via-stone-900 to-stone-950',
         wallBorder: 'border-stone-700',
         cardBg: 'bg-stone-950/90',
         cardBorder: 'border-stone-700',
       };
     case 'desert':
       return {
-        wallBg: 'bg-amber-950/85',
+        wallBg: 'bg-gradient-to-b from-amber-900 via-amber-950 to-stone-950',
         wallBorder: 'border-amber-800',
         cardBg: 'bg-stone-950/90',
         cardBorder: 'border-amber-700',
       };
     case 'ice':
       return {
-        wallBg: 'bg-slate-900',
+        wallBg: 'bg-gradient-to-b from-slate-700 via-slate-900 to-slate-950',
         wallBorder: 'border-cyan-800',
         cardBg: 'bg-slate-950/90',
         cardBorder: 'border-cyan-700',
       };
     case 'hell':
       return {
-        wallBg: 'bg-stone-950',
+        wallBg: 'bg-gradient-to-b from-stone-800 via-stone-950 to-black',
         wallBorder: 'border-red-900',
         cardBg: 'bg-stone-950/90',
         cardBorder: 'border-red-800',
@@ -312,7 +321,7 @@ function renderWallAccents(theme: EnvironmentTheme) {
       return (
         <div className="absolute -top-3 left-0 right-0 flex justify-between px-3 pointer-events-none">
           <div className="w-4 h-4 rounded-sm bg-amber-700/80 border border-amber-950" />
-          <div className="w-12 h-3 bg-blue-600/70 border-x border-b border-blue-900 rounded-b shadow-sm" />
+          <div className="w-12 h-3 bg-gradient-to-b from-amber-500 to-amber-900 border-x border-b border-stone-900 rounded-b shadow-sm" />
           <div className="w-4 h-4 rounded-sm bg-amber-700/80 border border-amber-950" />
         </div>
       );
