@@ -1,12 +1,17 @@
 import { AgeId } from '../../types/game';
 
+import background0 from './battle_medieval_1791770661530.jpg';
+import background1 from './battle_desert_1791770673415.jpg';
+import background2 from './battle_ice_1791770685523.jpg';
+import background3 from './battle_hell_1791770695689.jpg';
+
 // Exporting generated 16-bit pixel art backgrounds matching user reference image (clean, zero characters)
 export const BACKGROUNDS = {
-  idleCampPath: '/src/assets/images/battle_medieval_1791770661530.jpg',
-  battleMedieval: '/src/assets/images/battle_medieval_1791770661530.jpg',
-  battleDesert: '/src/assets/images/battle_desert_1791770673415.jpg',
-  battleIce: '/src/assets/images/battle_ice_1791770685523.jpg',
-  battleHell: '/src/assets/images/battle_hell_1791770695689.jpg',
+  idleCampPath: background0,
+  battleMedieval: background0,
+  battleDesert: background1,
+  battleIce: background2,
+  battleHell: background3,
 };
 
 export const getBattleBackgroundImage = (ageId: AgeId = 'stone') => {
