@@ -860,12 +860,17 @@ export default function App() {
 
       }));
     } else if (battleType === 'legends') {
-      setProfile((prev) => ({
-        ...prev,
-        runePoints: prev.runePoints + 1,
-        legendsChapter: Math.min(4, prev.legendsChapter + 1),
-
-      }));
+      setProfile((prev) => {
+        const chapter = sessionStats.legendsChapterId || prev.legendsChapter;
+        if (chapter < 1 || chapter > 4) return prev;
+        const firstClear = !prev.legendsClaimedChapterIds.includes(chapter);
+        return {
+          ...prev,
+          runePoints: prev.runePoints + (firstClear ? 1 : 0),
+          legendsChapter: Math.min(4, Math.max(prev.legendsChapter, chapter + 1)),
+          legendsClaimedChapterIds: firstClear ? [...prev.legendsClaimedChapterIds, chapter] : prev.legendsClaimedChapterIds,
+        };
+      });
     } else if (battleType === 'bosses') {
       setProfile((prev) => {
         const skillKeys: ('stasis' | 'volley' | 'rally')[] = ['stasis', 'volley', 'rally'];
@@ -895,7 +900,7 @@ export default function App() {
 
     setInBattle(false);
     setBattleResult(null);
-  }, [battleType, battleResult, sessionStats.goldEarnedInBattle, cardCoinBonus, runeCoinBonus]);
+  }, [battleType, battleResult, sessionStats.goldEarnedInBattle, sessionStats.legendsChapterId, cardCoinBonus, runeCoinBonus]);
 
   // --- SURVIVAL CONTINUE / CASHOUT ---
   const handleContinueSurvival = useCallback(() => {
