@@ -99,6 +99,7 @@ export default function App() {
   const battleSettledRef = useRef(false);
   const unitsForVictoryRef = useRef<BattleUnit[]>([]);
   const heroUsedThisBattleRef = useRef(false);
+  const skillLockUntilRef = useRef<Record<'stasis' | 'volley' | 'rally', number>>({ stasis: 0, volley: 0, rally: 0 });
 
   // Passive Card bonuses
   const cardDmgBonus = Object.entries(profile.cards).reduce((acc, [cId, state]) => {
@@ -140,6 +141,15 @@ export default function App() {
   useEffect(() => {
     saveProfile(profile);
   }, [profile]);
+
+  // Pause on browser/tab suspension so time and wave spawns cannot run invisibly.
+  useEffect(() => {
+    const pauseWhenHidden = () => {
+      if (document.visibilityState === 'hidden' && battleActiveRef.current) setIsPaused(true);
+    };
+    document.addEventListener('visibilitychange', pauseWhenHidden);
+    return () => document.removeEventListener('visibilitychange', pauseWhenHidden);
+  }, []);
 
   // Audio mute toggle
   const toggleSound = () => {
@@ -185,6 +195,7 @@ export default function App() {
       battleSettledRef.current = false;
       bossSpawnedRef.current = false;
       heroUsedThisBattleRef.current = false;
+      skillLockUntilRef.current = { stasis: 0, volley: 0, rally: 0 };
       lastEnemySpawnRef.current = Date.now();
       const playerAgeDef = getAgeDef(profile.armyAge);
       let targetEnemyAgeDef = getAgeByIndex(profile.opponentStage - 1);
@@ -342,7 +353,8 @@ export default function App() {
   // --- SKILL ACTIVATION ---
   const handleActivateSkill = useCallback(
     (skillId: 'stasis' | 'volley' | 'rally') => {
-      if (!inBattle || isPaused || battleResult || !profile.equippedSkills.includes(skillId) || !profile.skills[skillId]?.unlocked || sessionStats.skillCooldowns[skillId] > 0) return;
+      if (!inBattle || isPaused || battleResult || !profile.equippedSkills.includes(skillId) || !profile.skills[skillId]?.unlocked || sessionStats.skillCooldowns[skillId] > 0 || Date.now() < skillLockUntilRef.current[skillId]) return;
+      skillLockUntilRef.current[skillId] = Date.now() + (skillId === 'stasis' ? 12000 : skillId === 'volley' ? 10000 : 16000);
 
       const skillState = profile.skills[skillId];
       const level = skillState?.level || 1;
