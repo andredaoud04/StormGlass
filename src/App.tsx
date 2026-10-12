@@ -47,6 +47,7 @@ import {
   ShoppingBag,
   Map as MapIcon,
   Tent,
+  Layers,
 } from 'lucide-react';
 
 export default function App() {
@@ -1461,7 +1462,7 @@ export default function App() {
                 <div className="w-6 h-6 flex items-center justify-center">
                   <MapIcon className="w-5 h-5 text-amber-200" />
                 </div>
-                <span className="font-pixel text-[8px] font-bold">Dungeons</span>
+                <span className="font-pixel text-[9px] font-bold">Dungeons</span>
               </button>
 
             {/* 2. Upgrades (Renamed from Heroes: immediately to the left of Battle) */}
@@ -1475,7 +1476,7 @@ export default function App() {
                 <Shield className="w-5 h-5" />
                 <div className="absolute -top-1 -right-1 text-emerald-400 font-black text-[10px]">▲</div>
               </div>
-              <span className="font-pixel text-[8px] font-bold">Upgrades</span>
+              <span className="font-pixel text-[9px] font-bold">Upgrades</span>
             </button>
 
             {/* 3. Battle (Large highlighted central tab with golden crossed swords) */}
@@ -1488,7 +1489,7 @@ export default function App() {
               }`}
             >
               <Swords className="w-6 h-6 text-amber-400" />
-              <span className="font-pixel text-[8px] font-black">Battle</span>
+              <span className="font-pixel text-[9px] font-black">Battle</span>
             </button>
 
             {/* 4. Cards (Playing cards with red badge) */}
@@ -1499,10 +1500,10 @@ export default function App() {
               }`}
             >
               <div className="relative w-6 h-6 flex items-center justify-center">
-                <span className="text-lg">🎴</span>
+                <Layers className="w-5 h-5 text-amber-200" aria-hidden="true" />
                 <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-600 rounded-full" />
               </div>
-              <span className="font-pixel text-[8px] font-bold">Cards</span>
+              <span className="font-pixel text-[9px] font-bold">Cards</span>
             </button>
 
             {/* 5. Shop (Swapped with Dungeons: Far right position, dedicated solely to currency & rewarded ads) */}
@@ -1515,7 +1516,7 @@ export default function App() {
               <div className="w-6 h-6 flex items-center justify-center">
                 <ShoppingBag className="w-5 h-5" />
               </div>
-              <span className="font-pixel text-[8px] font-bold">Shop</span>
+              <span className="font-pixel text-[9px] font-bold">Shop</span>
             </button>
           </nav>
         )}
