@@ -9,5 +9,6 @@ export function formatCompactNumber(value: number): string {
   const suffix = magnitude === 1e9 ? 'b' : magnitude === 1e6 ? 'm' : 'k';
   const scaled = value / magnitude;
   const fractionDigits = Math.abs(scaled) < 10 ? 2 : Math.abs(scaled) < 100 ? 1 : 0;
-  return scaled.toFixed(fractionDigits).replace(/\.0+$|(?<=\.[0-9]*?)0+$/g, '').replace(/\.$/, '') + suffix;
+  const formatted = scaled.toFixed(fractionDigits);
+  return (formatted.includes('.') ? formatted.replace(/0+$/, '').replace(/\.$/, '') : formatted) + suffix;
 }
