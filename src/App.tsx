@@ -24,6 +24,7 @@ import {
 } from './data/gameData';
 import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
+import { advanceBattleClock, BATTLE_TICK_MS } from './logic/battleClock';
 import { formatCompactNumber } from './logic/formatNumber';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import { sound } from './services/sound';
@@ -521,18 +522,31 @@ export default function App() {
 
   // --- COMBAT TICK LOOP ---
   const lastTimeRef = useRef<number>(performance.now());
+  const battleClockRemainderRef = useRef(0);
+  const enemyBaseHpRef = useRef(enemyBaseHp);
+  const playerBaseHpRef = useRef(playerBaseHp);
+  useEffect(() => { enemyBaseHpRef.current = enemyBaseHp; }, [enemyBaseHp]);
+  useEffect(() => { playerBaseHpRef.current = playerBaseHp; }, [playerBaseHp]);
 
   useEffect(() => {
-    if (!inBattle) return;
+    if (!inBattle) {
+      battleClockRemainderRef.current = 0;
+      return;
+    }
     lastTimeRef.current = performance.now();
+    if (isPaused || battleResult) battleClockRemainderRef.current = 0;
 
     let animId: number;
 
     const gameTick = (currentTime: number) => {
-      const delta = Math.min(0.1, (currentTime - lastTimeRef.current) / 1000);
+      const elapsedMs = currentTime - lastTimeRef.current;
       lastTimeRef.current = currentTime;
+      const advance = advanceBattleClock(battleClockRemainderRef.current, elapsedMs, isPaused || Boolean(battleResult));
+      battleClockRemainderRef.current = advance.remainderMs;
 
-      if (!isPaused && !battleResult) {
+      // Simulation steps are 100ms, independent of rendering FPS.
+      for (let tick = 0; tick < advance.ticks; tick++) {
+        const delta = BATTLE_TICK_MS / 1000;
         // Food flow
         setFood((prev) => prev + foodRate * delta);
 
@@ -847,10 +861,10 @@ export default function App() {
 
         // Result check
         const bossCleared = battleType !== 'bosses' || (bossSpawnedRef.current && !unitsForVictoryRef.current.some((u) => u.side === 'enemy' && u.role === 'boss' && u.hp > 0));
-        if (enemyBaseHp <= 0 && !battleResult && battleType !== 'rush' && bossCleared) {
+        if (enemyBaseHpRef.current <= 0 && !battleResult && battleType !== 'rush' && bossCleared) {
           sound.playVictory();
           setBattleResult('victory');
-        } else if (playerBaseHp <= 0 && !battleResult) {
+        } else if (playerBaseHpRef.current <= 0 && !battleResult) {
           sound.playDefeat();
           setBattleResult('defeat');
         }
@@ -861,7 +875,7 @@ export default function App() {
 
     animId = requestAnimationFrame(gameTick);
     return () => cancelAnimationFrame(animId);
-  }, [inBattle, isPaused, battleResult, foodRate, battleType, enemyBaseHp, playerBaseHp]);
+  }, [inBattle, isPaused, battleResult, foodRate, battleType]);
 
   // --- VICTORY CLAIM ---
   const handleVictoryClaim = useCallback(() => {
