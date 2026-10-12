@@ -7,7 +7,9 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     user-select: none;
     -webkit-user-select: none;
-    overflow-x: hidden;
+    overflow: hidden;
+    height: 100%;
+    overscroll-behavior: none;
   }
 }
 
@@ -39,3 +41,5 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.8);
 }
+
+html, #root { height: 100%; overflow: hidden; overscroll-behavior: none; }
