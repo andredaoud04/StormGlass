@@ -108,36 +108,36 @@ export const DungeonsView: React.FC<DungeonsViewProps> = ({
         </div>
       </div>
       <p className="text-[10px] text-stone-400 px-1 mb-3">Dungeon keys replenish daily. Choose your challenge.</p>
-      <div className="flex flex-col gap-3 overflow-y-auto min-h-0 pb-3">
+      <div className="flex flex-col grid grid-rows-4 gap-1.5 flex-1 min-h-0 overflow-hidden pb-1">
         {([
           { type: 'rush' as DungeonType, name: 'RUSH', subtitle: 'Hold the barricade for 45 seconds', stat: `Wins: ${profile.rushHighWins}`, unlocked: isRushUnlocked, unlockAt: 2, accent: 'red', icon: <Timer size={27}/>, illustration: '⚔️', description: 'Survive 45 seconds of continuous onslaught against enemy waves.' },
           { type: 'legends' as DungeonType, name: 'LEGENDS', subtitle: currentLegendsChapter.title, stat: `Chapter ${currentLegendsChapter.id} · +1 Rune`, unlocked: isLegendsUnlocked, unlockAt: 3, accent: 'blue', icon: <BookOpen size={27}/>, illustration: '📖', description: `Crusader Road Chapter ${currentLegendsChapter.id}: ${currentLegendsChapter.title}`, extraData: {chapterId: currentLegendsChapter.id} },
           { type: 'bosses' as DungeonType, name: 'BOSS HUNT', subtitle: 'Defeat the Gate Colossus', stat: `Stage ${profile.bossStage} · Skill copies`, unlocked: isBossesUnlocked, unlockAt: 4, accent: 'purple', icon: <Skull size={27}/>, illustration: '🐉', description: 'Face the Gate Colossus for skill upgrade copies.' },
           { type: 'survival' as DungeonType, name: 'SURVIVAL', subtitle: 'Survive waves and cash out gems', stat: `Best: ${profile.survivalBestStreak} waves`, unlocked: true, unlockAt: 1, accent: 'emerald', icon: <ShieldAlert size={27}/>, illustration: '🛡️', description: 'Survive increasingly difficult waves with carried base health.' }
         ]).map(mode => (
-          <div key={mode.type} className="relative overflow-hidden rounded-xl border-2 border-amber-900/70 bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 min-h-[124px] p-3 shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="shrink-0 w-16 h-20 rounded-lg bg-stone-950/60 border border-amber-900/40 flex flex-col items-center justify-center gap-1 text-amber-300" aria-hidden="true">
+          <div key={mode.type} className="relative overflow-hidden rounded-xl border-2 border-amber-900/70 bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 min-h-0 p-1.5 sm:p-2 shadow-lg">
+            <div className="flex items-center gap-2 h-full">
+              <div className="shrink-0 w-11 h-11 sm:w-14 sm:h-14 rounded-lg bg-stone-950/60 border border-amber-900/40 flex flex-col items-center justify-center gap-0 text-amber-300" aria-hidden="true">
                 {mode.icon}
-                <span className="text-2xl">{mode.illustration}</span>
+                <span className="text-base">{mode.illustration}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-pixel text-amber-200 text-[12px]">{mode.name}</h3>
-                <p className="text-stone-300 text-[11px] mt-1 leading-snug">{mode.subtitle}</p>
-                <p className="text-amber-400/80 text-[10px] mt-1">{mode.stat}</p>
+                <p className="text-stone-300 text-[10px] mt-0.5 leading-tight">{mode.subtitle}</p>
+                <p className="text-amber-400/80 text-[9px] mt-0.5">{mode.stat}</p>
               </div>
-              <div className="shrink-0 flex flex-col items-center gap-2">
+              <div className="shrink-0 flex flex-col items-center gap-1">
                 <span className="font-pixel text-[10px] text-amber-300 flex items-center gap-1"><Key size={12}/> 1</span>
                 <button
                   disabled={!mode.unlocked || profile.keys < 1}
                   onClick={() => handleOpenConfirm(mode.type, mode.name, mode.description, mode.extraData)}
-                  className="min-w-[75px] rounded-md border-b-4 border-blue-900 bg-sky-600 px-2 py-2 font-pixel text-[10px] text-white disabled:bg-stone-700 disabled:border-stone-800 disabled:text-stone-400 active:translate-y-0.5"
+                  className="min-w-[75px] rounded-md border-b-4 border-blue-900 bg-sky-600 px-1 py-1.5 font-pixel text-[10px] text-white disabled:bg-stone-700 disabled:border-stone-800 disabled:text-stone-400 active:translate-y-0.5"
                 >
                   {mode.unlocked ? (profile.keys > 0 ? 'ENTER' : 'NO KEYS') : <span className="flex items-center gap-1"><Lock size={11}/> LOCKED</span>}
                 </button>
               </div>
             </div>
-            {!mode.unlocked && <p className="text-[10px] text-stone-400 text-right mt-1">Unlocks at Timeline {mode.unlockAt}</p>}
+            {!mode.unlocked && <p className="text-[10px] text-stone-400 text-right mt-0.5">Unlocks at Timeline {mode.unlockAt}</p>}
           </div>
         ))}
       </div>
