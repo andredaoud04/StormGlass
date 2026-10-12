@@ -1,0 +1,6 @@
+{
+  "name": "Stormglass: We Are Warriors RPG",
+  "description": "An RPG-styled era-evolving strategy battler inspired by We Are Warriors. Deploy armies, master food economy, evolve through historical ages, and conquer epic dungeons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
