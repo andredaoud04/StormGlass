@@ -240,10 +240,10 @@ function renderUnitGraphic(unitId: string, side: 'player' | 'enemy') {
 }
 
 /**
- * Base Outpost Structures with Heraldic Banners (Matches user's uploaded art)
- */
-/** Original Stormglass pixel-art fortress asset, rendered as crisp scalable SVG.
- * Keep the HP indicator outside the artwork so it remains legible at every scale.
+ * TEMPORARY code-drawn fortress fallback until approved transparent base sprites ship.
+ * The structure and roof are identical for ally and enemy within each era.
+ * No unapproved faction flags, coloured architectural accents or hanging banners.
+ * HP is an independent interface overlay, never baked into the artwork.
  */
 export const BaseOutpostSprite: React.FC<{
   side: 'player' | 'enemy';
@@ -252,12 +252,10 @@ export const BaseOutpostSprite: React.FC<{
   theme?: 'medieval' | 'desert' | 'ice' | 'hell';
 }> = ({ side, hpText, hpPercent, theme = 'medieval' }) => {
   const player = side === 'player';
-  const flag = player ? '#2076d9' : '#d63836';
-  const flagLight = player ? '#72c6ff' : '#ff8170';
   const stone = theme === 'desert' ? '#b98b55' : theme === 'ice' ? '#748caa' : theme === 'hell' ? '#51414a' : '#837b70';
   const stoneLight = theme === 'desert' ? '#e9bf7c' : theme === 'ice' ? '#c4ddec' : theme === 'hell' ? '#a26863' : '#c4b69a';
   const stoneDark = theme === 'desert' ? '#775038' : theme === 'ice' ? '#465976' : theme === 'hell' ? '#292633' : '#524c4b';
-  const roof = theme === 'desert' ? '#dba45b' : theme === 'ice' ? '#dceaf0' : theme === 'hell' ? '#492b35' : '#86583e';
+  const roof = theme === 'desert' ? '#dba45b' : theme === 'ice' ? '#dceaf0' : theme === 'hell' ? '#35363f' : '#86583e';
   const percent = Math.max(0, Math.min(100, hpPercent * 100));
   return (
     <div className="flex flex-col items-center shrink-0 select-none w-[clamp(94px,26vw,142px)] drop-shadow-[0_4px_3px_rgba(0,0,0,.7)]">
@@ -284,17 +282,13 @@ export const BaseOutpostSprite: React.FC<{
         <path d="M54 95v31m6-30v30" stroke="#8e5b36" strokeWidth="2"/>
         {/* Defensive slit windows */}
         <path d="M19 75v18m74-18v18" stroke="#191a22" strokeWidth="5"/>
-        <path d="M19 75v10m74-10v10" stroke={flagLight} strokeWidth="2"/>
+        <path d="M19 75v10m74-10v10" stroke={theme === 'hell' ? '#e98b45' : '#e9d4aa'} strokeWidth="2"/>
         {/* Roof tiles and masonry details */}
         <path d="M12 103h25m39 0h25M33 82h14m18 0h15M11 115h21m48 0h21" stroke={stoneDark} strokeWidth="2"/>
         <path d="M14 65h18m48 0h18M31 72h12m26 0h11" stroke={stoneLight} strokeWidth="2"/>
-        {/* Heraldic standard fixed to tower */}
-        <path d="M20 14v67" stroke="#30252a" strokeWidth="4"/>
-        <path d="M22 16h32v47L38 74 22 63Z" fill={flag} stroke="#211f2c" strokeWidth="3"/>
-        <path d="M26 21h24v38L38 67 26 59Z" fill={flagLight} opacity=".2"/>
-        <path d="M38 28v28m-9-14h18" stroke="#f4e4ba" strokeWidth="3"/>
-        <path d="m30 34 16 16m0-16L30 50" stroke="#f4e4ba" strokeWidth="2"/>
-        <rect x="16" y="9" width="8" height="7" fill="#e4b95d" stroke="#31232a" strokeWidth="2"/>
+        {/* Neutral structural roof detail — no faction standards. */}
+        <path d="M34 47h44m-38-7h33m-25-7h17" stroke={stoneDark} strokeWidth="1.7" opacity=".7" />
+        {theme === 'hell' && <g fill="#d9b88e" stroke="#332c32" strokeWidth="2"><path d="M7 37 Q 2 29 8 20 Q 9 30 18 31 L 18 38 Z"/><path d="M105 37 Q 110 29 104 20 Q 103 30 94 31 L 94 38 Z"/></g>}
         {theme === 'ice' && <g fill="#e9f7ff"><path d="M25 53h62l-9 8-11-4-12 5-11-5-10 4Z"/><path d="M6 38h38l-7 8-10-3-9 4Z"/></g>}
         {theme === 'desert' && <path d="M31 54h52v8H31Z" fill="#efce8a" opacity=".7"/>}
         {theme === 'hell' && <g fill="#fa792f"><path d="M14 119h5v-13h4v13h4v7H14ZM91 119h4v-16h4v16h4v7H91Z"/></g>}
