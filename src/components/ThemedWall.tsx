@@ -68,7 +68,7 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
               ) : (
                 <div className="flex flex-col items-center justify-center gap-0.5" aria-hidden="true">
                   <Crown className="w-5 h-5 text-amber-200" />
-                  <span className="font-pixel text-[5px] text-amber-100">{equippedHero.id === 'iron_marshal' ? 'IRON' : 'NOVA'}</span>
+                  <span className="font-pixel text-[7px] text-amber-100">{equippedHero.name.split(' ')[0].slice(0, 4).toUpperCase()}</span>
                 </div>
               )}
               {/* Golden Status / Readiness Bar underneath */}
