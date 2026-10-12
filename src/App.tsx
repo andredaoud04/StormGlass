@@ -1312,6 +1312,8 @@ export default function App() {
                     side="player"
                     hpText={`Lvl ${profile.baseLevel}`}
                     hpPercent={1}
+          theme={combatTheme}
+          theme={combatTheme}
                   />
                   <BaseOutpostSprite
                     side="enemy"
