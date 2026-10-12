@@ -96,9 +96,9 @@ export const VictoryDefeatModal: React.FC<VictoryDefeatModalProps> = ({
             )}
           </div>
 
-          {!isVictory && (
+          {!isVictory && battleType === 'campaign' && (
             <div className="text-[10px] text-emerald-400 font-pixel mt-2 pt-1.5 border-t border-stone-800/80 text-center">
-              All combat gold earned is permanently kept!
+              All campaign Gold earned in this battle is kept.
             </div>
           )}
         </RPGInnerPanel>
