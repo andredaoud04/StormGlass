@@ -94,6 +94,8 @@ export default function App() {
 
   // End of Battle Results Modal
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(null);
+  const battleActiveRef = useRef(false);
+  const battleSettledRef = useRef(false);
 
   // Passive Card bonuses
   const cardDmgBonus = Object.entries(profile.cards).reduce((acc, [cId, state]) => {
@@ -169,8 +171,19 @@ export default function App() {
         chapterId?: number;
         carriedBaseHp?: number;
         survivalWave?: number;
+        freeLegendsRetry?: boolean;
       }
     ) => {
+      if (battleActiveRef.current && !battleResult) return;
+      const needsKey = (type === 'rush' || type === 'legends' || type === 'bosses' || type === 'survival')
+        && !(type === 'survival' && (options?.survivalWave || 1) > 1)
+        && !(type === 'legends' && options?.freeLegendsRetry);
+      if (needsKey && profile.keys < 1) return;
+      if (needsKey) setProfile((prev) => prev.keys > 0 ? { ...prev, keys: prev.keys - 1 } : prev);
+      battleActiveRef.current = true;
+      battleSettledRef.current = false;
+      bossSpawnedRef.current = false;
+      lastEnemySpawnRef.current = Date.now();
       const playerAgeDef = getAgeDef(profile.armyAge);
       let targetEnemyAgeDef = getAgeByIndex(profile.opponentStage - 1);
 
@@ -205,6 +218,7 @@ export default function App() {
       }
 
       eMaxHp = Math.round(eMaxHp * (1 + (profile.timeline - 1) * 0.16));
+      if (type === 'survival') eMaxHp = Math.round(eMaxHp * (1 + ((options?.survivalWave || 1) - 1) * 0.18));
       setEnemyBaseMaxHp(eMaxHp);
       setEnemyBaseHp(eMaxHp);
 
@@ -235,7 +249,7 @@ export default function App() {
       setInBattle(true);
       sound.playDeploy();
     },
-    [profile, cardBaseBonus, runeBaseBonus]
+    [profile, cardBaseBonus, runeBaseBonus, battleResult]
   );
 
   // --- DEPLOY TROOP ---
@@ -470,6 +484,7 @@ export default function App() {
 
   useEffect(() => {
     if (!inBattle) return;
+    lastTimeRef.current = performance.now();
 
     let animId: number;
 
@@ -679,9 +694,7 @@ export default function App() {
             if (u.hp <= 0) {
               sound.playHit();
               if (u.side === 'enemy' && battleType === 'campaign') {
-                const coinMultiplier = 1 + cardCoinBonus + runeCoinBonus;
-                const baseReward = u.role === 'tank' ? 5 : 1;
-                const earned = Math.round(baseReward * coinMultiplier);
+                const earned = u.role === 'tank' ? 5 : 1;
 
                 sound.playCoin();
                 setSessionStats((prev) => ({
@@ -790,7 +803,8 @@ export default function App() {
         );
 
         // Result check
-        if (enemyBaseHp <= 0 && !battleResult && battleType !== 'rush') {
+        const bossCleared = battleType !== 'bosses' || (bossSpawnedRef.current && !units.some((u) => u.side === 'enemy' && u.role === 'boss' && u.hp > 0));
+        if (enemyBaseHp <= 0 && !battleResult && battleType !== 'rush' && bossCleared) {
           sound.playVictory();
           setBattleResult('victory');
         } else if (playerBaseHp <= 0 && !battleResult) {
@@ -804,7 +818,7 @@ export default function App() {
 
     animId = requestAnimationFrame(gameTick);
     return () => cancelAnimationFrame(animId);
-  }, [inBattle, isPaused, battleResult, foodRate, battleType, enemyBaseHp, playerBaseHp, cardCoinBonus, runeCoinBonus]);
+  }, [inBattle, isPaused, battleResult, foodRate, battleType, enemyBaseHp, playerBaseHp, units]);
 
   // --- VICTORY CLAIM ---
   const handleVictoryClaim = useCallback(() => {
@@ -829,14 +843,14 @@ export default function App() {
         ...prev,
         gems: prev.gems + 35,
         rushHighWins: prev.rushHighWins + 1,
-        keys: Math.max(0, prev.keys - 1),
+
       }));
     } else if (battleType === 'legends') {
       setProfile((prev) => ({
         ...prev,
         runePoints: prev.runePoints + 1,
         legendsChapter: Math.min(4, prev.legendsChapter + 1),
-        keys: Math.max(0, prev.keys - 1),
+
       }));
     } else if (battleType === 'bosses') {
       setProfile((prev) => {
@@ -847,7 +861,7 @@ export default function App() {
         return {
           ...prev,
           bossStage: prev.bossStage + 1,
-          keys: Math.max(0, prev.keys - 1),
+
           skills: {
             ...prev.skills,
             [randomSkill]: {
@@ -871,9 +885,10 @@ export default function App() {
 
   // --- SURVIVAL CONTINUE / CASHOUT ---
   const handleContinueSurvival = useCallback(() => {
+    if (battleResult !== 'victory' || battleType !== 'survival') return;
     const nextWave = sessionStats.survivalWave + 1;
     startBattle('survival', { carriedBaseHp: playerBaseHp, survivalWave: nextWave });
-  }, [sessionStats.survivalWave, playerBaseHp, startBattle]);
+  }, [battleResult, battleType, sessionStats.survivalWave, playerBaseHp, startBattle]);
 
   const handleCashoutSurvival = useCallback(() => {
     const wavesWon = sessionStats.survivalWave;
@@ -885,7 +900,7 @@ export default function App() {
       gems: prev.gems + gemsAwarded,
       runePoints: prev.runePoints + runesAwarded,
       survivalBestStreak: Math.max(prev.survivalBestStreak, wavesWon),
-      keys: Math.max(0, prev.keys - 1),
+
     }));
 
     setInBattle(false);
@@ -1500,7 +1515,7 @@ export default function App() {
             battleType={battleType}
             sessionStats={sessionStats}
             onRetry={() => startBattle(battleType)}
-            onContinue={handleVictoryClaim}
+            onContinue={battleType === 'survival' ? handleContinueSurvival : handleVictoryClaim}
             onOpenUpgrades={() => {
               handleDefeatAcknowledge();
               setActiveTab('upgrades');
