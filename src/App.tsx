@@ -704,18 +704,17 @@ export default function App() {
           for (const u of updated) {
             if (u.hp <= 0) {
               sound.playHit();
-              if (u.side === 'enemy' && battleType === 'campaign') {
-                const earned = u.role === 'tank' ? 5 : 1;
-
-                sound.playCoin();
+              if (u.side === 'enemy') {
+                const earned = battleType === 'campaign' ? (u.role === 'tank' ? 5 : 1) : 0;
                 setSessionStats((prev) => ({
                   ...prev,
                   goldEarnedInBattle: prev.goldEarnedInBattle + earned,
                   normalKills: prev.normalKills + (u.role !== 'tank' ? 1 : 0),
                   tankKills: prev.tankKills + (u.role === 'tank' ? 1 : 0),
                 }));
-
-                setFloatingTexts((ft) => [
+                if (battleType === 'campaign') {
+                  sound.playCoin();
+                  setFloatingTexts((ft) => [
                   ...ft,
                   {
                     id: `coin-${Date.now()}-${Math.random()}`,
@@ -726,7 +725,8 @@ export default function App() {
                     opacity: 1,
                     life: 0.8,
                   },
-                ]);
+                  ]);
+                }
               }
             } else {
               living.push(u);
@@ -1023,6 +1023,7 @@ export default function App() {
     setProfile((prev) => (prev.armyAge !== 'future' || !prev.clearedEnemyStages.includes(6)) ? prev : ({
       ...prev,
       timeline: prev.timeline + 1,
+      gold: 0, // Campaign-local currency resets on Prestige; permanent collections are preserved.
       armyAge: 'stone',
       opponentStage: 1,
       clearedEnemyStages: [],
