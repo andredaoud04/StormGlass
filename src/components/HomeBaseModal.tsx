@@ -17,9 +17,6 @@ export const HomeBaseModal: React.FC<HomeBaseModalProps> = ({
 }) => {
   const [showBrokerDeal, setShowBrokerDeal] = useState(false);
 
-  const stakeGold = Math.max(10, Math.floor(profile.gold * 0.15));
-  const rewardGems = 75;
-  const rewardRunes = 1;
 
   return (
     <RPGModalContainer
@@ -83,15 +80,15 @@ export const HomeBaseModal: React.FC<HomeBaseModalProps> = ({
             </div>
 
             <p className="text-xs text-stone-200 leading-relaxed mb-3">
-              "A wager for true champions! Face my elite demonic volcanic legion. Stake 15% of your current gold ({stakeGold} Gold). If you conquer the rift, claim 75 Gems and 1 Rune Point!"
+              The Broker is preparing an optional Hell Siege. Risk limits, rewards and recovery rules are not finalized; this challenge cannot take any of your resources yet.
             </p>
 
             <div className="flex items-center justify-between text-[11px] font-pixel text-stone-300 bg-stone-950/90 border border-stone-800 p-2 rounded-lg mb-3">
               <div>
-                STAKE: <span className="text-red-400 font-bold">-{stakeGold} Gold</span>
+                <span className="text-emerald-400 font-bold">NO RESOURCES AT RISK</span>
               </div>
               <div>
-                PRIZE: <span className="text-amber-400 font-bold">+{rewardGems} Gems · +{rewardRunes} Pt</span>
+                <span className="text-stone-400">COMING SOON</span>
               </div>
             </div>
 
@@ -100,10 +97,9 @@ export const HomeBaseModal: React.FC<HomeBaseModalProps> = ({
                 variant="red"
                 size="md"
                 className="flex-1"
-                disabled={profile.gold < stakeGold}
-                onClick={() => onStartHellSiege(stakeGold, rewardGems, rewardRunes)}
+                disabled
               >
-                ACCEPT CHALLENGE
+                CHALLENGE NOT YET AVAILABLE
               </RPGButton>
               <RPGButton
                 variant="dark"
