@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PlayerProfile } from '../types/game';
 import { sound } from '../services/sound';
 import { RPGModalContainer, RPGInnerPanel, RPGButton } from './RPGModalFrame';
@@ -12,26 +12,27 @@ interface ModalProps {
 
 // 1. MISSIONS MODAL
 export const MissionsModal: React.FC<ModalProps> = ({ profile, onClose, onUpdateProfile }) => {
-  const [claimed, setClaimed] = useState<Record<string, boolean>>({});
-
   const missions = [
-    { id: 'm1', text: 'Deploy 10 Clubbers in Battle', rewardGems: 25, progress: 10, goal: 10 },
     { id: 'm2', text: 'Reach Food Level 2 or higher', rewardGems: 30, progress: profile.foodLevel, goal: 2 },
     { id: 'm3', text: 'Destroy 1 Enemy Fortress Base', rewardGems: 50, progress: profile.clearedEnemyStages.length, goal: 1 },
     { id: 'm4', text: 'Unlock Slinger or Archer in Upgrades', rewardGems: 40, progress: profile.unlockedTroopIds.length, goal: 2 },
   ];
 
   const handleClaim = (id: string, gems: number) => {
+    const mission = missions.find((m) => m.id === id);
+    if (!mission || mission.progress < mission.goal || profile.claimedMissionIds.includes(id)) return;
     sound.playCoin();
-    setClaimed((prev) => ({ ...prev, [id]: true }));
-    onUpdateProfile((prev) => ({ ...prev, gems: prev.gems + gems }));
+    onUpdateProfile((prev) => prev.claimedMissionIds.includes(id) ? prev : ({
+      ...prev, gems: prev.gems + gems,
+      claimedMissionIds: [...prev.claimedMissionIds, id],
+    }));
   };
 
   return (
     <RPGModalContainer
       onClose={onClose}
       theme={profile.armyAge}
-      title="DAILY MISSIONS"
+      title="MILESTONES"
       subtitle="Complete quests for valuable gems"
       icon={<Scroll className="w-5 h-5 text-amber-300" />}
       maxWidth="max-w-sm"
@@ -39,7 +40,7 @@ export const MissionsModal: React.FC<ModalProps> = ({ profile, onClose, onUpdate
       <div className="space-y-2">
         {missions.map((m) => {
           const isCompleted = m.progress >= m.goal;
-          const isClaimed = claimed[m.id];
+          const isClaimed = profile.claimedMissionIds.includes(m.id);
 
           return (
             <RPGInnerPanel
@@ -83,20 +84,24 @@ export const MissionsModal: React.FC<ModalProps> = ({ profile, onClose, onUpdate
 export const SpinWheelModal: React.FC<ModalProps> = ({ profile, onClose, onUpdateProfile }) => {
   const [spinning, setSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<string | null>(null);
+  const spinLockRef = useRef(false);
+  const todayUtc = new Date().toISOString().slice(0, 10);
+  const alreadySpunToday = profile.lastDailySpinDate === todayUtc;
 
   const prizes = [
     { text: '50 GEMS', type: 'gems', amount: 50 },
     { text: '1 KEY', type: 'keys', amount: 1 },
-    { text: '100 GOLD', type: 'gold', amount: 100 },
+    { text: '25 GEMS', type: 'gems', amount: 25 },
     { text: '15 GEMS', type: 'gems', amount: 15 },
     { text: '2 KEYS', type: 'keys', amount: 2 },
-    { text: '200 GOLD', type: 'gold', amount: 200 },
+    { text: '3 KEYS', type: 'keys', amount: 3 },
     { text: '80 GEMS', type: 'gems', amount: 80 },
     { text: '1 RUNE PT', type: 'rune', amount: 1 },
   ];
 
   const handleSpin = () => {
-    if (spinning) return;
+    if (spinning || spinLockRef.current || alreadySpunToday) return;
+    spinLockRef.current = true;
     setSpinning(true);
     sound.playChestOpen();
 
@@ -105,14 +110,16 @@ export const SpinWheelModal: React.FC<ModalProps> = ({ profile, onClose, onUpdat
       const prize = prizes[idx];
       setWonPrize(prize.text);
       setSpinning(false);
+      spinLockRef.current = false;
       sound.playVictory();
 
       onUpdateProfile((prev) => {
-        if (prize.type === 'gems') return { ...prev, gems: prev.gems + prize.amount };
-        if (prize.type === 'keys') return { ...prev, keys: prev.keys + prize.amount };
-        if (prize.type === 'gold') return { ...prev, gold: prev.gold + prize.amount };
-        if (prize.type === 'rune') return { ...prev, runePoints: prev.runePoints + prize.amount };
-        return prev;
+        if (prev.lastDailySpinDate === todayUtc) return prev;
+        const stamped = { ...prev, lastDailySpinDate: todayUtc };
+        if (prize.type === 'gems') return { ...stamped, gems: prev.gems + prize.amount };
+        if (prize.type === 'keys') return { ...stamped, keys: prev.keys + prize.amount };
+        if (prize.type === 'rune') return { ...stamped, runePoints: prev.runePoints + prize.amount };
+        return stamped;
       });
     }, 2000);
   };
@@ -150,10 +157,10 @@ export const SpinWheelModal: React.FC<ModalProps> = ({ profile, onClose, onUpdat
           variant="gold"
           size="md"
           className="w-full mt-2"
-          disabled={spinning}
+          disabled={spinning || alreadySpunToday}
           onClick={handleSpin}
         >
-          {spinning ? 'SPINNING...' : 'FREE DAILY SPIN!'}
+          {spinning ? 'SPINNING...' : alreadySpunToday ? 'COME BACK TOMORROW' : 'FREE DAILY SPIN!'}
         </RPGButton>
       </div>
     </RPGModalContainer>
