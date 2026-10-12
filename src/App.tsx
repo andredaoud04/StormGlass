@@ -1561,7 +1561,9 @@ export default function App() {
           <VictoryDefeatModal
             isVictory={battleResult === 'victory'}
             battleType={battleType}
-            sessionStats={sessionStats}
+            sessionStats={{ ...sessionStats, goldEarnedInBattle: battleType === 'campaign'
+              ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus, battleResult === 'victory')
+              : 0 }}
             onRetry={() => {
                 if (battleResult !== 'defeat') return;
                 if (battleType !== 'campaign' && battleType !== 'hell' && battleType !== 'legends' && profile.keys < 1) {
