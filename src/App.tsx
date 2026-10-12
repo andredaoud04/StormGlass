@@ -1313,12 +1313,12 @@ export default function App() {
                     hpText={`Lvl ${profile.baseLevel}`}
                     hpPercent={1}
           theme={combatTheme}
-          theme={combatTheme}
                   />
                   <BaseOutpostSprite
                     side="enemy"
                     hpText={`Stage ${profile.opponentStage}`}
                     hpPercent={1}
+                    theme={combatTheme}
                   />
                 </div>
 
