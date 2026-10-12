@@ -42,7 +42,7 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
 
   return (
     <div
-      className={`relative w-full ${themeStyles.wallBg} border-t-4 ${themeStyles.wallBorder} p-2.5 sm:p-3 select-none shadow-[0_-8px_20px_rgba(0,0,0,0.8)] shrink-0 z-20`}
+      className={`relative w-full ${themeStyles.wallBg} border-t-4 ${themeStyles.wallBorder} p-2 sm:p-2.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] select-none shadow-[0_-8px_20px_rgba(0,0,0,0.8)] shrink-0 z-20`}
     >
       {/* Decorative environment elements on top of the wall matching reference image */}
       {renderWallAccents(theme)}
@@ -131,7 +131,7 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
       <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Food Status Card with Golden Wheat Sheaf */}
         <div
-          className={`w-24 sm:w-28 h-18 sm:h-20 rounded-xl border-2 ${themeStyles.cardBorder} ${themeStyles.cardBg} p-2 flex flex-col justify-between shadow-lg shrink-0`}
+          className={`w-[92px] sm:w-28 h-[76px] sm:h-[88px] rounded-xl border-2 ${themeStyles.cardBorder} ${themeStyles.cardBg} p-2 flex flex-col justify-between shadow-lg shrink-0`}
         >
           <div className="flex items-center gap-1.5">
             <WheatIcon className="w-5 h-5" />
