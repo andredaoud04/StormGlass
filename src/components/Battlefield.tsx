@@ -73,7 +73,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
       )}
 
       {/* Bases Outposts Container (Left: Player, Right: Enemy) matching reference image layout */}
-      <div className="absolute inset-0 pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-3 sm:pb-4">
+      <div className="absolute left-0 right-0 bottom-[26%] h-[32%] pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-0">
         {/* Player Base (Left Outpost with Blue Heraldic Banner) */}
         <BaseOutpostSprite
           side="player"
@@ -99,7 +99,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
           return (
             <div
               key={unit.uid}
-              className="absolute bottom-3 sm:bottom-4 flex flex-col items-center transition-transform"
+              className="absolute bottom-[26%] flex flex-col items-center transition-transform"
               style={{
                 left: `${unitLeftPercent}%`,
                 transform: 'translateX(-50%)',
@@ -135,7 +135,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
         {projectiles.map((proj) => {
           const leftPercent = Math.max(0, Math.min(100, proj.currentX));
           const arcHeight = Math.sin(proj.progress * Math.PI) * 28;
-          const bottomPercent = 14 + (arcHeight / 300) * 100;
+          const bottomPercent = 28 + (arcHeight / 300) * 100;
 
           return (
             <div
