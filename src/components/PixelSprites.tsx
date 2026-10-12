@@ -242,31 +242,63 @@ function renderUnitGraphic(unitId: string, side: 'player' | 'enemy') {
 /**
  * Base Outpost Structures with Heraldic Banners (Matches user's uploaded art)
  */
+/** Original Stormglass pixel-art fortress asset, rendered as crisp scalable SVG.
+ * Keep the HP indicator outside the artwork so it remains legible at every scale.
+ */
 export const BaseOutpostSprite: React.FC<{
   side: 'player' | 'enemy';
   hpText: string;
   hpPercent: number;
-}> = ({ side, hpText, hpPercent }) => {
-  const isPlayer = side === 'player';
-  const percentage = Math.max(0, Math.min(100, hpPercent * 100));
+  theme?: 'medieval' | 'desert' | 'ice' | 'hell';
+}> = ({ side, hpText, hpPercent, theme = 'medieval' }) => {
+  const player = side === 'player';
+  const flag = player ? '#2076d9' : '#d63836';
+  const flagLight = player ? '#72c6ff' : '#ff8170';
+  const stone = theme === 'desert' ? '#b98b55' : theme === 'ice' ? '#748caa' : theme === 'hell' ? '#51414a' : '#837b70';
+  const stoneLight = theme === 'desert' ? '#e9bf7c' : theme === 'ice' ? '#c4ddec' : theme === 'hell' ? '#a26863' : '#c4b69a';
+  const stoneDark = theme === 'desert' ? '#775038' : theme === 'ice' ? '#465976' : theme === 'hell' ? '#292633' : '#524c4b';
+  const roof = theme === 'desert' ? '#dba45b' : theme === 'ice' ? '#dceaf0' : theme === 'hell' ? '#492b35' : '#86583e';
+  const percent = Math.max(0, Math.min(100, hpPercent * 100));
   return (
-    <div className="relative flex flex-col items-center select-none w-[76px] sm:w-[92px] drop-shadow-[0_3px_3px_rgba(0,0,0,0.75)]">
-      {/* HP always travels with the base, never with the top of the viewport. */}
-      <div className="w-full flex flex-col items-center gap-1 mb-1">
-        <span className="font-pixel text-[11px] sm:text-xs font-bold text-white whitespace-nowrap drop-shadow-[0_2px_3px_#000]">{hpText}</span>
-        <div className="w-full h-2.5 rounded-full border-2 border-stone-950 bg-stone-900 overflow-hidden">
-          <div className={`h-full ${isPlayer ? 'bg-emerald-400' : 'bg-rose-500'}`} style={{width: `${percentage}%`}} />
+    <div className="flex flex-col items-center shrink-0 select-none w-[clamp(94px,26vw,142px)] drop-shadow-[0_4px_3px_rgba(0,0,0,.7)]">
+      <div className="w-[92%] flex flex-col items-center gap-0.5 mb-1">
+        <span className="font-pixel text-[10px] sm:text-xs font-bold text-white whitespace-nowrap drop-shadow-[0_2px_2px_#000]">{hpText}</span>
+        <div className="w-full h-2.5 bg-stone-950 rounded border-2 border-stone-950 overflow-hidden">
+          <div className={`h-full ${player ? 'bg-emerald-400' : 'bg-rose-500'}`} style={{ width: `${percent}%` }} />
         </div>
       </div>
-      {/* Pixel fortress silhouette with readable faction colors and grounded footprint. */}
-      <div className="relative w-[66px] sm:w-[78px] h-[92px] sm:h-[110px] pixelated">
-        <div className={`absolute inset-x-1 bottom-0 h-[70%] border-[3px] border-stone-950 ${isPlayer ? 'bg-slate-500' : 'bg-stone-600'}`} />
-        <div className={`absolute left-0 bottom-0 w-[21%] h-[88%] border-[3px] border-stone-950 ${isPlayer ? 'bg-blue-700' : 'bg-red-700'}`} />
-        <div className={`absolute right-0 bottom-0 w-[21%] h-[88%] border-[3px] border-stone-950 ${isPlayer ? 'bg-blue-700' : 'bg-red-700'}`} />
-        <div className="absolute left-[35%] bottom-0 w-[30%] h-[40%] rounded-t-full bg-stone-950 border-2 border-amber-950" />
-        <div className={`absolute left-[35%] top-[20%] w-[30%] h-[13%] border-2 border-stone-950 ${isPlayer ? 'bg-sky-300' : 'bg-amber-300'}`} />
-        <div className={`absolute left-[15%] right-[15%] top-[2%] h-[15%] border-[3px] border-stone-950 ${isPlayer ? 'bg-blue-600' : 'bg-red-600'}`} />
-      </div>
+      <svg viewBox="0 0 112 134" width="100%" role="img" aria-label={`${theme} ${side} fortress`} style={{imageRendering:'pixelated',overflow:'visible'}}>
+        <ellipse cx="56" cy="129" rx="53" ry="5" fill="#10131b" opacity=".6"/>
+        {/* Defensive towers, heavy masonry and crenellations */}
+        <path d="M5 126V37h7V27h8v10h8V27h8v10h7v89Z M69 126V37h7V27h8v10h8V27h8v10h7v89Z" fill={stoneDark} stroke="#231e24" strokeWidth="3"/>
+        <path d="M10 124V42h28v82Z M74 124V42h28v82Z" fill={stone} stroke="#2b2527" strokeWidth="2"/>
+        <path d="M13 44h9v15h-9Zm12 0h10v15H25Zm52 0h9v15h-9Zm12 0h10v15H89Z" fill={stoneLight} opacity=".6"/>
+        <path d="M28 126V62h56v64Z" fill={stoneDark} stroke="#29232a" strokeWidth="3"/>
+        <path d="M32 120V67h48v53Z" fill={stone} />
+        <path d="M30 63h54V51H30Z" fill={roof} stroke="#32262a" strokeWidth="3"/>
+        <path d="M25 53 56 24l31 29Z" fill={roof} stroke="#2e242a" strokeWidth="3"/>
+        <path d="M34 49 56 30l22 19Z" fill={stoneLight} opacity=".65"/>
+        {/* Shaded doorway and timber gate */}
+        <path d="M43 126V95a13 13 0 0 1 26 0v31Z" fill="#21191c" stroke="#35252a" strokeWidth="3"/>
+        <path d="M48 126V96a8 8 0 0 1 16 0v30Z" fill="#553626"/>
+        <path d="M54 95v31m6-30v30" stroke="#8e5b36" strokeWidth="2"/>
+        {/* Defensive slit windows */}
+        <path d="M19 75v18m74-18v18" stroke="#191a22" strokeWidth="5"/>
+        <path d="M19 75v10m74-10v10" stroke={flagLight} strokeWidth="2"/>
+        {/* Roof tiles and masonry details */}
+        <path d="M12 103h25m39 0h25M33 82h14m18 0h15M11 115h21m48 0h21" stroke={stoneDark} strokeWidth="2"/>
+        <path d="M14 65h18m48 0h18M31 72h12m26 0h11" stroke={stoneLight} strokeWidth="2"/>
+        {/* Heraldic standard fixed to tower */}
+        <path d="M20 14v67" stroke="#30252a" strokeWidth="4"/>
+        <path d="M22 16h32v47L38 74 22 63Z" fill={flag} stroke="#211f2c" strokeWidth="3"/>
+        <path d="M26 21h24v38L38 67 26 59Z" fill={flagLight} opacity=".2"/>
+        <path d="M38 28v28m-9-14h18" stroke="#f4e4ba" strokeWidth="3"/>
+        <path d="m30 34 16 16m0-16L30 50" stroke="#f4e4ba" strokeWidth="2"/>
+        <rect x="16" y="9" width="8" height="7" fill="#e4b95d" stroke="#31232a" strokeWidth="2"/>
+        {theme === 'ice' && <g fill="#e9f7ff"><path d="M25 53h62l-9 8-11-4-12 5-11-5-10 4Z"/><path d="M6 38h38l-7 8-10-3-9 4Z"/></g>}
+        {theme === 'desert' && <path d="M31 54h52v8H31Z" fill="#efce8a" opacity=".7"/>}
+        {theme === 'hell' && <g fill="#fa792f"><path d="M14 119h5v-13h4v13h4v7H14ZM91 119h4v-16h4v16h4v7H91Z"/></g>}
+      </svg>
     </div>
   );
 };
