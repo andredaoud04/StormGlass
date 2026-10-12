@@ -542,6 +542,9 @@ export default function App() {
 
         // Units update
         setUnits((prevUnits) => {
+          // An attack is authorized only on the precise frame its cooldown reaches zero.
+          // Previously checking cooldown >= attackSpeed - 0.05 repeatedly landed 2-4 hits per swing.
+          const attacksReady = new Set<string>();
           let updated = prevUnits.map((unit) => {
             const isFrozen = unit.stasisFrozenRemaining > 0;
             const newFrozen = Math.max(0, unit.stasisFrozenRemaining - delta);
@@ -562,7 +565,7 @@ export default function App() {
             const isPlayer = unit.side === 'player';
             const newCd = Math.max(0, unit.attackCooldown - delta);
 
-            const targets = prevUnits.filter((u) => u.side !== unit.side);
+            const targets = prevUnits.filter((u) => u.side !== unit.side && u.hp > 0);
             let closestDist = 999;
             let targetUnit: BattleUnit | null = null;
 
@@ -579,8 +582,8 @@ export default function App() {
             const isBaseInRange = baseDist <= unit.range;
 
             if (isTargetUnitInRange || isBaseInRange) {
-              let willSwing = false;
-              if (newCd <= 0) willSwing = true;
+              const willSwing = newCd <= 0;
+              if (willSwing) attacksReady.add(unit.uid);
 
               return {
                 ...unit,
@@ -610,12 +613,12 @@ export default function App() {
 
           // Resolve attacks
           for (const unit of updated) {
-            if (unit.isAttacking && unit.attackCooldown >= unit.attackSpeed - 0.05) {
+            if (attacksReady.has(unit.uid)) {
               const isPlayer = unit.side === 'player';
               const rallyMult = unit.rallyBuffRemaining > 0 ? 1.45 : 1.0;
               const dmg = Math.round(unit.damage * rallyMult);
 
-              const targets = updated.filter((u) => u.side !== unit.side);
+              const targets = updated.filter((u) => u.side !== unit.side && u.hp > 0);
               let closestDist = 999;
               let targetUnit: BattleUnit | null = null;
               for (const t of targets) {
