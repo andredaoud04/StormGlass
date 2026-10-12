@@ -2,6 +2,7 @@ import React from 'react';
 import { HeroDef, SkillDef, UnitDef } from '../types/game';
 import { UnitSprite } from './PixelSprites';
 import { Crown, Snowflake, Flame, Wind, Plus } from 'lucide-react';
+import { formatCompactNumber } from '../logic/formatNumber';
 
 export type EnvironmentTheme = 'medieval' | 'desert' | 'ice' | 'hell';
 
@@ -33,12 +34,6 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
   onActivateSkill,
 }) => {
   const themeStyles = getThemeBarricadeStyles(theme);
-
-  const formatCompact = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
-    return Math.floor(num).toString();
-  };
 
   return (
     <div
@@ -145,7 +140,7 @@ export const ThemedWall: React.FC<ThemedWallProps> = ({
           <div className="flex items-center gap-1.5">
             <WheatIcon className="w-5 h-5" />
             <span className="font-pixel text-xs sm:text-sm font-black text-amber-200 tabular-nums drop-shadow-sm">
-              {formatCompact(food)}
+              {formatCompactNumber(food)}
             </span>
           </div>
           <div className="font-pixel text-[9px] sm:text-[10px] text-cyan-400 font-bold tabular-nums">
