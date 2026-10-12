@@ -26,6 +26,16 @@ import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
 import { formatCompactNumber } from './logic/formatNumber';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
+import {
+  BattleSimState,
+  SIM_STEP,
+  SkillId,
+  activateSkill,
+  createBattleState,
+  deployPlayerUnit,
+  interpolateForRender,
+  stepBattle,
+} from './logic/battleSim';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
 import { Battlefield } from './components/Battlefield';
@@ -115,9 +125,9 @@ export default function App() {
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(null);
   const battleActiveRef = useRef(false);
   const battleSettledRef = useRef(false);
-  const unitsForVictoryRef = useRef<BattleUnit[]>([]);
   const heroUsedThisBattleRef = useRef(false);
-  const skillLockUntilRef = useRef<Record<'stasis' | 'volley' | 'rally', number>>({ stasis: 0, volley: 0, rally: 0 });
+  const simRef = useRef<BattleSimState | null>(null);
+  const prevSimRef = useRef<BattleSimState | null>(null);
 
   // Passive Card bonuses
   const cardDmgBonus = Object.entries(profile.cards).reduce((acc, [cId, state]) => {
@@ -211,10 +221,7 @@ export default function App() {
       if (needsKey) setProfile((prev) => prev.keys > 0 ? { ...prev, keys: prev.keys - 1 } : prev);
       battleActiveRef.current = true;
       battleSettledRef.current = false;
-      bossSpawnedRef.current = false;
       heroUsedThisBattleRef.current = false;
-      skillLockUntilRef.current = { stasis: 0, volley: 0, rally: 0 };
-      lastEnemySpawnRef.current = Date.now();
       const playerAgeDef = getAgeDef(profile.armyAge);
       let targetEnemyAgeDef = getAgeByIndex(profile.opponentStage - 1);
 
@@ -235,8 +242,8 @@ export default function App() {
       const pMaxHp = Math.round(
         playerAgeDef.baseHp * (1 + cardBaseBonus + runeBaseBonus + (profile.baseLevel - 1) * 0.12)
       );
+      const pStartHp = options?.carriedBaseHp !== undefined ? options.carriedBaseHp : pMaxHp;
       setPlayerBaseMaxHp(pMaxHp);
-      setPlayerBaseHp(options?.carriedBaseHp !== undefined ? options.carriedBaseHp : pMaxHp);
 
       // Enemy Base HP
       let eMaxHp = targetEnemyAgeDef.baseHp;
@@ -251,9 +258,21 @@ export default function App() {
       eMaxHp = Math.round(eMaxHp * (1 + (profile.timeline - 1) * 0.16));
       if (type === 'survival') eMaxHp = Math.round(eMaxHp * (1 + ((options?.survivalWave || 1) - 1) * 0.18));
       setEnemyBaseMaxHp(eMaxHp);
-      setEnemyBaseHp(eMaxHp);
 
-      setFood(0);
+      const sim = createBattleState({
+        battleType: type,
+        foodRate,
+        playerBaseHp: pStartHp,
+        playerBaseMaxHp: pMaxHp,
+        enemyBaseMaxHp: eMaxHp,
+        enemyRoster: targetEnemyAgeDef.units,
+        timeline: profile.timeline,
+      });
+      simRef.current = sim;
+      prevSimRef.current = null;
+      setFood(sim.food);
+      setPlayerBaseHp(sim.playerBaseHp);
+      setEnemyBaseHp(sim.enemyBaseHp);
       setUnits([]);
       setProjectiles([]);
       setFloatingTexts([]);
@@ -280,588 +299,150 @@ export default function App() {
       setInBattle(true);
       sound.playDeploy();
     },
-    [profile, cardBaseBonus, runeBaseBonus, battleResult]
+    [profile, cardBaseBonus, runeBaseBonus, foodRate, battleResult]
   );
 
+  // --- SIMULATION BRIDGE ---
+  // The simulation ref is the single source of truth while a battle runs; React state is a render copy.
+  const publishSim = useCallback((sim: BattleSimState, prev: BattleSimState | null, alpha: number) => {
+    const view = prev ? interpolateForRender(prev, sim, alpha) : sim;
+    setUnits(view.units);
+    setProjectiles(view.projectiles);
+    setFloatingTexts(view.floatingTexts);
+    setParticles(view.particles);
+    setFood(sim.food);
+    setPlayerBaseHp(sim.playerBaseHp);
+    setEnemyBaseHp(sim.enemyBaseHp);
+    setSessionStats((s) => ({
+      ...s,
+      rushTimerRemaining: sim.rushTimerRemaining,
+      skillCooldowns: { ...sim.skillCooldowns },
+      goldEarnedInBattle: sim.goldEarnedInBattle,
+      normalKills: sim.normalKills,
+      tankKills: sim.tankKills,
+    }));
+  }, []);
+
+  const applyCommand = useCallback((next: BattleSimState) => {
+    if (next === simRef.current) return false;
+    simRef.current = next;
+    // Commands take effect immediately; drop the interpolation base so new units don't blend from nowhere.
+    prevSimRef.current = null;
+    publishSim(next, null, 1);
+    return true;
+  }, [publishSim]);
+
   // --- DEPLOY TROOP ---
-  const foodSpendLockRef = useRef(0);
-  useEffect(() => { foodSpendLockRef.current = food; }, [food]);
   const handleDeployUnit = useCallback(
     (unitDef: UnitDef) => {
+      const sim = simRef.current;
       const ageIndex = getAgeIndex(profile.armyAge);
       const legalAge = unitDef.ageId === profile.armyAge || (ageIndex > 0 && unitDef.ageId === AGES[ageIndex - 1].id);
       const unlocked = profile.unlockedTroopIds.includes(unitDef.id) || (unitDef.ageId === profile.armyAge && unitDef.unlockCostGold === 0);
-      if (!inBattle || isPaused || battleResult || !legalAge || !unlocked || foodSpendLockRef.current < unitDef.cost) return;
-      foodSpendLockRef.current -= unitDef.cost;
-      setFood((prev) => Math.max(0, prev - unitDef.cost));
-      sound.playDeploy();
+      if (!sim || !inBattle || isPaused || battleResult || !legalAge || !unlocked) return;
 
       const finalDmg = Math.round(unitDef.damage * (1 + cardDmgBonus + runeDmgBonus));
       const finalHp = Math.round(unitDef.hp * (1 + cardHpBonus + runeHpBonus + (profile.baseLevel - 1) * 0.05));
-
-      const newUnit: BattleUnit = {
-        uid: `p-${Date.now()}-${Math.random()}`,
+      const deployed = applyCommand(deployPlayerUnit(sim, {
         unitDefId: unitDef.id,
         name: unitDef.name,
-        side: 'player',
         role: unitDef.role,
-        x: 8,
         hp: finalHp,
-        maxHp: finalHp,
         damage: finalDmg,
         speed: unitDef.speed,
         range: unitDef.range,
         attackSpeed: unitDef.attackSpeed,
-        attackCooldown: 0.2,
-        isAttacking: false,
-        isWalking: true,
-        hitFlash: 0,
-        stasisFrozenRemaining: 0,
-        rallyBuffRemaining: 0,
         projectileType: unitDef.projectileType,
-      };
-
-      setUnits((prev) => [...prev, newUnit]);
+      }, unitDef.cost));
+      if (deployed) sound.playDeploy();
     },
-    [inBattle, isPaused, battleResult, profile.armyAge, profile.unlockedTroopIds, cardDmgBonus, runeDmgBonus, cardHpBonus, runeHpBonus, profile.baseLevel]
+    [inBattle, isPaused, battleResult, profile.armyAge, profile.unlockedTroopIds, cardDmgBonus, runeDmgBonus, cardHpBonus, runeHpBonus, profile.baseLevel, applyCommand]
   );
 
   // --- DEPLOY HERO ---
   const handleDeployHero = useCallback(() => {
-    if (!inBattle || isPaused || battleResult || heroUsedThisBattleRef.current || sessionStats.heroUsed || !profile.equippedHeroId || !profile.heroesUnlocked.includes(profile.equippedHeroId)) return;
+    const sim = simRef.current;
+    if (!sim || !inBattle || isPaused || battleResult || heroUsedThisBattleRef.current || sessionStats.heroUsed || !profile.equippedHeroId || !profile.heroesUnlocked.includes(profile.equippedHeroId)) return;
 
     const heroDef = HEROES.find((h) => h.id === profile.equippedHeroId);
     if (!heroDef) return;
 
-    heroUsedThisBattleRef.current = true;
-    sound.playHeroDeploy();
-    setSessionStats((prev) => ({ ...prev, heroUsed: true }));
-
-    const playerAgeDef = getAgeDef(profile.armyAge);
-    const baseTroop = playerAgeDef.units[0];
-
+    const baseTroop = getAgeDef(profile.armyAge).units[0];
     const heroHp = Math.round(baseTroop.hp * heroDef.baseMultiplierHp * 2.5 * (1 + cardHpBonus + runeHpBonus));
     const heroDmg = Math.round(baseTroop.damage * heroDef.baseMultiplierDmg * 2.2 * (1 + cardDmgBonus + runeDmgBonus));
 
-    const heroUnit: BattleUnit = {
-      uid: `hero-${Date.now()}`,
+    const deployed = applyCommand(deployPlayerUnit(sim, {
       unitDefId: heroDef.id,
       name: heroDef.name,
-      side: 'player',
       role: 'hero',
-      x: 8,
       hp: heroHp,
-      maxHp: heroHp,
       damage: heroDmg,
       speed: 8.0,
       range: 5.5,
       attackSpeed: 0.9,
-      attackCooldown: 0.2,
-      isAttacking: false,
-      isWalking: true,
-      hitFlash: 0,
-      stasisFrozenRemaining: 0,
-      rallyBuffRemaining: 0,
       projectileType: 'slash',
-    };
-
-    setUnits((prev) => [...prev, heroUnit]);
-  }, [inBattle, isPaused, battleResult, sessionStats.heroUsed, profile.equippedHeroId, profile.heroesUnlocked, profile.armyAge, cardHpBonus, runeHpBonus, cardDmgBonus, runeDmgBonus]);
+    }, 0));
+    if (!deployed) return;
+    heroUsedThisBattleRef.current = true;
+    sound.playHeroDeploy();
+    setSessionStats((prev) => ({ ...prev, heroUsed: true }));
+  }, [inBattle, isPaused, battleResult, sessionStats.heroUsed, profile.equippedHeroId, profile.heroesUnlocked, profile.armyAge, cardHpBonus, runeHpBonus, cardDmgBonus, runeDmgBonus, applyCommand]);
 
   // --- SKILL ACTIVATION ---
   const handleActivateSkill = useCallback(
-    (skillId: 'stasis' | 'volley' | 'rally') => {
-      if (!inBattle || isPaused || battleResult || !profile.equippedSkills.includes(skillId) || !profile.skills[skillId]?.unlocked || sessionStats.skillCooldowns[skillId] > 0 || Date.now() < skillLockUntilRef.current[skillId]) return;
-      skillLockUntilRef.current[skillId] = Date.now() + (skillId === 'stasis' ? 12000 : skillId === 'volley' ? 10000 : 16000);
-
-      const skillState = profile.skills[skillId];
-      const level = skillState?.level || 1;
-
-      if (skillId === 'stasis') {
-        sound.playSkillStasis();
-        const duration = 3.0 + (level - 1) * 0.35;
-        setUnits((prev) =>
-          prev.map((u) => (u.side === 'enemy' ? { ...u, stasisFrozenRemaining: duration } : u))
-        );
-        setSessionStats((prev) => ({
-          ...prev,
-          skillCooldowns: { ...prev.skillCooldowns, stasis: 12 },
-        }));
-      } else if (skillId === 'volley') {
-        sound.playSkillVolley();
-        const dmg = 80 + getAgeIndex(profile.armyAge) * 16 + (level - 1) * 24;
-
-        setUnits((prev) =>
-          prev.map((u) => {
-            if (u.side === 'enemy') {
-              const newHp = Math.max(0, u.hp - dmg);
-              return { ...u, hp: newHp, hitFlash: 0.15 };
-            }
-            return u;
-          })
-        );
-
-        setFloatingTexts((prev) => [
-          ...prev,
-          {
-            id: `v-${Date.now()}`,
-            text: `VOLLEY -${dmg}`,
-            x: 55,
-            y: 40,
-            color: '#f97316',
-            opacity: 1,
-            life: 1.2,
-          },
-        ]);
-
-        setSessionStats((prev) => ({
-          ...prev,
-          skillCooldowns: { ...prev.skillCooldowns, volley: 10 },
-        }));
-      } else if (skillId === 'rally') {
-        sound.playSkillRally();
-        const duration = 6.0 + (level - 1) * 0.4;
-        setUnits((prev) =>
-          prev.map((u) => (u.side === 'player' ? { ...u, rallyBuffRemaining: duration } : u))
-        );
-        setSessionStats((prev) => ({
-          ...prev,
-          skillCooldowns: { ...prev.skillCooldowns, rally: 16 },
-        }));
-      }
+    (skillId: SkillId) => {
+      const sim = simRef.current;
+      if (!sim || !inBattle || isPaused || battleResult || !profile.equippedSkills.includes(skillId) || !profile.skills[skillId]?.unlocked) return;
+      const level = profile.skills[skillId]?.level || 1;
+      if (!applyCommand(activateSkill(sim, skillId, level, getAgeIndex(profile.armyAge)))) return;
+      if (skillId === 'stasis') sound.playSkillStasis();
+      else if (skillId === 'volley') sound.playSkillVolley();
+      else sound.playSkillRally();
     },
-    [inBattle, isPaused, battleResult, sessionStats.skillCooldowns, profile.equippedSkills, profile.skills, profile.armyAge]
+    [inBattle, isPaused, battleResult, profile.equippedSkills, profile.skills, profile.armyAge, applyCommand]
   );
 
-  // --- ENEMY SPAWNER ---
-  const lastEnemySpawnRef = useRef<number>(0);
-  const bossSpawnedRef = useRef<boolean>(false);
-
+  // --- COMBAT LOOP ---
+  // Fixed 100ms simulation steps, decoupled from display rate; rendering interpolates between steps.
   useEffect(() => {
-    if (!inBattle) {
-      bossSpawnedRef.current = false;
-      return;
-    }
-
-    const enemyAgeDef = getAgeDef(enemyAgeId);
-    let spawnInterval = 3500 / (1 + (profile.timeline - 1) * 0.12);
-    if (battleType === 'rush') spawnInterval = 1400;
-
-    const timer = setInterval(() => {
-      if (isPaused || battleResult) return;
-
-      const now = Date.now();
-      if (now - lastEnemySpawnRef.current < spawnInterval) return;
-      lastEnemySpawnRef.current = now;
-
-      // Bosses mode: spawn Gate Colossus once
-      if (battleType === 'bosses' && !bossSpawnedRef.current) {
-        bossSpawnedRef.current = true;
-        const bossUnit: BattleUnit = {
-          uid: `boss-colossus-${now}`,
-          unitDefId: 'gate_colossus',
-          name: 'Gate Colossus',
-          side: 'enemy',
-          role: 'boss',
-          x: 92,
-          hp: 850,
-          maxHp: 850,
-          damage: 55,
-          speed: 3.5,
-          range: 6.0,
-          attackSpeed: 1.4,
-          attackCooldown: 0.4,
-          isAttacking: false,
-          isWalking: true,
-          hitFlash: 0,
-          stasisFrozenRemaining: 0,
-          rallyBuffRemaining: 0,
-          projectileType: 'none',
-          isBoss: true,
-        };
-        setUnits((prev) => [...prev, bossUnit]);
-        return;
-      }
-
-      // Pick enemy unit
-      const roll = Math.random();
-      let chosenUnit = enemyAgeDef.units[0];
-      if (roll > 0.65) chosenUnit = enemyAgeDef.units[1];
-      if (roll > 0.88) chosenUnit = enemyAgeDef.units[2];
-
-      const eUnit: BattleUnit = {
-        uid: `e-${now}-${Math.random()}`,
-        unitDefId: chosenUnit.id,
-        name: chosenUnit.name,
-        side: 'enemy',
-        role: chosenUnit.role,
-        x: 92,
-        hp: chosenUnit.hp,
-        maxHp: chosenUnit.hp,
-        damage: chosenUnit.damage,
-        speed: chosenUnit.speed,
-        range: chosenUnit.range,
-        attackSpeed: chosenUnit.attackSpeed,
-        attackCooldown: 0.3,
-        isAttacking: false,
-        isWalking: true,
-        hitFlash: 0,
-        stasisFrozenRemaining: 0,
-        rallyBuffRemaining: 0,
-        projectileType: chosenUnit.projectileType,
-      };
-
-      setUnits((prev) => [...prev, eUnit]);
-    }, 400);
-
-    return () => clearInterval(timer);
-  }, [inBattle, isPaused, battleResult, enemyAgeId, battleType, profile.timeline]);
-
-  useEffect(() => { unitsForVictoryRef.current = units; }, [units]);
-
-  // --- COMBAT TICK LOOP ---
-  const lastTimeRef = useRef<number>(performance.now());
-
-  useEffect(() => {
-    if (!inBattle) return;
-    lastTimeRef.current = performance.now();
-
+    if (!inBattle || isPaused || battleResult) return;
+    let lastTime = performance.now();
+    let accumulator = 0;
     let animId: number;
 
-    const gameTick = (currentTime: number) => {
-      const delta = Math.min(0.1, (currentTime - lastTimeRef.current) / 1000);
-      lastTimeRef.current = currentTime;
+    const frame = (now: number) => {
+      // Clamp long frames (tab throttling, debugger) so a stall can't fast-forward the battle.
+      accumulator += Math.min(0.25, (now - lastTime) / 1000);
+      lastTime = now;
 
-      if (!isPaused && !battleResult) {
-        // Food flow
-        setFood((prev) => prev + foodRate * delta);
-
-        // Rush timer
-        if (battleType === 'rush') {
-          setSessionStats((prev) => {
-            const nextTimer = Math.max(0, prev.rushTimerRemaining - delta);
-            if (nextTimer <= 0 && !battleResult) {
-              sound.playVictory();
-              setBattleResult('victory');
-            }
-            return { ...prev, rushTimerRemaining: nextTimer };
-          });
-        }
-
-        // Skill cooldowns
-        setSessionStats((prev) => ({
-          ...prev,
-          skillCooldowns: {
-            stasis: Math.max(0, prev.skillCooldowns.stasis - delta),
-            volley: Math.max(0, prev.skillCooldowns.volley - delta),
-            rally: Math.max(0, prev.skillCooldowns.rally - delta),
-          },
-        }));
-
-        // Units update
-        setUnits((prevUnits) => {
-          // An attack is authorized only on the precise frame its cooldown reaches zero.
-          // Previously checking cooldown >= attackSpeed - 0.05 repeatedly landed 2-4 hits per swing.
-          const attacksReady = new Set<string>();
-          let updated = prevUnits.map((unit) => {
-            const isFrozen = unit.stasisFrozenRemaining > 0;
-            const newFrozen = Math.max(0, unit.stasisFrozenRemaining - delta);
-            const newRally = Math.max(0, unit.rallyBuffRemaining - delta);
-            const newHitFlash = Math.max(0, unit.hitFlash - delta);
-
-            if (isFrozen) {
-              return {
-                ...unit,
-                isWalking: false,
-                isAttacking: false,
-                stasisFrozenRemaining: newFrozen,
-                rallyBuffRemaining: newRally,
-                hitFlash: newHitFlash,
-              };
-            }
-
-            const isPlayer = unit.side === 'player';
-            const newCd = Math.max(0, unit.attackCooldown - delta);
-
-            const targets = prevUnits.filter((u) => u.side !== unit.side && u.hp > 0);
-            let closestDist = 999;
-            let targetUnit: BattleUnit | null = null;
-
-            for (const t of targets) {
-              const dist = isPlayer ? t.x - unit.x : unit.x - t.x;
-              if (dist >= 0 && dist < closestDist) {
-                closestDist = dist;
-                targetUnit = t;
-              }
-            }
-
-            const baseDist = isPlayer ? 92 - unit.x : unit.x - 8;
-            const isTargetUnitInRange = targetUnit && closestDist <= unit.range;
-            const isBaseInRange = baseDist <= unit.range;
-
-            if (isTargetUnitInRange || isBaseInRange) {
-              const willSwing = newCd <= 0;
-              if (willSwing) attacksReady.add(unit.uid);
-
-              return {
-                ...unit,
-                isWalking: false,
-                isAttacking: true,
-                attackCooldown: willSwing ? unit.attackSpeed : newCd,
-                stasisFrozenRemaining: newFrozen,
-                rallyBuffRemaining: newRally,
-                hitFlash: newHitFlash,
-              };
-            } else {
-              const moveDist = unit.speed * delta * (isPlayer ? 1 : -1);
-              const nextX = Math.max(8, Math.min(92, unit.x + moveDist));
-
-              return {
-                ...unit,
-                x: nextX,
-                isWalking: true,
-                isAttacking: false,
-                attackCooldown: newCd,
-                stasisFrozenRemaining: newFrozen,
-                rallyBuffRemaining: newRally,
-                hitFlash: newHitFlash,
-              };
-            }
-          });
-
-          // Resolve attacks
-          for (const unit of updated) {
-            if (attacksReady.has(unit.uid)) {
-              const isPlayer = unit.side === 'player';
-              const rallyMult = unit.rallyBuffRemaining > 0 ? 1.45 : 1.0;
-              const dmg = Math.round(unit.damage * rallyMult);
-
-              const targets = updated.filter((u) => u.side !== unit.side && u.hp > 0);
-              let closestDist = 999;
-              let targetUnit: BattleUnit | null = null;
-              for (const t of targets) {
-                const dist = isPlayer ? t.x - unit.x : unit.x - t.x;
-                if (dist >= 0 && dist < closestDist) {
-                  closestDist = dist;
-                  targetUnit = t;
-                }
-              }
-
-              const targetBaseDist = isPlayer ? 92 - unit.x : unit.x - 8;
-
-              if (targetUnit && closestDist <= unit.range) {
-                if (unit.projectileType && unit.projectileType !== 'none') {
-                  sound.playRangedAttack();
-                  const pType: Projectile['type'] = unit.projectileType;
-
-                  setProjectiles((p) => [
-                    ...p,
-                    {
-                      id: `proj-${Date.now()}-${Math.random()}`,
-                      type: pType,
-                      startX: unit.x,
-                      targetX: targetUnit!.x,
-                      currentX: unit.x,
-                      y: 20,
-                      side: unit.side,
-                      damage: dmg,
-                      targetUid: targetUnit!.uid,
-                      progress: 0,
-                    },
-                  ]);
-                } else {
-                  sound.playMeleeAttack();
-                  targetUnit.hp = Math.max(0, targetUnit.hp - dmg);
-                  targetUnit.hitFlash = 0.15;
-
-                  setFloatingTexts((ft) => [
-                    ...ft,
-                    {
-                      id: `ft-${Date.now()}-${Math.random()}`,
-                      text: `-${dmg}`,
-                      x: targetUnit!.x,
-                      y: 28,
-                      color: isPlayer ? '#60a5fa' : '#f87171',
-                      opacity: 1,
-                      life: 0.8,
-                    },
-                  ]);
-                }
-              } else if (targetBaseDist <= unit.range) {
-                if (unit.projectileType && unit.projectileType !== 'none') {
-                  sound.playRangedAttack();
-                  const pType: Projectile['type'] = unit.projectileType;
-
-                  setProjectiles((p) => [
-                    ...p,
-                    {
-                      id: `proj-base-${Date.now()}-${Math.random()}`,
-                      type: pType,
-                      startX: unit.x,
-                      targetX: isPlayer ? 92 : 8,
-                      currentX: unit.x,
-                      y: 20,
-                      side: unit.side,
-                      damage: dmg,
-                      progress: 0,
-                    },
-                  ]);
-                } else {
-                  sound.playMeleeAttack();
-                  if (isPlayer) {
-                    setEnemyBaseHp((eHp) => Math.max(0, eHp - dmg));
-                  } else {
-                    setPlayerBaseHp((pHp) => Math.max(0, pHp - dmg));
-                  }
-
-                  setFloatingTexts((ft) => [
-                    ...ft,
-                    {
-                      id: `ft-base-${Date.now()}-${Math.random()}`,
-                      text: `-${dmg}`,
-                      x: isPlayer ? 92 : 8,
-                      y: 40,
-                      color: isPlayer ? '#38bdf8' : '#ef4444',
-                      opacity: 1,
-                      life: 0.9,
-                    },
-                  ]);
-                }
-              }
-            }
-          }
-
-          // Kill coins & death
-          const living: BattleUnit[] = [];
-          for (const u of updated) {
-            if (u.hp <= 0) {
-              sound.playHit();
-              if (u.side === 'enemy') {
-                const earned = battleType === 'campaign' ? (u.role === 'tank' ? 5 : 1) : 0;
-                setSessionStats((prev) => ({
-                  ...prev,
-                  goldEarnedInBattle: prev.goldEarnedInBattle + earned,
-                  normalKills: prev.normalKills + (u.role !== 'tank' ? 1 : 0),
-                  tankKills: prev.tankKills + (u.role === 'tank' ? 1 : 0),
-                }));
-                if (battleType === 'campaign') {
-                  sound.playCoin();
-                  setFloatingTexts((ft) => [
-                  ...ft,
-                  {
-                    id: `coin-${Date.now()}-${Math.random()}`,
-                    text: `+${earned}G`,
-                    x: u.x,
-                    y: 35,
-                    color: '#fbbf24',
-                    opacity: 1,
-                    life: 0.8,
-                  },
-                  ]);
-                }
-              }
-            } else {
-              living.push(u);
-            }
-          }
-
-          return living;
-        });
-
-        // Projectiles update
-        setProjectiles((prevProj) => {
-          const activeProj: Projectile[] = [];
-
-          for (const p of prevProj) {
-            const nextProgress = p.progress + delta * 2.8;
-            if (nextProgress >= 1) {
-              sound.playHit();
-              const isPlayer = p.side === 'player';
-
-              if (p.targetUid) {
-                setUnits((uList) =>
-                  uList.map((u) => {
-                    if (u.uid === p.targetUid) {
-                      const nextHp = Math.max(0, u.hp - p.damage);
-                      return { ...u, hp: nextHp, hitFlash: 0.15 };
-                    }
-                    return u;
-                  })
-                );
-              } else {
-                if (isPlayer) {
-                  setEnemyBaseHp((eHp) => Math.max(0, eHp - p.damage));
-                } else {
-                  setPlayerBaseHp((pHp) => Math.max(0, pHp - p.damage));
-                }
-              }
-
-              setParticles((parts) => [
-                ...parts,
-                {
-                  id: `spark-${Date.now()}-${Math.random()}`,
-                  x: p.targetX,
-                  y: 20,
-                  vx: (Math.random() - 0.5) * 8,
-                  vy: Math.random() * 8,
-                  color: '#fbbf24',
-                  size: 3,
-                  alpha: 1,
-                  life: 0.3,
-                },
-              ]);
-
-              setFloatingTexts((ft) => [
-                ...ft,
-                {
-                  id: `ft-proj-${Date.now()}-${Math.random()}`,
-                  text: `-${p.damage}`,
-                  x: p.targetX,
-                  y: 30,
-                  color: isPlayer ? '#60a5fa' : '#f87171',
-                  opacity: 1,
-                  life: 0.7,
-                },
-              ]);
-            } else {
-              const currentX = p.startX + (p.targetX - p.startX) * nextProgress;
-              activeProj.push({ ...p, progress: nextProgress, currentX });
-            }
-          }
-
-          return activeProj;
-        });
-
-        // Floating texts & particles
-        setFloatingTexts((ftList) =>
-          ftList
-            .map((t) => ({ ...t, y: t.y + delta * 12, opacity: t.opacity - delta * 1.1, life: t.life - delta }))
-            .filter((t) => t.life > 0 && t.opacity > 0)
-        );
-
-        setParticles((pList) =>
-          pList
-            .map((p) => ({ ...p, x: p.x + p.vx * delta, y: p.y + p.vy * delta, alpha: p.alpha - delta * 2.5, life: p.life - delta }))
-            .filter((p) => p.life > 0 && p.alpha > 0)
-        );
-
-        // Result check
-        const bossCleared = battleType !== 'bosses' || (bossSpawnedRef.current && !unitsForVictoryRef.current.some((u) => u.side === 'enemy' && u.role === 'boss' && u.hp > 0));
-        if (enemyBaseHp <= 0 && !battleResult && battleType !== 'rush' && bossCleared) {
-          sound.playVictory();
-          setBattleResult('victory');
-        } else if (playerBaseHp <= 0 && !battleResult) {
-          sound.playDefeat();
-          setBattleResult('defeat');
+      let sim = simRef.current;
+      while (sim && !sim.result && accumulator >= SIM_STEP) {
+        accumulator -= SIM_STEP;
+        prevSimRef.current = sim;
+        const { state, events } = stepBattle(sim, Math.random);
+        sim = state;
+        for (const e of new Set(events)) {
+          if (e === 'melee') sound.playMeleeAttack();
+          else if (e === 'ranged') sound.playRangedAttack();
+          else if (e === 'hit') sound.playHit();
+          else if (e === 'coin') sound.playCoin();
+          else if (e === 'victory') sound.playVictory();
+          else if (e === 'defeat') sound.playDefeat();
         }
       }
-
-      animId = requestAnimationFrame(gameTick);
+      if (!sim) return;
+      simRef.current = sim;
+      publishSim(sim, prevSimRef.current, accumulator / SIM_STEP);
+      if (sim.result) {
+        setBattleResult(sim.result);
+        return;
+      }
+      animId = requestAnimationFrame(frame);
     };
 
-    animId = requestAnimationFrame(gameTick);
+    animId = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(animId);
-  }, [inBattle, isPaused, battleResult, foodRate, battleType, enemyBaseHp, playerBaseHp]);
+  }, [inBattle, isPaused, battleResult, publishSim]);
 
   // --- VICTORY CLAIM ---
   const handleVictoryClaim = useCallback(() => {
@@ -928,7 +509,7 @@ export default function App() {
   const handleContinueSurvival = useCallback(() => {
     if (battleResult !== 'victory' || battleType !== 'survival') return;
     const nextWave = sessionStats.survivalWave + 1;
-    startBattle('survival', { carriedBaseHp: playerBaseHp, survivalWave: nextWave });
+    startBattle('survival', { carriedBaseHp: simRef.current?.playerBaseHp ?? playerBaseHp, survivalWave: nextWave });
   }, [battleResult, battleType, sessionStats.survivalWave, playerBaseHp, startBattle]);
 
   const handleCashoutSurvival = useCallback(() => {
