@@ -256,11 +256,16 @@ export default function App() {
   );
 
   // --- DEPLOY TROOP ---
+  const foodSpendLockRef = useRef(0);
+  useEffect(() => { foodSpendLockRef.current = food; }, [food]);
   const handleDeployUnit = useCallback(
     (unitDef: UnitDef) => {
-      if (food < unitDef.cost) return;
-
-      setFood((prev) => prev - unitDef.cost);
+      const ageIndex = getAgeIndex(profile.armyAge);
+      const legalAge = unitDef.ageId === profile.armyAge || (ageIndex > 0 && unitDef.ageId === AGES[ageIndex - 1].id);
+      const unlocked = profile.unlockedTroopIds.includes(unitDef.id) || (unitDef.ageId === profile.armyAge && unitDef.unlockCostGold === 0);
+      if (!inBattle || isPaused || battleResult || !legalAge || !unlocked || foodSpendLockRef.current < unitDef.cost) return;
+      foodSpendLockRef.current -= unitDef.cost;
+      setFood((prev) => Math.max(0, prev - unitDef.cost));
       sound.playDeploy();
 
       const finalDmg = Math.round(unitDef.damage * (1 + cardDmgBonus + runeDmgBonus));
@@ -290,7 +295,7 @@ export default function App() {
 
       setUnits((prev) => [...prev, newUnit]);
     },
-    [food, cardDmgBonus, runeDmgBonus, cardHpBonus, runeHpBonus, profile.baseLevel]
+    [inBattle, isPaused, battleResult, profile.armyAge, profile.unlockedTroopIds, cardDmgBonus, runeDmgBonus, cardHpBonus, runeHpBonus, profile.baseLevel]
   );
 
   // --- DEPLOY HERO ---
@@ -958,24 +963,29 @@ export default function App() {
     const cost = Math.round(12 * Math.pow(1.35, profile.foodLevel - 1));
     if (profile.gold < cost) return;
     sound.playUpgrade();
-    setProfile((prev) => ({ ...prev, gold: prev.gold - cost, foodLevel: prev.foodLevel + 1 }));
+    setProfile((prev) => {
+      const price = Math.round(12 * Math.pow(1.35, prev.foodLevel - 1));
+      return prev.gold >= price ? { ...prev, gold: prev.gold - price, foodLevel: prev.foodLevel + 1 } : prev;
+    });
   };
 
   const handleUpgradeBase = () => {
     const cost = Math.round(15 * Math.pow(1.35, profile.baseLevel - 1));
     if (profile.gold < cost) return;
     sound.playUpgrade();
-    setProfile((prev) => ({ ...prev, gold: prev.gold - cost, baseLevel: prev.baseLevel + 1 }));
+    setProfile((prev) => {
+      const price = Math.round(15 * Math.pow(1.35, prev.baseLevel - 1));
+      return prev.gold >= price ? { ...prev, gold: prev.gold - price, baseLevel: prev.baseLevel + 1 } : prev;
+    });
   };
 
   const handleUnlockTroop = (unit: UnitDef) => {
     if (profile.gold < unit.unlockCostGold) return;
     sound.playUpgrade();
-    setProfile((prev) => ({
-      ...prev,
-      gold: prev.gold - unit.unlockCostGold,
-      unlockedTroopIds: [...prev.unlockedTroopIds, unit.id],
-    }));
+    setProfile((prev) => {
+      if (prev.gold < unit.unlockCostGold || prev.unlockedTroopIds.includes(unit.id) || prev.armyAge !== unit.ageId) return prev;
+      return { ...prev, gold: prev.gold - unit.unlockCostGold, unlockedTroopIds: [...prev.unlockedTroopIds, unit.id] };
+    });
   };
 
   const handleEvolveAge = () => {
@@ -987,20 +997,25 @@ export default function App() {
     if (profile.gold < cost) return;
 
     sound.playVictory();
-    setProfile((prev) => ({
-      ...prev,
-      gold: prev.gold - cost,
-      armyAge: nextAge.id,
-      foodLevel: 1,
-      baseLevel: 1,
-      unlockedTroopIds: Array.from(new Set([...prev.unlockedTroopIds, nextAge.units[0].id])),
-    }));
+    setProfile((prev) => {
+      const idx = getAgeIndex(prev.armyAge);
+      if (idx >= AGES.length - 1) return prev;
+      const next = AGES[idx + 1];
+      const price = prev.clearedEnemyStages.includes(AGES[idx].eraNumber) ? 0 : AGES[idx].evolveCostGold;
+      if (prev.gold < price) return prev;
+      return {
+        ...prev, gold: prev.gold - price, armyAge: next.id,
+        opponentStage: Math.max(prev.opponentStage, next.eraNumber),
+        foodLevel: 1, baseLevel: 1,
+        unlockedTroopIds: Array.from(new Set([...prev.unlockedTroopIds, next.units[0].id])),
+      };
+    });
   };
 
   const handlePrestige = () => {
     if (profile.armyAge !== 'future' || !profile.clearedEnemyStages.includes(6)) return;
     sound.playVictory();
-    setProfile((prev) => ({
+    setProfile((prev) => (prev.armyAge !== 'future' || !prev.clearedEnemyStages.includes(6)) ? prev : ({
       ...prev,
       timeline: prev.timeline + 1,
       armyAge: 'stone',
@@ -1022,13 +1037,12 @@ export default function App() {
     const needed = current.level * 3;
     if (current.copies < needed) return;
     sound.playUpgrade();
-    setProfile((prev) => ({
-      ...prev,
-      cards: {
-        ...prev.cards,
-        [cardId]: { ...current, level: current.level + 1, copies: current.copies - needed },
-      },
-    }));
+    setProfile((prev) => {
+      const owned = prev.cards[cardId];
+      const price = owned ? owned.level * 3 : Infinity;
+      if (!owned || owned.copies < price) return prev;
+      return { ...prev, cards: { ...prev.cards, [cardId]: { ...owned, level: owned.level + 1, copies: owned.copies - price } } };
+    });
   };
 
   const handleDiscoverSkill = () => {
@@ -1037,6 +1051,7 @@ export default function App() {
     const skillList: ('stasis' | 'volley' | 'rally')[] = ['stasis', 'volley', 'rally'];
     const chosen = skillList[Math.floor(Math.random() * skillList.length)];
     setProfile((prev) => {
+      if (prev.gems < 80) return prev;
       const existing = prev.skills[chosen] || { skillId: chosen, level: 1, copies: 0, unlocked: false };
       return {
         ...prev,
@@ -1055,17 +1070,17 @@ export default function App() {
     const needed = Math.max(2, existing.level * 2);
     if (existing.copies < needed) return;
     sound.playUpgrade();
-    setProfile((prev) => ({
-      ...prev,
-      skills: {
-        ...prev.skills,
-        [skillId]: { ...existing, level: existing.level + 1, copies: existing.copies - needed },
-      },
-    }));
+    setProfile((prev) => {
+      const skill = prev.skills[skillId];
+      const price = skill ? Math.max(2, skill.level * 2) : Infinity;
+      if (!skill?.unlocked || skill.copies < price) return prev;
+      return { ...prev, skills: { ...prev.skills, [skillId]: { ...skill, level: skill.level + 1, copies: skill.copies - price } } };
+    });
   };
 
   const handleEquipSkill = (skillId: 'stasis' | 'volley' | 'rally', slotIndex: number) => {
     setProfile((prev) => {
+      if (!prev.skills[skillId]?.unlocked || slotIndex < 0 || slotIndex >= 3) return prev;
       const slots = [...prev.equippedSkills];
       const existingIdx = slots.indexOf(skillId);
       if (existingIdx !== -1) slots[existingIdx] = null;
@@ -1077,17 +1092,17 @@ export default function App() {
   const handleUpgradeRune = (nodeId: string) => {
     if (profile.runePoints < 1) return;
     sound.playUpgrade();
-    setProfile((prev) => ({
-      ...prev,
-      runePoints: prev.runePoints - 1,
-      runes: { ...prev.runes, [nodeId]: (prev.runes[nodeId] || 0) + 1 },
-    }));
+    setProfile((prev) => {
+      const rune = RUNES.find((it) => it.id === nodeId);
+      if (!rune || prev.runePoints < 1 || (prev.runes[nodeId] || 0) >= rune.maxRank || (rune.parentId && !prev.runes[rune.parentId])) return prev;
+      return { ...prev, runePoints: prev.runePoints - 1, runes: { ...prev.runes, [nodeId]: (prev.runes[nodeId] || 0) + 1 } };
+    });
   };
 
   const handleEquipHero = (heroId: string) => {
     setProfile((prev) => ({
       ...prev,
-      equippedHeroId: prev.equippedHeroId === heroId ? null : heroId,
+      equippedHeroId: !prev.heroesUnlocked.includes(heroId) ? prev.equippedHeroId : (prev.equippedHeroId === heroId ? null : heroId),
     }));
   };
 
@@ -1124,14 +1139,22 @@ export default function App() {
     }
 
     setRecentChestPulls(pulls);
-    setProfile((prev) => ({ ...prev, gems: prev.gems - costGems, cards: updatedCards }));
+    setProfile((prev) => {
+      if (prev.gems < costGems) return prev;
+      const cards = { ...prev.cards };
+      for (const draw of pulls) {
+        const owned = cards[draw.id];
+        cards[draw.id] = owned ? { ...owned, copies: owned.copies + 1 } : { cardId: draw.id, level: 1, copies: 1 };
+      }
+      return { ...prev, gems: prev.gems - costGems, cards };
+    });
   };
 
   const handleClaimDaily = () => {
     const todayUtc = new Date().toISOString().slice(0, 10);
     if (profile.lastDailyClaimDate === todayUtc) return;
     sound.playCoin();
-    setProfile((prev) => ({
+    setProfile((prev) => prev.lastDailyClaimDate === todayUtc ? prev : ({
       ...prev,
       gems: prev.gems + 25,
       keys: prev.keys + 1,
@@ -1140,9 +1163,10 @@ export default function App() {
   };
 
   const currentAgeDef = getAgeDef(profile.armyAge);
-  const availableTroopsInCombat = currentAgeDef.units.filter(
-    (u) => profile.unlockedTroopIds.includes(u.id) || u.unlockCostGold === 0
-  );
+  const availableTroopsInCombat = [
+    ...currentAgeDef.units,
+    ...(getAgeIndex(profile.armyAge) > 0 ? AGES[getAgeIndex(profile.armyAge) - 1].units : []),
+  ].filter((u) => profile.unlockedTroopIds.includes(u.id) || (u.ageId === profile.armyAge && u.unlockCostGold === 0)).slice(0, 3);
 
   const combatTheme = getCombatTheme(enemyAgeId, battleType);
   const currentStageEnemyAgeId = getAgeByIndex(profile.opponentStage - 1).id;
