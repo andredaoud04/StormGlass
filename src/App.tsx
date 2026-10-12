@@ -1307,7 +1307,7 @@ export default function App() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/30 pointer-events-none" />
 
                 {/* Bases Outposts on the Battlefield (Player on Left, Enemy on Right) matching battle scene */}
-                <div className="absolute left-0 right-0 bottom-[26%] h-[32%] pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-0">
+                <div className="absolute left-0 right-0 top-[19%] h-[18%] pointer-events-none z-10 flex justify-between items-end px-1 sm:px-2 pb-0">
                   <BaseOutpostSprite
                     side="player"
                     hpText={`Lvl ${profile.baseLevel}`}
@@ -1366,7 +1366,7 @@ export default function App() {
                 </div>
 
                 {/* --- LARGE BATTLE CTA BUTTON (Matches Image 2 exactly) --- */}
-                <div className="relative z-20 flex flex-col items-center mb-3 px-6">
+                <div className="absolute z-20 left-0 right-0 top-[59%] flex flex-col items-center px-6">
                   <button
                     onClick={() => startBattle('campaign')}
                     className="relative w-56 sm:w-64 h-14 sm:h-16 rounded-2xl bg-gradient-to-b from-blue-400 via-blue-600 to-blue-700 border-4 border-stone-950 shadow-[0_5px_0_#1e3a8a,0_10px_20px_rgba(0,0,0,0.7)] hover:brightness-110 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a] transition-all flex items-center justify-center gap-2.5 sm:gap-3"
