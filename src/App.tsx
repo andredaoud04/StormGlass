@@ -35,15 +35,13 @@ import { CardsView } from './components/CardsView';
 import { ShopView } from './components/ShopView';
 import { HomeBaseModal } from './components/HomeBaseModal';
 import { VictoryDefeatModal } from './components/VictoryDefeatModal';
+import { RPGModalContainer, RPGButton } from './components/RPGModalFrame';
 import { MissionsModal, SpinWheelModal, SettingsModal } from './components/SideMenuModals';
 import {
   Settings,
   Swords,
   Scroll,
-  Gift,
-  Skull,
   Shield,
-  Flag,
   ShoppingBag,
   Map as MapIcon,
   Tent,
@@ -51,7 +49,7 @@ import {
 
 export default function App() {
   const [profile, setProfile] = useState<PlayerProfile>(() => loadProfile());
-  const [activeTab, setActiveTab] = useState<'battle' | 'heroes' | 'dungeons' | 'cards' | 'shop'>('battle');
+  const [activeTab, setActiveTab] = useState<'battle' | 'upgrades' | 'dungeons' | 'cards' | 'shop'>('battle');
   const [showHomeModal, setShowHomeModal] = useState(false);
   const [showMissionsModal, setShowMissionsModal] = useState(false);
   const [showSpinModal, setShowSpinModal] = useState(false);
@@ -64,6 +62,8 @@ export default function App() {
   // Active Combat State
   const [inBattle, setInBattle] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [showRetreatConfirm, setShowRetreatConfirm] = useState(false);
+  const pausedBeforeRetreatRef = useRef(false);
   const [battleType, setBattleType] = useState<'campaign' | 'rush' | 'legends' | 'bosses' | 'survival' | 'hell'>('campaign');
   const [enemyAgeId, setEnemyAgeId] = useState<AgeId>('stone');
   const [playerBaseHp, setPlayerBaseHp] = useState(420);
@@ -811,18 +811,16 @@ export default function App() {
     const earnedGold = sessionStats.goldEarnedInBattle;
 
     if (battleType === 'campaign') {
-      const currentEraIndex = getAgeIndex(profile.armyAge) + 1;
-      const nextOpponentStage = Math.min(6, profile.opponentStage + 1);
-
       setProfile((prev) => {
-        const cleared = prev.clearedEnemyStages.includes(currentEraIndex)
+        const defeatedStage = prev.opponentStage;
+        const cleared = prev.clearedEnemyStages.includes(defeatedStage)
           ? prev.clearedEnemyStages
-          : [...prev.clearedEnemyStages, currentEraIndex];
+          : [...prev.clearedEnemyStages, defeatedStage];
 
         return {
           ...prev,
           gold: prev.gold + earnedGold + 10,
-          opponentStage: nextOpponentStage,
+          opponentStage: Math.min(6, prev.opponentStage + 1),
           clearedEnemyStages: cleared,
         };
       });
@@ -869,7 +867,7 @@ export default function App() {
 
     setInBattle(false);
     setBattleResult(null);
-  }, [battleType, sessionStats.goldEarnedInBattle, profile.armyAge, profile.opponentStage]);
+  }, [battleType, sessionStats.goldEarnedInBattle]);
 
   // --- SURVIVAL CONTINUE / CASHOUT ---
   const handleContinueSurvival = useCallback(() => {
@@ -904,6 +902,11 @@ export default function App() {
     setBattleResult(null);
   }, [sessionStats.goldEarnedInBattle]);
 
+  const cancelRetreat = () => {
+    setShowRetreatConfirm(false);
+    setIsPaused(pausedBeforeRetreatRef.current);
+  };
+
   // --- RETREAT / SURRENDER ---
   const handleRetreat = useCallback(() => {
     sound.playDefeat();
@@ -913,6 +916,7 @@ export default function App() {
     }
     setInBattle(false);
     setIsPaused(false);
+    setShowRetreatConfirm(false);
     setBattleResult(null);
   }, [sessionStats.goldEarnedInBattle]);
 
@@ -1133,12 +1137,7 @@ export default function App() {
               <span className="font-pixel text-[11px] text-white font-bold tabular-nums whitespace-nowrap">
                 {profile.gold}
               </span>
-              <button
-                onClick={() => setActiveTab('shop')}
-                className="w-3.5 h-3.5 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-stone-950 flex items-center justify-center text-[9px] font-bold ml-0.5 shrink-0"
-              >
-                +
-              </button>
+              
             </div>
 
             {/* Center Battle Stage Banner matching reference image */}
@@ -1155,12 +1154,7 @@ export default function App() {
                 <span className="font-pixel text-[11px] text-white font-bold tabular-nums whitespace-nowrap">
                   {profile.gems}
                 </span>
-                <button
-                  onClick={() => setActiveTab('shop')}
-                  className="w-3.5 h-3.5 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-stone-950 flex items-center justify-center text-[9px] font-bold ml-0.5 shrink-0"
-                >
-                  +
-                </button>
+                
               </div>
 
               {/* Square Settings Gear Button */}
@@ -1186,7 +1180,11 @@ export default function App() {
               totalGems={profile.gems}
               isPaused={isPaused}
               onTogglePause={() => setIsPaused(!isPaused)}
-              onRetreatClick={handleRetreat}
+              onRetreatClick={() => {
+                pausedBeforeRetreatRef.current = isPaused;
+                setIsPaused(true);
+                setShowRetreatConfirm(true);
+              }}
               rushTimer={battleType === 'rush' ? sessionStats.rushTimerRemaining : undefined}
             />
 
@@ -1279,17 +1277,6 @@ export default function App() {
                       </div>
                     </button>
 
-                    {/* Events Button (4d 3h) */}
-                    <button
-                      onClick={() => setActiveTab('dungeons')}
-                      className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-b from-stone-800 to-stone-950 border-2 border-stone-600 shadow-xl flex items-center justify-center text-amber-400 hover:scale-105 active:scale-95 transition-all mt-2.5"
-                    >
-                      <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
-                      <div className="absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap">
-                        4d 3h
-                      </div>
-                    </button>
-
                     {/* Citadel Home Base Shortcut */}
                     <button
                       onClick={() => setShowHomeModal(true)}
@@ -1304,28 +1291,6 @@ export default function App() {
 
                   {/* Right Column Buttons */}
                   <div className="flex flex-col gap-2 sm:gap-2.5 pointer-events-auto items-end">
-                    {/* Progress Button (18/55) */}
-                    <button
-                      onClick={() => setActiveTab('heroes')}
-                      className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-b from-stone-800 to-stone-950 border-2 border-stone-600 shadow-xl flex items-center justify-center text-red-400 hover:scale-105 active:scale-95 transition-all"
-                    >
-                      <Skull className="w-5 h-5 sm:w-6 sm:h-6 text-stone-200" />
-                      <div className="absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap">
-                        {profile.clearedEnemyStages.length}/6
-                      </div>
-                    </button>
-
-                    {/* Arena Button (4d 3h) */}
-                    <button
-                      onClick={() => startBattle('campaign')}
-                      className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-b from-stone-800 to-stone-950 border-2 border-stone-600 shadow-xl flex items-center justify-center text-blue-400 hover:scale-105 active:scale-95 transition-all mt-2.5"
-                    >
-                      <Swords className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
-                      <div className="absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] text-blue-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap">
-                        Arena
-                      </div>
-                    </button>
-
                     {/* Lucky Spin Wheel (Free!) */}
                     <button
                       onClick={() => setShowSpinModal(true)}
@@ -1338,16 +1303,6 @@ export default function App() {
                       </div>
                     </button>
 
-                    {/* Season Pass Banner */}
-                    <button
-                      onClick={() => setActiveTab('cards')}
-                      className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-b from-red-950 to-stone-950 border-2 border-red-700 shadow-xl flex items-center justify-center text-red-300 hover:scale-105 active:scale-95 transition-all mt-2.5"
-                    >
-                      <Flag className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
-                      <div className="absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] text-red-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap">
-                        Season
-                      </div>
-                    </button>
                   </div>
                 </div>
 
@@ -1369,7 +1324,7 @@ export default function App() {
             )}
 
             {/* UPGRADES / HEROES TAB */}
-            {activeTab === 'heroes' && (
+            {activeTab === 'upgrades' && (
               <UpgradesView
                 profile={profile}
                 onUpgradeFood={handleUpgradeFood}
@@ -1435,9 +1390,9 @@ export default function App() {
 
             {/* 2. Upgrades (Renamed from Heroes: immediately to the left of Battle) */}
             <button
-              onClick={() => setActiveTab('heroes')}
+              onClick={() => setActiveTab('upgrades')}
               className={`flex flex-col items-center gap-0.5 transition-all ${
-                activeTab === 'heroes' ? 'scale-105 text-amber-400' : 'text-stone-400 hover:text-stone-200'
+                activeTab === 'upgrades' ? 'scale-105 text-amber-400' : 'text-stone-400 hover:text-stone-200'
               }`}
             >
               <div className="relative w-6 h-6 flex items-center justify-center">
@@ -1490,6 +1445,28 @@ export default function App() {
         )}
 
         {/* --- MODALS --- */}
+        {showRetreatConfirm && (
+          <RPGModalContainer
+            isOpen={true}
+            onClose={cancelRetreat}
+            title="RETREAT?"
+            subtitle="Leave the current encounter"
+            maxWidth="max-w-xs"
+            icon={<Swords className="w-5 h-5 text-amber-300" />}
+          >
+            <p className="font-pixel text-xs text-stone-300 mb-4">
+              End this battle without advancing the enemy stage. Campaign Gold earned so far is kept.
+            </p>
+            <div className="flex gap-2">
+              <RPGButton variant="dark" size="md" className="flex-1" onClick={cancelRetreat}>
+                CONTINUE
+              </RPGButton>
+              <RPGButton variant="gold" size="md" className="flex-1" onClick={handleRetreat}>
+                RETREAT
+              </RPGButton>
+            </div>
+          </RPGModalContainer>
+        )}
         {showHomeModal && (
           <HomeBaseModal
             profile={profile}
@@ -1536,7 +1513,7 @@ export default function App() {
             onContinue={handleVictoryClaim}
             onOpenUpgrades={() => {
               handleDefeatAcknowledge();
-              setActiveTab('heroes');
+              setActiveTab('upgrades');
             }}
             onExit={handleDefeatAcknowledge}
             onCashoutSurvival={battleType === 'survival' ? handleCashoutSurvival : undefined}
