@@ -248,59 +248,24 @@ export const BaseOutpostSprite: React.FC<{
   hpPercent: number;
 }> = ({ side, hpText, hpPercent }) => {
   const isPlayer = side === 'player';
-  const barColor = isPlayer ? 'bg-emerald-500' : 'bg-red-500';
-
+  const percentage = Math.max(0, Math.min(100, hpPercent * 100));
   return (
-    <div className="flex flex-col items-center select-none filter drop-shadow-[0_4px_6px_rgba(0,0,0,0.8)]">
-      {/* HP Number Label */}
-      <div className="font-pixel text-xs sm:text-sm font-black text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] mb-1 tracking-wider">
-        {hpText}
+    <div className="relative flex flex-col items-center select-none w-[76px] sm:w-[92px] drop-shadow-[0_3px_3px_rgba(0,0,0,0.75)]">
+      {/* HP always travels with the base, never with the top of the viewport. */}
+      <div className="w-full flex flex-col items-center gap-1 mb-1">
+        <span className="font-pixel text-[11px] sm:text-xs font-bold text-white whitespace-nowrap drop-shadow-[0_2px_3px_#000]">{hpText}</span>
+        <div className="w-full h-2.5 rounded-full border-2 border-stone-950 bg-stone-900 overflow-hidden">
+          <div className={`h-full ${isPlayer ? 'bg-emerald-400' : 'bg-rose-500'}`} style={{width: `${percentage}%`}} />
+        </div>
       </div>
-
-      {/* HP Bar */}
-      <div className="w-18 sm:w-22 h-2 sm:h-2.5 bg-stone-950 rounded-full border-2 border-stone-900 p-0.5 overflow-hidden shadow-lg mb-1.5">
-        <div
-          className={`h-full ${barColor} rounded-full transition-all duration-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]`}
-          style={{ width: `${Math.max(0, Math.min(100, hpPercent * 100))}%` }}
-        />
-      </div>
-
-      {/* Heraldic Hanging Banner (Blue with Radiant Sun for Player, Red with Radiant Sun for Enemy) */}
-      <div className="relative w-9 sm:w-11 h-14 sm:h-18">
-        {/* Horizontal Wooden / Brass Hanging Bar on top */}
-        <div className="w-full h-1 sm:h-1.5 bg-amber-700 border-y border-amber-950 rounded-full mb-0.5 shadow-sm" />
-
-        {isPlayer ? (
-          <svg viewBox="0 0 36 60" className="w-full h-full drop-shadow-md">
-            {/* Blue Banner with swallowtail bottom cutout */}
-            <polygon points="0,0 36,0 36,50 18,38 0,50" fill="#2563eb" stroke="#1d4ed8" strokeWidth="1.5" />
-            <polygon points="2,2 34,2 34,46 18,36 2,46" fill="#3b82f6" opacity="0.4" />
-            {/* White / Gold Radiant Sunburst Crest */}
-            <circle cx="18" cy="22" r="5.5" fill="#ffffff" />
-            <circle cx="18" cy="22" r="3.5" fill="#60a5fa" />
-            {Array.from({ length: 8 }).map((_, i) => {
-              const angle = (i * Math.PI) / 4;
-              const x2 = 18 + Math.cos(angle) * 10.5;
-              const y2 = 22 + Math.sin(angle) * 10.5;
-              return <line key={i} x1="18" y1="22" x2={x2} y2={y2} stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />;
-            })}
-          </svg>
-        ) : (
-          <svg viewBox="0 0 36 60" className="w-full h-full drop-shadow-md">
-            {/* Red Banner with swallowtail bottom cutout */}
-            <polygon points="0,0 36,0 36,50 18,38 0,50" fill="#dc2626" stroke="#b91c1c" strokeWidth="1.5" />
-            <polygon points="2,2 34,2 34,46 18,36 2,46" fill="#ef4444" opacity="0.4" />
-            {/* White Radiant Sunburst Crest */}
-            <circle cx="18" cy="22" r="5.5" fill="#ffffff" />
-            <circle cx="18" cy="22" r="3.5" fill="#f87171" />
-            {Array.from({ length: 8 }).map((_, i) => {
-              const angle = (i * Math.PI) / 4;
-              const x2 = 18 + Math.cos(angle) * 10.5;
-              const y2 = 22 + Math.sin(angle) * 10.5;
-              return <line key={i} x1="18" y1="22" x2={x2} y2={y2} stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />;
-            })}
-          </svg>
-        )}
+      {/* Pixel fortress silhouette with readable faction colors and grounded footprint. */}
+      <div className="relative w-[66px] sm:w-[78px] h-[92px] sm:h-[110px] pixelated">
+        <div className={`absolute inset-x-1 bottom-0 h-[70%] border-[3px] border-stone-950 ${isPlayer ? 'bg-slate-500' : 'bg-stone-600'}`} />
+        <div className={`absolute left-0 bottom-0 w-[21%] h-[88%] border-[3px] border-stone-950 ${isPlayer ? 'bg-blue-700' : 'bg-red-700'}`} />
+        <div className={`absolute right-0 bottom-0 w-[21%] h-[88%] border-[3px] border-stone-950 ${isPlayer ? 'bg-blue-700' : 'bg-red-700'}`} />
+        <div className="absolute left-[35%] bottom-0 w-[30%] h-[40%] rounded-t-full bg-stone-950 border-2 border-amber-950" />
+        <div className={`absolute left-[35%] top-[20%] w-[30%] h-[13%] border-2 border-stone-950 ${isPlayer ? 'bg-sky-300' : 'bg-amber-300'}`} />
+        <div className={`absolute left-[15%] right-[15%] top-[2%] h-[15%] border-[3px] border-stone-950 ${isPlayer ? 'bg-blue-600' : 'bg-red-600'}`} />
       </div>
     </div>
   );
