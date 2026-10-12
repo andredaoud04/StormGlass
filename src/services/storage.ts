@@ -51,6 +51,7 @@ export function loadProfile(): PlayerProfile {
     if (!raw) return { ...INITIAL_PROFILE };
 
     const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid profile save format');
     const profile: PlayerProfile = {
       ...INITIAL_PROFILE,
       ...parsed,
@@ -69,6 +70,14 @@ export function loadProfile(): PlayerProfile {
       unlockedTroopIds: Array.isArray(parsed.unlockedTroopIds) ? parsed.unlockedTroopIds : ['stone_clubber'],
     };
 
+    // Repair invalid negative/nonfinite balances without removing legitimate positive currency.
+    for (const currency of ['gold', 'gems', 'keys', 'runePoints'] as const) {
+      const value = Number(profile[currency]);
+      profile[currency] = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+    }
+    profile.timeline = Math.max(1, Math.floor(Number(profile.timeline) || 1));
+    profile.opponentStage = Math.max(1, Math.min(6, Math.floor(Number(profile.opponentStage) || 1)));
+
     // Check UTC daily key refill
     const todayUtc = new Date().toISOString().slice(0, 10);
     if (profile.lastDailyKeyRefillDate !== todayUtc) {
@@ -79,6 +88,13 @@ export function loadProfile(): PlayerProfile {
     return profile;
   } catch (err) {
     console.error('Failed to load profile:', err);
+    // Preserve unreadable saves locally before the fallback profile is auto-saved.
+    try {
+      const damaged = localStorage.getItem(SAVE_KEY);
+      if (damaged && !localStorage.getItem(`${SAVE_KEY}-recovery`)) {
+        localStorage.setItem(`${SAVE_KEY}-recovery`, damaged);
+      }
+    } catch { /* Storage may be blocked or exhausted. */ }
     return { ...INITIAL_PROFILE };
   }
 }
