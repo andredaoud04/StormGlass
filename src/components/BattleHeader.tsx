@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pause, Play, LogOut } from 'lucide-react';
+import { formatCompactNumber } from '../logic/formatNumber';
 
 interface BattleHeaderProps {
   battleStageNumber: number;
@@ -20,12 +21,6 @@ export const BattleHeader: React.FC<BattleHeaderProps> = ({
   onRetreatClick,
   rushTimer,
 }) => {
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
-    return Math.floor(num).toString();
-  };
-
   return (
     <header className="w-full flex items-center justify-between px-2.5 py-1.5 bg-stone-950/95 border-b-2 border-stone-800 select-none z-30 shrink-0">
       {/* Gold Counter Pill (Left) matching reference image */}
@@ -34,7 +29,7 @@ export const BattleHeader: React.FC<BattleHeaderProps> = ({
           <span className="text-[9px] font-pixel text-amber-950 font-black">$</span>
         </div>
         <span className="font-pixel text-[11px] text-white font-bold tabular-nums whitespace-nowrap">
-          {formatNumber(goldEarnedThisBattle)}
+          {formatCompactNumber(goldEarnedThisBattle)}
         </span>
       </div>
 
@@ -51,7 +46,7 @@ export const BattleHeader: React.FC<BattleHeaderProps> = ({
         <div className="flex items-center gap-1.5 bg-stone-900 border-2 border-blue-500 rounded-md px-2 py-0.5 shadow-md">
           <div className="w-3 h-3 rotate-45 bg-gradient-to-br from-cyan-300 via-blue-500 to-indigo-700 border border-cyan-200 shadow-[0_0_6px_#38bdf8] shrink-0" />
           <span className="font-pixel text-[11px] text-white font-bold tabular-nums whitespace-nowrap">
-            {formatNumber(totalGems)}
+            {formatCompactNumber(totalGems)}
           </span>
         </div>
 
