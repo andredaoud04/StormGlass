@@ -109,16 +109,11 @@ export const DungeonsView: React.FC<DungeonsViewProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-stone-900 border border-amber-600/50 rounded-lg px-2 py-1 shadow">
-          <Key className="w-3.5 h-3.5 text-amber-400" />
-          <span className="font-pixel text-[10px] text-amber-300 font-bold tabular-nums">
-            {profile.keys} Keys
-          </span>
-        </div>
+        <span className="text-[9px] text-amber-400 font-pixel">Choose a trial</span>
       </div>
 
       {/* Compact 2x2 Grid fitting portrait viewport with NO scrolling */}
-      <div className="grid grid-cols-2 gap-2 flex-1 my-1">
+      <div className={`grid gap-2 flex-1 my-1 ${profile.timeline === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
         {/* 1. SURVIVAL DUNGEON (Always available) */}
         <div className="rounded-xl border-2 border-emerald-600/70 bg-gradient-to-b from-emerald-950/40 via-stone-900/90 to-stone-950 p-2 sm:p-2.5 flex flex-col justify-between shadow-md">
           <div>
@@ -160,6 +155,7 @@ export const DungeonsView: React.FC<DungeonsViewProps> = ({
 
         {/* 2. RUSH DUNGEON */}
         <div
+          style={{ display: isRushUnlocked ? undefined : 'none' }}
           className={`rounded-xl border-2 p-2 sm:p-2.5 flex flex-col justify-between shadow-md ${
             isRushUnlocked
               ? 'border-red-600/70 bg-gradient-to-b from-red-950/40 via-stone-900/90 to-stone-950'
@@ -211,6 +207,7 @@ export const DungeonsView: React.FC<DungeonsViewProps> = ({
 
         {/* 3. LEGENDS ANTHOLOGY */}
         <div
+          style={{ display: isLegendsUnlocked ? undefined : 'none' }}
           className={`rounded-xl border-2 p-2 sm:p-2.5 flex flex-col justify-between shadow-md ${
             isLegendsUnlocked
               ? 'border-blue-600/70 bg-gradient-to-b from-blue-950/40 via-stone-900/90 to-stone-950'
@@ -263,6 +260,7 @@ export const DungeonsView: React.FC<DungeonsViewProps> = ({
 
         {/* 4. BOSSES (GATE COLOSSUS) */}
         <div
+          style={{ display: isBossesUnlocked ? undefined : 'none' }}
           className={`rounded-xl border-2 p-2 sm:p-2.5 flex flex-col justify-between shadow-md ${
             isBossesUnlocked
               ? 'border-purple-600/70 bg-gradient-to-b from-purple-950/40 via-stone-900/90 to-stone-950'
