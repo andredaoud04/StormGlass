@@ -163,6 +163,9 @@ export interface PlayerProfile {
   runePoints: number;
   lastDailyClaimDate: string | null;
   lastDailyKeyRefillDate: string | null;
+  lastDailySpinDate: string | null;
+  claimedMissionIds: string[];
+  legendsClaimedChapterIds: number[];
   
   // Progression
   armyAge: AgeId;
