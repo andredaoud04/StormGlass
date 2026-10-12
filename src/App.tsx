@@ -1114,14 +1114,6 @@ export default function App() {
   const combatTheme = getCombatTheme(enemyAgeId, battleType);
   const currentStageEnemyAgeId = getAgeByIndex(profile.opponentStage - 1).id;
   const currentBattleBackground = getBattleBackgroundImage(currentStageEnemyAgeId);
-  const isDungeonsUnlocked = profile.timeline > 1;
-
-  useEffect(() => {
-    if (activeTab === 'dungeons' && !isDungeonsUnlocked) {
-      setActiveTab('battle');
-    }
-  }, [activeTab, isDungeonsUnlocked]);
-
   return (
     <div className="flex justify-center min-h-screen bg-black text-slate-100 font-sans">
       {/* Mobile-first portrait viewport matching user's design */}
@@ -1373,8 +1365,7 @@ export default function App() {
         {/* --- BOTTOM NAVIGATION BAR --- */}
         {!inBattle && (
           <nav className="relative z-30 flex items-center justify-around py-2 px-1.5 bg-stone-950 border-t-4 border-stone-800 select-none shadow-2xl shrink-0">
-            {/* 1. Dungeons (Swapped with Shop: Far left, completely absent until unlocked after Prestige 1) */}
-            {isDungeonsUnlocked && (
+            {/* Dungeons: visible at all times; individual mode unlocks are handled in DungeonsView. */}
               <button
                 onClick={() => setActiveTab('dungeons')}
                 className={`flex flex-col items-center gap-0.5 transition-all ${
@@ -1386,7 +1377,6 @@ export default function App() {
                 </div>
                 <span className="font-pixel text-[8px] font-bold">Dungeons</span>
               </button>
-            )}
 
             {/* 2. Upgrades (Renamed from Heroes: immediately to the left of Battle) */}
             <button
