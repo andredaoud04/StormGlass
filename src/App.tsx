@@ -24,6 +24,7 @@ import {
 } from './data/gameData';
 import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
+import { formatCompactNumber } from './logic/formatNumber';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
@@ -1212,7 +1213,7 @@ export default function App() {
                 <span className="text-[9px] font-pixel text-amber-950 font-black">$</span>
               </div>
               <span className="font-pixel text-[11px] text-white font-bold tabular-nums whitespace-nowrap">
-                {profile.gold}
+                {formatCompactNumber(profile.gold)}
               </span>
               
             </div>
@@ -1229,7 +1230,7 @@ export default function App() {
               <div className="flex items-center gap-1 bg-stone-900 border-2 border-blue-500/90 rounded-md px-2 py-0.5 shadow-md">
                 <div className="w-3 h-3 rotate-45 bg-gradient-to-br from-cyan-300 via-blue-500 to-indigo-700 border border-cyan-200 shadow-[0_0_6px_#38bdf8] shrink-0" />
                 <span className="font-pixel text-[11px] text-white font-bold tabular-nums whitespace-nowrap">
-                  {profile.gems}
+                  {formatCompactNumber(profile.gems)}
                 </span>
                 
               </div>
@@ -1308,11 +1309,7 @@ export default function App() {
               /* IDLE HOME SCREEN (Matches battlefield environment) */
               <div
                 className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden select-none bg-slate-950"
-                style={{
-                  backgroundImage: `url(${currentBattleBackground})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'bottom',
-                }}
+
               >
                 {/* 16-Bit Battle Environment Background matching battlefield */}
                 <img
