@@ -1523,11 +1523,7 @@ export default function App() {
           <HomeBaseModal
             profile={profile}
             onClose={() => setShowHomeModal(false)}
-            onStartHellSiege={(stake) => {
-              setShowHomeModal(false);
-              setProfile((prev) => ({ ...prev, gold: Math.max(0, prev.gold - stake) }));
-              startBattle('hell');
-            }}
+            onStartHellSiege={() => { /* Unapproved high-stakes mechanics are disabled until capped and tested. */ }}
           />
         )}
 
