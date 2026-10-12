@@ -79,6 +79,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
           side="player"
           hpText={formatHp(playerBaseHp)}
           hpPercent={playerBasePercent}
+          theme={(enemyAge === 'ancient' ? 'desert' : enemyAge === 'gunpowder' || enemyAge === 'industrial' ? 'ice' : enemyAge === 'future' ? 'hell' : 'medieval')}
         />
 
         {/* Enemy Base (Right Outpost with Red Heraldic Banner) */}
@@ -86,6 +87,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
           side="enemy"
           hpText={formatHp(enemyBaseHp)}
           hpPercent={enemyBasePercent}
+          theme={(enemyAge === 'ancient' ? 'desert' : enemyAge === 'gunpowder' || enemyAge === 'industrial' ? 'ice' : enemyAge === 'future' ? 'hell' : 'medieval')}
         />
       </div>
 
