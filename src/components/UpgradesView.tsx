@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AgeId, PlayerProfile, UnitDef } from '../types/game';
 import { AGES, getAgeDef, getAgeIndex, getBaseFoodRate, getFoodUpgradeCost, getBaseUpgradeCost } from '../data/gameData';
 import { UnitSprite } from './PixelSprites';
+import { LOADOUT_SLOTS, eligibleTroops, normalizeLoadout } from '../logic/loadout';
 import { ArrowUpCircle, Sparkles, Lock, Check, Shield, Wheat, ArrowRight, Zap, Crown } from 'lucide-react';
 
 interface UpgradesViewProps {
@@ -11,7 +12,75 @@ interface UpgradesViewProps {
   onUnlockTroop: (unit: UnitDef) => void;
   onEvolveAge: () => void;
   onPrestige: () => void;
+  onSetLoadoutSlot: (slot: number, unitId: string) => void;
 }
+
+/**
+ * Compact three-slot battle loadout (SG-PROGRESS / 1.1.2). Only owned current or
+ * immediately previous Age troops are shown. When more than three are eligible,
+ * tap an equipped troop to pick the slot to replace, then tap a reserve troop.
+ */
+const LoadoutSelector: React.FC<{ profile: PlayerProfile; onSetSlot: (slot: number, unitId: string) => void }> = ({ profile, onSetSlot }) => {
+  const eligible = eligibleTroops(profile);
+  const loadout = normalizeLoadout(profile);
+  const [targetSlotRaw, setTargetSlot] = useState(LOADOUT_SLOTS - 1);
+  const targetSlot = Math.min(targetSlotRaw, Math.max(0, loadout.length - 1));
+  const canSwap = eligible.length > LOADOUT_SLOTS;
+  // One row when everything fits; otherwise one row per Army Age (current, then previous).
+  const rows = canSwap
+    ? [eligible.filter((u) => u.ageId === profile.armyAge), eligible.filter((u) => u.ageId !== profile.armyAge)].filter((r) => r.length > 0)
+    : [eligible];
+
+  return (
+    <div className="mt-2 rounded-xl border-2 border-stone-700 bg-gradient-to-b from-stone-900 via-stone-950 to-black p-1.5 shadow-md" data-testid="loadout-selector">
+      <div className="flex items-center justify-between mb-2 px-0.5 gap-2">
+        <span className="font-pixel text-[10px] text-amber-300 font-bold tracking-wider uppercase whitespace-nowrap">Battle Loadout</span>
+        <span className="font-pixel text-[8px] text-stone-400 truncate min-w-0">
+          {canSwap ? `Tap a troop to fill slot ${targetSlot + 1}` : `${loadout.length}/${LOADOUT_SLOTS} · all owned equipped`}
+        </span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {rows.map((row, rowIdx) => (
+          <div key={rowIdx} className="grid grid-cols-3 gap-1.5">
+            {row.map((unit) => {
+              const slot = loadout.indexOf(unit.id);
+              const equipped = slot >= 0;
+              const isTarget = canSwap && equipped && slot === targetSlot;
+              return (
+                <button
+                  key={unit.id}
+                  type="button"
+                  disabled={!canSwap}
+                  aria-pressed={equipped}
+                  aria-label={equipped ? `${unit.name}, slot ${slot + 1}` : `Equip ${unit.name} in slot ${targetSlot + 1}`}
+                  onClick={() => (equipped ? setTargetSlot(slot) : onSetSlot(targetSlot, unit.id))}
+                  className={`relative min-w-0 rounded-lg border-2 pl-1 pr-1 py-0.5 flex items-center gap-1 transition-all ${canSwap ? 'cursor-pointer active:scale-95' : 'cursor-default'} ${
+                    equipped
+                      ? isTarget
+                        ? 'border-amber-400 bg-amber-950/50 ring-1 ring-amber-300/60'
+                        : 'border-emerald-500/80 bg-emerald-950/40'
+                      : 'border-stone-700 bg-stone-900/60 opacity-75 hover:opacity-100'
+                  }`}
+                >
+                  {equipped && (
+                    <span className={`absolute -top-1.5 -left-1.5 w-4 h-4 rounded-full font-pixel text-[9px] font-black flex items-center justify-center border ${
+                      isTarget ? 'bg-amber-400 text-stone-950 border-amber-200' : 'bg-emerald-500 text-stone-950 border-emerald-200'
+                    }`}>{slot + 1}</span>
+                  )}
+                  <span className="shrink-0"><UnitSprite unitId={unit.id} size={26} /></span>
+                  <span className="min-w-0 flex flex-col items-start leading-tight">
+                    <span className="max-w-full font-pixel text-[9px] text-stone-100 font-bold truncate">{unit.name}</span>
+                    <span className="font-pixel text-[8px] text-amber-400/90">{unit.cost} 🌾</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const UpgradesView: React.FC<UpgradesViewProps> = ({
   profile,
@@ -20,6 +89,7 @@ export const UpgradesView: React.FC<UpgradesViewProps> = ({
   onUnlockTroop,
   onEvolveAge,
   onPrestige,
+  onSetLoadoutSlot,
 }) => {
   const currentAge = getAgeDef(profile.armyAge);
   const currentAgeIdx = getAgeIndex(profile.armyAge);
@@ -114,6 +184,8 @@ export const UpgradesView: React.FC<UpgradesViewProps> = ({
             );
           })}
         </div>
+
+        <LoadoutSelector profile={profile} onSetSlot={onSetLoadoutSlot} />
       </div>
 
       {/* ======================================================== */}

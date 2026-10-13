@@ -25,7 +25,8 @@ import {
 import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
 import { formatCompactNumber } from './logic/formatNumber';
-import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
+import { campaignGoldPayout, claimDailyCrate, dungeonEntryKeyCost, isDailyCrateClaimed, settleLegendsFirstClear, utcDateKey } from './logic/rules';
+import { loadoutUnits, setLoadoutSlot, withNormalizedLoadout } from './logic/loadout';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
 import { Battlefield } from './components/Battlefield';
@@ -1011,7 +1012,8 @@ export default function App() {
     sound.playUpgrade();
     setProfile((prev) => {
       if (prev.gold < unit.unlockCostGold || prev.unlockedTroopIds.includes(unit.id) || prev.armyAge !== unit.ageId) return prev;
-      return { ...prev, gold: prev.gold - unit.unlockCostGold, unlockedTroopIds: [...prev.unlockedTroopIds, unit.id] };
+      // An empty loadout slot is auto-filled by normalization; full loadouts are left as chosen.
+      return withNormalizedLoadout({ ...prev, gold: prev.gold - unit.unlockCostGold, unlockedTroopIds: [...prev.unlockedTroopIds, unit.id] });
     });
   };
 
@@ -1030,19 +1032,19 @@ export default function App() {
       const next = AGES[idx + 1];
       const price = prev.clearedEnemyStages.includes(AGES[idx].eraNumber) ? 0 : AGES[idx].evolveCostGold;
       if (prev.gold < price) return prev;
-      return {
+      return withNormalizedLoadout({
         ...prev, gold: prev.gold - price, armyAge: next.id,
         opponentStage: Math.max(prev.opponentStage, next.eraNumber),
         foodLevel: 1, baseLevel: 1,
         unlockedTroopIds: Array.from(new Set([...prev.unlockedTroopIds, next.units[0].id])),
-      };
+      });
     });
   };
 
   const handlePrestige = () => {
     if (profile.armyAge !== 'future' || !profile.clearedEnemyStages.includes(6)) return;
     sound.playVictory();
-    setProfile((prev) => (prev.armyAge !== 'future' || !prev.clearedEnemyStages.includes(6)) ? prev : ({
+    setProfile((prev) => (prev.armyAge !== 'future' || !prev.clearedEnemyStages.includes(6)) ? prev : withNormalizedLoadout({
       ...prev,
       timeline: prev.timeline + 1,
       gold: 0, // Campaign-local currency resets on Prestige; permanent collections are preserved.
@@ -1056,6 +1058,13 @@ export default function App() {
       heroesUnlocked: Array.from(new Set([...prev.heroesUnlocked, 'crusader_champion'])),
       equippedHeroId: prev.equippedHeroId || 'crusader_champion',
     }));
+  };
+
+  const handleSetLoadoutSlot = (slot: number, unitId: string) => {
+    setProfile((prev) => {
+      const troopLoadout = setLoadoutSlot(prev, slot, unitId);
+      return { ...prev, troopLoadout };
+    });
   };
 
   // --- CARDS & SKILLS ---
@@ -1179,22 +1188,13 @@ export default function App() {
   };
 
   const handleClaimDaily = () => {
-    const todayUtc = new Date().toISOString().slice(0, 10);
-    if (profile.lastDailyClaimDate === todayUtc) return;
+    const todayUtc = utcDateKey();
+    if (isDailyCrateClaimed(profile, todayUtc)) return;
     sound.playCoin();
-    setProfile((prev) => prev.lastDailyClaimDate === todayUtc ? prev : ({
-      ...prev,
-      gems: prev.gems + 25,
-      keys: prev.keys + 1,
-      lastDailyClaimDate: todayUtc,
-    }));
+    setProfile((prev) => claimDailyCrate(prev, todayUtc));
   };
 
-  const currentAgeDef = getAgeDef(profile.armyAge);
-  const availableTroopsInCombat = [
-    ...currentAgeDef.units,
-    ...(getAgeIndex(profile.armyAge) > 0 ? AGES[getAgeIndex(profile.armyAge) - 1].units : []),
-  ].filter((u) => profile.unlockedTroopIds.includes(u.id) || (u.ageId === profile.armyAge && u.unlockCostGold === 0)).slice(0, 3);
+  const availableTroopsInCombat = loadoutUnits(profile);
 
   const combatTheme = getCombatTheme(enemyAgeId, battleType);
   const currentStageEnemyAgeId = getAgeByIndex(profile.opponentStage - 1).id;
@@ -1408,6 +1408,7 @@ export default function App() {
                 onUnlockTroop={handleUnlockTroop}
                 onEvolveAge={handleEvolveAge}
                 onPrestige={handlePrestige}
+                onSetLoadoutSlot={handleSetLoadoutSlot}
               />
             )}
 
@@ -1441,6 +1442,7 @@ export default function App() {
               <ShopView
                 profile={profile}
                 onUpdateProfile={setProfile}
+                onClaimDaily={handleClaimDaily}
               />
             )}
           </div>
