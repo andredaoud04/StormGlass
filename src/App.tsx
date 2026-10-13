@@ -513,7 +513,8 @@ export default function App() {
   // --- SURVIVAL CONTINUE / CASHOUT ---
   const handleContinueSurvival = useCallback(() => {
     // The sim ref is replaced by startBattle, so a second tap on Continue finds no victory to continue from.
-    if (simRef.current?.result !== 'victory' || battleResult !== 'victory' || battleType !== 'survival') return;
+    // A Cash-out in the same tick already settled this run, so it cannot also continue (and later pay again).
+    if (battleSettledRef.current || simRef.current?.result !== 'victory' || battleResult !== 'victory' || battleType !== 'survival') return;
     const nextWave = sessionStats.survivalWave + 1;
     startBattle('survival', { carriedBaseHp: simRef.current?.playerBaseHp ?? playerBaseHp, survivalWave: nextWave });
   }, [battleResult, battleType, sessionStats.survivalWave, playerBaseHp, startBattle]);

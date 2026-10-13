@@ -20,6 +20,8 @@ export const MAX_FRAME_SECONDS = 0.25;
  * enemy appears only once a slot frees. Tunable for readability/performance; boss spawns ignore it.
  */
 export const MAX_ALIVE_ENEMIES = 6;
+/** WBS 1.7.8: transient impact effects are capped at 16 (newest kept); purely visual, never gameplay. */
+export const MAX_TRANSIENT_EFFECTS = 16;
 const EPS = 1e-9;
 export const LANE_PLAYER_BASE = 8;
 export const LANE_ENEMY_BASE = 92;
@@ -439,10 +441,12 @@ export function stepBattle(state: BattleSimState, rng: Rng): { state: BattleSimS
 
   s.floatingTexts = s.floatingTexts
     .map((t) => ({ ...t, y: t.y + dt * 12, opacity: t.opacity - dt * 1.1, life: t.life - dt }))
-    .filter((t) => t.life > 0 && t.opacity > 0);
+    .filter((t) => t.life > 0 && t.opacity > 0)
+    .slice(-MAX_TRANSIENT_EFFECTS);
   s.particles = s.particles
     .map((p) => ({ ...p, x: p.x + p.vx * dt, y: p.y + p.vy * dt, alpha: p.alpha - dt * 2.5, life: p.life - dt }))
-    .filter((p) => p.life > 0 && p.alpha > 0);
+    .filter((p) => p.life > 0 && p.alpha > 0)
+    .slice(-MAX_TRANSIENT_EFFECTS);
 
   const bossCleared = s.battleType !== 'bosses' || (s.bossSpawned && !s.units.some((u) => u.side === 'enemy' && u.role === 'boss'));
   if (s.battleType === 'rush' && s.rushTimerRemaining <= 0) s.result = 'victory';
@@ -479,7 +483,9 @@ export function advanceFrame(
   } = {},
 ): FrameResult {
   if (opts.paused || state.result) return { state, prev: null, accumulator: 0, steps: 0 };
-  let acc = accumulator + Math.max(0, Math.min(MAX_FRAME_SECONDS, frameSeconds));
+  // Non-finite inputs (NaN/Infinity from a bad timestamp) count as no time, so they can never poison the clock.
+  const frame = Number.isFinite(frameSeconds) ? Math.max(0, Math.min(MAX_FRAME_SECONDS, frameSeconds)) : 0;
+  let acc = (Number.isFinite(accumulator) ? Math.max(0, accumulator) : 0) + frame;
   let prev: BattleSimState | null = null;
   let steps = 0;
   while (!state.result && acc + EPS >= SIM_STEP) {
