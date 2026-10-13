@@ -77,3 +77,8 @@ test('deploying with a stockpile still respects the wave (no extra enemies from 
   while (!s.result && s.tick < 600) s = stepBattle(s, rng).state;
   assert.ok(s.enemyWaveIndex <= s.enemyWave!.length);
 });
+
+test('every Age after Stone sends a tank in campaign, so tank-kill Gold exists', () => {
+  assert.ok(!campaignEnemyWave(stone, 1).some((u) => u.role === 'tank'), 'Stone Battle 1 stays tank-free');
+  for (const age of AGES.slice(1)) assert.ok(campaignEnemyWave(age, 1).some((u) => u.role === 'tank'), age.id);
+});

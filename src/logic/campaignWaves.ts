@@ -7,20 +7,24 @@ type WaveRole = Extract<UnitRole, 'melee' | 'ranged' | 'tank'>;
  * order length + min(3, Timeline − 1) enemies, then stops. Extra Timeline
  * enemies repeat the order from the start.
  *
- * MODEL values (not owner-locked). Lengths/compositions were chosen with
- * scripts/campaignPacing.ts so a fresh Stone save can win Battle 1 by
- * deploying Clubbers (~60s) and every stage stays winnable with the
- * existing upgrade prices. Re-run that script after changing them.
+ * MODEL values (not owner-locked), checked with scripts/campaignPacing.ts:
+ * - Stone sends no tank so a fresh save can win Battle 1 with Clubbers (~67s).
+ * - Later Ages close each wave with a tank, so the locked +5 tank-kill Gold
+ *   exists in campaign.
+ * Stages 2–6 are only winnable with the documented later-Age Food costs
+ * (6/9/14 … 10/16/23); with the old 15/28/52+ table no Ancient-or-later army
+ * can win a battle. Re-run the pacing script after changing either.
  */
-const STANDARD_ORDER: WaveRole[] = ['melee', 'melee', 'melee', 'ranged', 'melee'];
+const STONE_ORDER: WaveRole[] = ['melee', 'melee', 'melee', 'ranged', 'melee'];
+const LATER_ORDER: WaveRole[] = ['melee', 'melee', 'melee', 'ranged', 'tank'];
 
 export const CAMPAIGN_ENEMY_ORDER: Record<AgeId, WaveRole[]> = {
-  stone: STANDARD_ORDER,
-  ancient: STANDARD_ORDER,
-  crusader: STANDARD_ORDER,
-  gunpowder: STANDARD_ORDER,
-  industrial: STANDARD_ORDER,
-  future: STANDARD_ORDER,
+  stone: STONE_ORDER,
+  ancient: LATER_ORDER,
+  crusader: LATER_ORDER,
+  gunpowder: LATER_ORDER,
+  industrial: LATER_ORDER,
+  future: LATER_ORDER,
 };
 
 export function campaignWaveSize(ageId: AgeId, timeline: number): number {
