@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   BattleSimState,
   MAX_ALIVE_ENEMIES,
+  MAX_TRANSIENT_EFFECTS,
   SIM_STEP,
   UnitSpawn,
   activateSkill,
@@ -426,5 +427,30 @@ describe('combat rules', () => {
     assert.ok(s.skillCooldowns.volley > 0);
     s = run(s, 0.1);
     assert.equal(s.skillCooldowns.volley, 0);
+  });
+});
+
+describe('hardening', () => {
+  const base = () => createBattleState({ seed: 1, battleType: 'survival', foodRate: 1, playerBaseHp: 1e9, playerBaseMaxHp: 1e9, enemyBaseMaxHp: 1e9, enemyRoster: AGES[0].units, timeline: 1 });
+
+  it('non-finite frame times or accumulators count as zero time and never poison the clock', () => {
+    const rng = createRng(1);
+    for (const [frame, acc] of [[NaN, 0], [Infinity, 0], [-Infinity, 0], [0.1, NaN], [0.1, Infinity]] as const) {
+      const r = advanceFrame(base(), acc, frame, rng);
+      assert.ok(Number.isFinite(r.accumulator), `frame=${frame} acc=${acc}`);
+      const next = advanceFrame(r.state, r.accumulator, 0.1, rng);
+      assert.equal(next.steps, 1, `clock resumes after frame=${frame} acc=${acc}`);
+    }
+  });
+
+  it('caps transient floating texts and particles at MAX_TRANSIENT_EFFECTS', () => {
+    let s = { ...base(), foodGranted: 1e6 };
+    const rng = createRng(2);
+    const clubber = AGES[0].units[0];
+    for (let i = 0; i < 1200; i++) {
+      s = deployPlayerUnit(s, { ...clubber, unitDefId: clubber.id }, clubber.cost);
+      s = stepBattle(s, rng).state;
+      assert.ok(s.floatingTexts.length <= MAX_TRANSIENT_EFFECTS && s.particles.length <= MAX_TRANSIENT_EFFECTS);
+    }
   });
 });
