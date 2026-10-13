@@ -41,8 +41,8 @@ const DailyCratePanel: React.FC<{ profile: PlayerProfile; onClaim: () => void }>
             <span className="flex items-center gap-0.5 text-cyan-300"><Gem className="w-3 h-3" />+{DAILY_CRATE_GEMS}</span>
             <span className="flex items-center gap-0.5 text-amber-300"><KeyRound className="w-3 h-3" />+{DAILY_CRATE_KEYS}</span>
           </div>
-          <div className="mt-0.5 font-pixel text-[9px] text-stone-400 whitespace-nowrap" data-testid="daily-crate-next">
-            {claimed ? `Claimed — next in ${formatWait(msUntilNextUtcDay(now))}` : 'One claim per day · resets 00:00 UTC'}
+          <div className="mt-0.5 font-pixel text-[9px] leading-tight text-stone-400 break-words" data-testid="daily-crate-next">
+            {claimed ? `Next in ${formatWait(msUntilNextUtcDay(now))}` : 'Daily · resets 00:00 UTC'}
           </div>
         </div>
         <RPGButton

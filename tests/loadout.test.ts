@@ -1,6 +1,6 @@
 import { describe, it, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { eligibleTroops, normalizeLoadout, setLoadoutSlot, loadoutUnits, withNormalizedLoadout } from '../src/logic/loadout';
+import { eligibleTroops, normalizeLoadout, setLoadoutSlot, loadoutUnits, withNormalizedLoadout, loadoutAfterEvolution } from '../src/logic/loadout';
 import { INITIAL_PROFILE, loadProfile } from '../src/services/storage';
 import type { PlayerProfile } from '../src/types/game';
 
@@ -143,5 +143,47 @@ describe('Loadout save migration', () => {
       troopLoadout: ['stone_brute', 'ancient_guardian', 'stone_slinger'],
     }));
     assert.deepEqual(loadProfile().troopLoadout, ['stone_brute', 'ancient_guardian', 'stone_slinger']);
+  });
+});
+
+describe('Loadout after Evolution', () => {
+  it('replaces only the last slot with the new Age free melee when the loadout is full', () => {
+    const evolved = make({
+      armyAge: 'crusader',
+      unlockedTroopIds: [...STONE_ALL, ...ANCIENT_ALL, 'crusader_swordsman'],
+      troopLoadout: ['ancient_guardian', 'ancient_archer', 'ancient_hoplite'],
+    });
+    assert.deepEqual(loadoutAfterEvolution(evolved), ['ancient_guardian', 'ancient_archer', 'crusader_swordsman']);
+  });
+  it('keeps an already-equipped melee and fills an empty slot instead of replacing', () => {
+    const equipped = make({ armyAge: 'crusader', unlockedTroopIds: [...ANCIENT_ALL, 'crusader_swordsman'], troopLoadout: ['ancient_guardian', 'crusader_swordsman', 'ancient_archer'] });
+    assert.deepEqual(loadoutAfterEvolution(equipped), ['ancient_guardian', 'crusader_swordsman', 'ancient_archer']);
+    const partial = make({ armyAge: 'ancient', unlockedTroopIds: ['stone_clubber', 'ancient_hoplite'], troopLoadout: ['stone_clubber'] });
+    assert.deepEqual(loadoutAfterEvolution(partial), ['stone_clubber', 'ancient_hoplite']);
+  });
+  it('does not change plain normalization of a full previous-Age loadout', () => {
+    const p = make({ armyAge: 'crusader', unlockedTroopIds: [...ANCIENT_ALL, 'crusader_swordsman'], troopLoadout: ['ancient_guardian', 'ancient_archer', 'ancient_hoplite'] });
+    assert.deepEqual(normalizeLoadout(p), ['ancient_guardian', 'ancient_archer', 'ancient_hoplite']);
+  });
+});
+
+describe('Army Age / troop id save repair', () => {
+  it('repairs an unknown armyAge to stone and dedupes unlockedTroopIds without touching other fields', () => {
+    values.set('stormglass-save-v1', JSON.stringify({
+      ...INITIAL_PROFILE, armyAge: 'space_age', gold: 444, gems: 55, opponentStage: 3, clearedEnemyStages: [1, 2],
+      unlockedTroopIds: ['stone_clubber', 'stone_slinger', 'stone_clubber', 'ancient_hoplite', 'stone_slinger'],
+    }));
+    const loaded = loadProfile();
+    assert.equal(loaded.armyAge, 'stone');
+    assert.deepEqual(loaded.unlockedTroopIds, ['stone_clubber', 'stone_slinger', 'ancient_hoplite']);
+    assert.equal(loaded.gold, 444);
+    assert.equal(loaded.gems, 55);
+    assert.equal(loaded.opponentStage, 3);
+    assert.deepEqual(loaded.clearedEnemyStages, [1, 2]);
+    assert.deepEqual(loaded.troopLoadout, ['stone_clubber', 'stone_slinger']);
+  });
+  it('keeps a valid armyAge', () => {
+    values.set('stormglass-save-v1', JSON.stringify({ ...INITIAL_PROFILE, armyAge: 'gunpowder' }));
+    assert.equal(loadProfile().armyAge, 'gunpowder');
   });
 });

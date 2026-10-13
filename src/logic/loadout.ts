@@ -49,6 +49,21 @@ export function withNormalizedLoadout<T extends LoadoutSource & { troopLoadout: 
 }
 
 /**
+ * Loadout right after an Army Evolution: normalized as usual, but the new Age's free
+ * melee is guaranteed a slot so the evolved Age is always represented in battle.
+ * If it is missing and the loadout is full, it replaces the LAST slot.
+ */
+export function loadoutAfterEvolution(profile: LoadoutSource): string[] {
+  const loadout = normalizeLoadout(profile);
+  const idx = getAgeIndex(profile.armyAge);
+  if (idx < 0) return loadout;
+  const melee = AGES[idx].units.find((u) => u.unlockCostGold === 0);
+  if (!melee || loadout.includes(melee.id)) return loadout;
+  if (loadout.length < LOADOUT_SLOTS) return [...loadout, melee.id];
+  return [...loadout.slice(0, LOADOUT_SLOTS - 1), melee.id];
+}
+
+/**
  * Puts `unitId` into `slot`. If the troop is already equipped elsewhere the two
  * slots swap. Ineligible troops or invalid slots leave the (normalized) loadout unchanged.
  */

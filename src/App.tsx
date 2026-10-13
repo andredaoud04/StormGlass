@@ -26,7 +26,7 @@ import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
 import { formatCompactNumber } from './logic/formatNumber';
 import { campaignGoldPayout, claimDailyCrate, dungeonEntryKeyCost, isDailyCrateClaimed, settleLegendsFirstClear, utcDateKey } from './logic/rules';
-import { loadoutUnits, setLoadoutSlot, withNormalizedLoadout } from './logic/loadout';
+import { loadoutAfterEvolution, loadoutUnits, setLoadoutSlot, withNormalizedLoadout } from './logic/loadout';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
 import { Battlefield } from './components/Battlefield';
@@ -1032,12 +1032,14 @@ export default function App() {
       const next = AGES[idx + 1];
       const price = prev.clearedEnemyStages.includes(AGES[idx].eraNumber) ? 0 : AGES[idx].evolveCostGold;
       if (prev.gold < price) return prev;
-      return withNormalizedLoadout({
+      const evolved = {
         ...prev, gold: prev.gold - price, armyAge: next.id,
         opponentStage: Math.max(prev.opponentStage, next.eraNumber),
         foodLevel: 1, baseLevel: 1,
         unlockedTroopIds: Array.from(new Set([...prev.unlockedTroopIds, next.units[0].id])),
-      });
+      };
+      // Evolution guarantees the new Age's free melee a slot (replaces the last slot if full).
+      return { ...evolved, troopLoadout: loadoutAfterEvolution(evolved) };
     });
   };
 

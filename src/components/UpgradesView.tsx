@@ -54,7 +54,7 @@ const LoadoutSelector: React.FC<{ profile: PlayerProfile; onSetSlot: (slot: numb
                   aria-pressed={equipped}
                   aria-label={equipped ? `${unit.name}, slot ${slot + 1}` : `Equip ${unit.name} in slot ${targetSlot + 1}`}
                   onClick={() => (equipped ? setTargetSlot(slot) : onSetSlot(targetSlot, unit.id))}
-                  className={`relative min-w-0 rounded-lg border-2 pl-1 pr-1 py-0.5 flex items-center gap-1 transition-all ${canSwap ? 'cursor-pointer active:scale-95' : 'cursor-default'} ${
+                  className={`relative min-w-0 min-h-[44px] rounded-lg border-2 pl-1 pr-1 py-1 flex items-center gap-1 transition-all ${canSwap ? 'cursor-pointer active:scale-95' : 'cursor-default'} ${
                     equipped
                       ? isTarget
                         ? 'border-amber-400 bg-amber-950/50 ring-1 ring-amber-300/60'
@@ -67,7 +67,7 @@ const LoadoutSelector: React.FC<{ profile: PlayerProfile; onSetSlot: (slot: numb
                       isTarget ? 'bg-amber-400 text-stone-950 border-amber-200' : 'bg-emerald-500 text-stone-950 border-emerald-200'
                     }`}>{slot + 1}</span>
                   )}
-                  <span className="shrink-0"><UnitSprite unitId={unit.id} size={26} /></span>
+                  <span className="shrink-0"><UnitSprite unitId={unit.id} size={30} /></span>
                   <span className="min-w-0 flex flex-col items-start leading-tight">
                     <span className="max-w-full font-pixel text-[9px] text-stone-100 font-bold truncate">{unit.name}</span>
                     <span className="font-pixel text-[8px] text-amber-400/90">{unit.cost} 🌾</span>
