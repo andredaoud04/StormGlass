@@ -25,6 +25,7 @@ import {
 import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
 import { formatCompactNumber } from './logic/formatNumber';
+import { canSpinToday, hasClaimableMission } from './logic/missions';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
@@ -1347,7 +1348,7 @@ export default function App() {
                       className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-b from-stone-800 to-stone-950 border-2 border-stone-600 shadow-xl flex items-center justify-center text-amber-300 hover:scale-105 active:scale-95 transition-all"
                     >
                       <Scroll className="w-5 h-5 sm:w-6 sm:h-6 text-amber-200" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border border-white" />
+                      {hasClaimableMission(profile) && <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border border-white" />}
                       <div className="absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
                         Missions
                       </div>
@@ -1373,9 +1374,9 @@ export default function App() {
                       className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-b from-stone-800 to-stone-950 border-2 border-amber-600 shadow-xl flex items-center justify-center text-amber-400 hover:scale-105 active:scale-95 transition-all mt-2.5"
                     >
                       <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border border-white" />
-                      <div className="absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] text-emerald-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap font-bold">
-                        Free!
+                      {canSpinToday(profile) && <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-600 rounded-full border border-white" />}
+                      <div className={`absolute -bottom-3.5 font-pixel text-[7.5px] sm:text-[8px] drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] whitespace-nowrap font-bold ${canSpinToday(profile) ? 'text-emerald-300' : 'text-stone-400'}`}>
+                        {canSpinToday(profile) ? 'Free!' : 'Spun'}
                       </div>
                     </button>
 
