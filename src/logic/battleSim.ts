@@ -69,6 +69,9 @@ export interface BattleSimState {
   floatingTexts: FloatingText[];
   particles: Particle[];
   enemyRoster: UnitDef[];
+  /** Authored finite wave (campaign). When set, enemies spawn in exactly this order and then stop. */
+  enemyWave: UnitDef[] | null;
+  enemyWaveIndex: number;
   spawnInterval: number;
   spawnTimer: number;
   bossSpawned: boolean;
@@ -90,6 +93,8 @@ export interface BattleSetup {
   playerBaseMaxHp: number;
   enemyBaseMaxHp: number;
   enemyRoster: UnitDef[];
+  /** Finite authored enemy order; omit for endless random spawning (Rush, Survival, Dungeons). */
+  enemyWave?: UnitDef[];
   timeline: number;
   rushDuration?: number;
   seed?: number;
@@ -133,6 +138,8 @@ export function createBattleState(setup: BattleSetup): BattleSimState {
     floatingTexts: [],
     particles: [],
     enemyRoster: setup.enemyRoster,
+    enemyWave: setup.enemyWave ? setup.enemyWave.slice() : null,
+    enemyWaveIndex: 0,
     spawnInterval: enemySpawnInterval(setup.battleType, setup.timeline),
     spawnTimer: 0,
     bossSpawned: false,
@@ -233,12 +240,16 @@ export function activateSkill(state: BattleSimState, skillId: SkillId, level: nu
   return next;
 }
 
-function findTarget(units: BattleUnit[], unit: BattleUnit): { target: BattleUnit | null; dist: number } {
+function findTarget(
+  units: BattleUnit[],
+  unit: BattleUnit,
+  isAlive: (u: BattleUnit) => boolean = (u) => u.hp > 0,
+): { target: BattleUnit | null; dist: number } {
   const isPlayer = unit.side === 'player';
   let dist = Infinity;
   let target: BattleUnit | null = null;
   for (const t of units) {
-    if (t.side === unit.side || t.hp <= 0) continue;
+    if (t.side === unit.side || !isAlive(t)) continue;
     const d = isPlayer ? t.x - unit.x : unit.x - t.x;
     if (d >= 0 && d < dist) {
       dist = d;
@@ -269,6 +280,14 @@ function spawnEnemies(s: BattleSimState, dt: number, rng: Rng) {
   // is free, then the next waits a full interval. Nothing is banked while held.
   if (livingNonBossEnemies(s.units) >= MAX_ALIVE_ENEMIES) {
     s.spawnTimer = s.spawnInterval - dt;
+    return;
+  }
+  if (s.enemyWave) {
+    // Finite wave: once every authored enemy has entered, the lane stops refilling.
+    if (s.enemyWaveIndex >= s.enemyWave.length) return;
+    s.spawnTimer = Math.max(0, s.spawnTimer - s.spawnInterval);
+    const def = s.enemyWave[s.enemyWaveIndex++];
+    s.units.push(makeUnit(s, 'enemy', { ...def, unitDefId: def.id }));
     return;
   }
   s.spawnTimer = Math.max(0, s.spawnTimer - s.spawnInterval);
@@ -326,13 +345,17 @@ export function stepBattle(state: BattleSimState, rng: Rng): { state: BattleSimS
     }
   }
 
-  // Resolve swings against current hit points so already-dead units are never targeted.
+  // All swings in a step land simultaneously: who may swing and who may be targeted is judged by hit
+  // points at the start of this phase, so two units trading blows both connect regardless of array
+  // order. (Resolving sequentially let whichever side spawned first win every even trade.)
+  const hpAtSwing = new Map(s.units.map((u) => [u.uid, u.hp]));
+  const aliveAtSwing = (u: BattleUnit) => (hpAtSwing.get(u.uid) ?? 0) > 0;
   for (const unit of swinging) {
-    if (unit.hp <= 0) continue;
+    if (!aliveAtSwing(unit)) continue;
     const isPlayer = unit.side === 'player';
     const dmg = Math.round(unit.damage * (unit.rallyBuffRemaining > 0 ? 1.45 : 1));
     const ranged = !!unit.projectileType && unit.projectileType !== 'none';
-    const { target, dist } = findTarget(s.units, unit);
+    const { target, dist } = findTarget(s.units, unit, aliveAtSwing);
     const hitsUnit = target && dist <= unit.range;
     if (!hitsUnit && baseDistance(unit) > unit.range) continue;
     const targetX = hitsUnit ? target!.x : isPlayer ? LANE_ENEMY_BASE : LANE_PLAYER_BASE;

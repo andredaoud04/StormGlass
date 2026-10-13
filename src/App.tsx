@@ -25,6 +25,7 @@ import {
 import { loadProfile, saveProfile } from './services/storage';
 import { getGameScale } from './logic/viewport';
 import { formatCompactNumber } from './logic/formatNumber';
+import { campaignEnemyWave } from './logic/campaignWaves';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import {
   BattleSimState,
@@ -271,6 +272,7 @@ export default function App() {
         playerBaseMaxHp: pMaxHp,
         enemyBaseMaxHp: eMaxHp,
         enemyRoster: targetEnemyAgeDef.units,
+        enemyWave: type === 'campaign' ? campaignEnemyWave(targetEnemyAgeDef, profile.timeline) : undefined,
         timeline: profile.timeline,
       });
       simRef.current = sim;
