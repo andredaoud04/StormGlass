@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { dungeonEntryKeyCost, campaignGoldPayout, settleLegendsFirstClear } from '../src/logic/rules';
+import { dungeonEntryKeyCost, campaignGoldPayout, settleLegendsFirstClear, claimDailyCrate, isDailyCrateClaimed, msUntilNextUtcDay, utcDateKey } from '../src/logic/rules';
 import type { PlayerProfile } from '../src/types/game';
 
 const profile = (overrides: Partial<PlayerProfile> = {}) => ({
@@ -63,5 +63,36 @@ describe('Legends ownership', () => {
     const previous = profile();
     assert.equal(settleLegendsFirstClear(previous, 5), previous);
     assert.equal(settleLegendsFirstClear(previous, 0), previous);
+  });
+});
+
+describe('Daily crate', () => {
+  const base = { gold: 40, gems: 100, keys: 2, lastDailyClaimDate: null } as unknown as PlayerProfile;
+  it('grants +25 Gems and +1 Key, never Gold', () => {
+    const claimed = claimDailyCrate(base, '2026-10-13');
+    assert.equal(claimed.gems, 125);
+    assert.equal(claimed.keys, 3);
+    assert.equal(claimed.gold, 40);
+    assert.equal(claimed.lastDailyClaimDate, '2026-10-13');
+    assert.ok(isDailyCrateClaimed(claimed, '2026-10-13'));
+  });
+  it('second same-day claim is a no-op', () => {
+    const once = claimDailyCrate(base, '2026-10-13');
+    const twice = claimDailyCrate(once, '2026-10-13');
+    assert.equal(twice, once);
+    assert.equal(twice.gems, 125);
+    assert.equal(twice.keys, 3);
+  });
+  it('next UTC day can be claimed again', () => {
+    const next = claimDailyCrate(claimDailyCrate(base, '2026-10-13'), '2026-10-14');
+    assert.equal(next.gems, 150);
+    assert.equal(next.keys, 4);
+  });
+  it('rejects malformed dates', () => {
+    assert.equal(claimDailyCrate(base, ''), base);
+  });
+  it('reports time until the next UTC midnight', () => {
+    assert.equal(msUntilNextUtcDay(new Date('2026-10-13T18:30:00Z')), 5.5 * 3600 * 1000);
+    assert.equal(utcDateKey(new Date('2026-10-13T23:59:59Z')), '2026-10-13');
   });
 });

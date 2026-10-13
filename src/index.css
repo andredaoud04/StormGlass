@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/*
+ * The whole game is one fixed 420×900 logical artboard scaled to the screen (src/logic/viewport.ts),
+ * so viewport breakpoints must not restyle it: an iPad would otherwise render a different layout
+ * inside the same artboard (wrapped stats, resized buttons). Removing the breakpoints keeps every
+ * device pixel-identical to the approved phone composition. Use artboard-relative sizing instead.
+ */
+@theme {
+  --breakpoint-*: initial;
+}
+
 @layer base {
   body {
     background-color: #0d1117;
@@ -46,3 +56,21 @@ html, #root { height: 100%; overflow: hidden; overscroll-behavior: none; }
 
 /* The game owns the viewport; Safari must not move the page behind its HUD. */
 html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+
+/* --- Pixel unit animation (sprite sheets: walk ×4, wind-up, strike) --- */
+@keyframes sg-unit-walk {
+  from { background-position-x: 0; }
+  to { background-position-x: calc(var(--fw) * -4); }
+}
+@keyframes sg-unit-attack {
+  from { background-position-x: calc(var(--fw) * -4); }
+  to { background-position-x: calc(var(--fw) * -5); }
+}
+@keyframes sg-unit-breathe {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.965); }
+}
+@keyframes sg-poof {
+  0% { opacity: 0.95; transform: translate(-50%, 0) scale(0.6); }
+  100% { opacity: 0; transform: translate(-50%, -14px) scale(1.5); }
+}

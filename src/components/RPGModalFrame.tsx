@@ -59,7 +59,7 @@ export const RPGModalContainer: React.FC<RPGModalContainerProps> = ({
 
       {/* --- UNIFIED RPG BATTLE TIMELINE FRAME CONTAINER --- */}
       <div
-        className={`relative w-full ${maxWidth} z-10 flex flex-col rounded-2xl ${cfg.outerBorder} ${cfg.outerBg} shadow-[0_16px_40px_rgba(0,0,0,0.95),0_0_28px_${cfg.glowColor}] p-2.5 sm:p-3 max-h-[92vh] transition-transform animate-in zoom-in-95 duration-200 ${className}`}
+        className={`relative w-full ${maxWidth} z-10 flex flex-col rounded-2xl ${cfg.outerBorder} ${cfg.outerBg} shadow-[0_16px_40px_rgba(0,0,0,0.95),0_0_28px_${cfg.glowColor}] p-2.5 sm:p-3 max-h-[828px] transition-transform animate-in zoom-in-95 duration-200 ${className}`}
       >
         {/* 4 Illustrated Corner Rivet Brackets */}
         <CornerBrackets theme={resolvedTheme} variant={variant} />
@@ -129,7 +129,7 @@ export const RPGModalContainer: React.FC<RPGModalContainerProps> = ({
 
         {/* --- RECESSED INNER CHAMBER CONTENT --- */}
         <div
-          className={`relative flex-1 ${cfg.innerBg} border-2 ${cfg.innerBorder} rounded-xl p-2.5 sm:p-3 overflow-y-auto max-h-[72vh] shadow-[inset_0_4px_12px_rgba(0,0,0,0.85)] ${bodyClassName}`}
+          className={`relative flex-1 ${cfg.innerBg} border-2 ${cfg.innerBorder} rounded-xl p-2.5 sm:p-3 overflow-y-auto max-h-[648px] shadow-[inset_0_4px_12px_rgba(0,0,0,0.85)] ${bodyClassName}`}
         >
           {children}
         </div>

@@ -1,4 +1,6 @@
 import { PlayerProfile } from '../types/game';
+import { normalizeLoadout } from '../logic/loadout';
+import { AGES } from '../data/gameData';
 
 const SAVE_KEY = 'stormglass-save-v1';
 
@@ -18,6 +20,7 @@ export const INITIAL_PROFILE: PlayerProfile = {
   opponentStage: 1,
   clearedEnemyStages: [],
   unlockedTroopIds: ['stone_clubber'],
+  troopLoadout: ['stone_clubber'],
 
   foodLevel: 1,
   baseLevel: 1,
@@ -67,7 +70,11 @@ export function loadProfile(): PlayerProfile {
       legendsClaimedChapterIds: Array.isArray(parsed.legendsClaimedChapterIds)
         ? parsed.legendsClaimedChapterIds
         : Array.from({ length: Math.max(0, Math.min(3, Number(parsed.legendsChapter || 1) - 1)) }, (_, i) => i + 1),
-      unlockedTroopIds: Array.isArray(parsed.unlockedTroopIds) ? parsed.unlockedTroopIds : ['stone_clubber'],
+      unlockedTroopIds: Array.isArray(parsed.unlockedTroopIds)
+        ? Array.from(new Set(parsed.unlockedTroopIds.filter((id: unknown): id is string => typeof id === 'string')))
+        : ['stone_clubber'],
+      // Never inherit INITIAL_PROFILE's Stone loadout for an older save; it is derived below.
+      troopLoadout: Array.isArray(parsed.troopLoadout) ? parsed.troopLoadout : [],
     };
 
     // Repair invalid negative/nonfinite balances without removing legitimate positive currency.
@@ -77,6 +84,9 @@ export function loadProfile(): PlayerProfile {
     }
     profile.timeline = Math.max(1, Math.floor(Number(profile.timeline) || 1));
     profile.opponentStage = Math.max(1, Math.min(6, Math.floor(Number(profile.opponentStage) || 1)));
+    if (!AGES.some((age) => age.id === profile.armyAge)) profile.armyAge = 'stone';
+    // Three-slot troop loadout: missing/invalid entries fall back to the legacy default order.
+    profile.troopLoadout = normalizeLoadout(profile);
 
     // Check UTC daily key refill
     const todayUtc = new Date().toISOString().slice(0, 10);

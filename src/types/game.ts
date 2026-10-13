@@ -172,6 +172,7 @@ export interface PlayerProfile {
   opponentStage: number; // 1 = Stone, 2 = Ancient, 3 = Crusader, 4 = Gunpowder, 5 = Industrial, 6 = Future
   clearedEnemyStages: number[]; // e.g. [1, 2] means Stone and Ancient base defeated in current timeline
   unlockedTroopIds: string[]; // Troops permanently unlocked with gold
+  troopLoadout: string[]; // Up to 3 distinct equipped troop ids (current or previous Army Age, owned)
   
   // Local Age Upgrades (resets on Evolution)
   foodLevel: number;
