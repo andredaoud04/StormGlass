@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { AgeId, BattleUnit, FloatingText, Particle, Projectile } from '../types/game';
 import { BaseOutpostSprite, UnitSprite } from './PixelSprites';
 import { BACKGROUNDS, getBattleBackgroundImage } from '../assets/images';
@@ -33,6 +33,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
   stasisActive,
   rallyActive,
 }) => {
+  const poofs = useDeathPoofs(units);
   const playerBasePercent = Math.max(0, Math.min(1, playerBaseHp / playerBaseMaxHp));
   const enemyBasePercent = Math.max(0, Math.min(1, enemyBaseHp / enemyBaseMaxHp));
 
@@ -91,45 +92,66 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
         />
       </div>
 
-      {/* Units Layer */}
+      {/* Units Layer: crisp 2× pixel sprites standing on the shared ground line */}
       <div className="absolute inset-0 pointer-events-none z-15">
         {units.map((unit) => {
           const hpPercent = Math.max(0, Math.min(1, unit.hp / unit.maxHp));
           const isPlayer = unit.side === 'player';
-          const unitLeftPercent = Math.max(12, Math.min(88, unit.x));
+          const unitLeftPercent = Math.max(10, Math.min(90, unit.x));
+          const hash = uidHash(unit.uid);
+          const depth = (hash % 4) * 3; // slight stagger so groups don't fully overlap
+          const scale = unit.role === 'boss' ? 2.2 : 2;
+          const big = unit.role === 'boss' || unit.role === 'hero' || unit.role === 'tank';
 
           return (
             <div
               key={unit.uid}
-              className="absolute bottom-[26%] flex flex-col items-center transition-transform"
+              className="absolute flex flex-col items-center"
               style={{
                 left: `${unitLeftPercent}%`,
+                bottom: `calc(26% - ${4 + depth}px)`,
                 transform: 'translateX(-50%)',
+                zIndex: 20 - (hash % 4),
               }}
             >
-              {/* Mini Unit HP Bar */}
-              <div className="w-8 h-1 bg-stone-950 rounded-full border border-stone-700 overflow-hidden mb-0.5">
+              <div
+                className={`${big ? 'w-12' : 'w-9'} h-[5px] rounded-sm bg-black/70 p-[1px] -mb-1 relative z-10`}
+              >
                 <div
-                  className={`h-full ${isPlayer ? 'bg-emerald-400' : 'bg-red-400'}`}
+                  className={`h-full rounded-[1px] ${isPlayer ? 'bg-gradient-to-b from-emerald-300 to-emerald-500' : 'bg-gradient-to-b from-rose-400 to-red-600'}`}
                   style={{ width: `${hpPercent * 100}%` }}
                 />
               </div>
-
-              {/* Unit Sprite */}
-              <UnitSprite
-                unitId={unit.unitDefId}
-                side={unit.side}
-                role={unit.role}
-                isWalking={unit.isWalking}
-                isAttacking={unit.isAttacking}
-                hitFlash={unit.hitFlash}
-                isStasisFrozen={unit.stasisFrozenRemaining > 0}
-                isRallyBuffed={unit.rallyBuffRemaining > 0}
-                size={unit.role === 'boss' ? 72 : unit.role === 'hero' ? 62 : 48}
-              />
+              <div className="relative">
+                <div className="absolute left-1/2 bottom-[2px] -translate-x-1/2 w-[70%] h-[7px] rounded-[50%] bg-black/35" />
+                <UnitSprite
+                  unitId={unit.unitDefId}
+                  side={unit.side}
+                  role={unit.role}
+                  isWalking={unit.isWalking}
+                  isAttacking={unit.isAttacking}
+                  hitFlash={unit.hitFlash}
+                  isStasisFrozen={unit.stasisFrozenRemaining > 0}
+                  isRallyBuffed={unit.rallyBuffRemaining > 0}
+                  scale={scale}
+                  animDelay={(hash % 7) * 0.09}
+                />
+              </div>
             </div>
           );
         })}
+        {poofs.map((p) => (
+          <div
+            key={p.id}
+            className="absolute w-9 h-9 rounded-full pointer-events-none"
+            style={{
+              left: `${p.x}%`,
+              bottom: 'calc(26% + 6px)',
+              background: 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(214,206,190,0.75) 40%, rgba(120,110,100,0) 70%)',
+              animation: 'sg-poof 0.45s ease-out forwards',
+            }}
+          />
+        ))}
       </div>
 
       {/* Flying Projectiles Layer */}
@@ -223,4 +245,24 @@ function renderProjectileGraphic(type: string, side: 'player' | 'enemy') {
     default:
       return <div className="w-2 h-2 bg-white rounded-full" />;
   }
+}
+
+function uidHash(uid: string) {
+  let h = 0;
+  for (let i = 0; i < uid.length; i++) h = (h * 31 + uid.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+/** Remembers units that just left the lane (died) so a short dust poof plays where they fell. */
+function useDeathPoofs(units: BattleUnit[]) {
+  const last = useRef(new Map<string, number>());
+  const active = useRef<{ id: string; x: number; until: number }[]>([]);
+  const now = Date.now();
+  const present = new Set(units.map((u) => u.uid));
+  for (const [uid, x] of last.current) {
+    if (!present.has(uid)) active.current.push({ id: `poof-${uid}`, x: Math.max(10, Math.min(90, x)), until: now + 450 });
+  }
+  last.current = new Map(units.map((u) => [u.uid, u.x]));
+  active.current = active.current.filter((p) => p.until > now).slice(-12);
+  return active.current;
 }
