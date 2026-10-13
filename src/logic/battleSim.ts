@@ -21,6 +21,8 @@ export const MAX_FRAME_SECONDS = 0.25;
  */
 export const MAX_ALIVE_ENEMIES = 6;
 const EPS = 1e-9;
+/** One Gold per full 5% of enemy base max HP removed: 20 milestones from full to destroyed. */
+export const BASE_GOLD_MAX_MILESTONES = 20;
 export const LANE_PLAYER_BASE = 8;
 export const LANE_ENEMY_BASE = 92;
 const PROJECTILE_SPEED = 2.8; // progress per second
@@ -80,6 +82,8 @@ export interface BattleSimState {
   heroUsed: boolean;
   skillCooldowns: Record<SkillId, number>;
   goldEarnedInBattle: number;
+  /** Campaign base-damage milestones already paid (each = a full 5% of enemy base max HP, max 20). */
+  enemyBaseGoldMilestones: number;
   normalKills: number;
   tankKills: number;
   result: 'victory' | 'defeat' | null;
@@ -148,6 +152,7 @@ export function createBattleState(setup: BattleSetup): BattleSimState {
     heroUsed: false,
     skillCooldowns: { stasis: 0, volley: 0, rally: 0 },
     goldEarnedInBattle: 0,
+    enemyBaseGoldMilestones: 0,
     normalKills: 0,
     tankKills: 0,
     result: null,
@@ -466,6 +471,20 @@ export function stepBattle(state: BattleSimState, rng: Rng): { state: BattleSimS
   s.particles = s.particles
     .map((p) => ({ ...p, x: p.x + p.vx * dt, y: p.y + p.vy * dt, alpha: p.alpha - dt * 2.5, life: p.life - dt }))
     .filter((p) => p.life > 0 && p.alpha > 0);
+
+  // SG-COMBAT: campaign pays +1 Gold per full 5% of the enemy base's max HP actually removed (max 20).
+  // Milestones are monotonic, so each one pays once; the +10 destruction bounty is added at settlement.
+  if (s.battleType === 'campaign' && s.enemyBaseMaxHp > 0) {
+    const removed = s.enemyBaseMaxHp - Math.max(0, s.enemyBaseHp);
+    const reached = Math.min(BASE_GOLD_MAX_MILESTONES, Math.floor((removed * BASE_GOLD_MAX_MILESTONES) / s.enemyBaseMaxHp + EPS));
+    if (reached > s.enemyBaseGoldMilestones) {
+      const earned = reached - s.enemyBaseGoldMilestones;
+      s.enemyBaseGoldMilestones = reached;
+      s.goldEarnedInBattle += earned;
+      events.push('coin');
+      s.floatingTexts.push({ id: `ft-${s.nextId++}`, text: `+${earned}G`, x: LANE_ENEMY_BASE, y: 46, color: '#fbbf24', opacity: 1, life: 0.8 });
+    }
+  }
 
   const bossCleared = s.battleType !== 'bosses' || (s.bossSpawned && !s.units.some((u) => u.side === 'enemy' && u.role === 'boss'));
   if (s.battleType === 'rush' && s.rushTimerRemaining <= 0) s.result = 'victory';
