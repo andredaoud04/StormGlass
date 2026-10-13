@@ -36,3 +36,31 @@ export function settleLegendsFirstClear(profile: PlayerProfile, chapter: number)
       : [...profile.legendsClaimedChapterIds, chapter],
   };
 }
+
+export const DAILY_CRATE_GEMS = 25;
+export const DAILY_CRATE_KEYS = 1;
+
+export function utcDateKey(now: Date = new Date()): string {
+  return now.toISOString().slice(0, 10);
+}
+
+export function isDailyCrateClaimed(profile: Pick<PlayerProfile, 'lastDailyClaimDate'>, todayUtc: string): boolean {
+  return profile.lastDailyClaimDate === todayUtc;
+}
+
+/** Daily crate (1.6.4 / 1.5.9): +25 Gems, +1 Key, once per UTC date. Never grants Gold. */
+export function claimDailyCrate(profile: PlayerProfile, todayUtc: string): PlayerProfile {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(todayUtc) || isDailyCrateClaimed(profile, todayUtc)) return profile;
+  return {
+    ...profile,
+    gems: profile.gems + DAILY_CRATE_GEMS,
+    keys: profile.keys + DAILY_CRATE_KEYS,
+    lastDailyClaimDate: todayUtc,
+  };
+}
+
+/** Milliseconds until the next UTC midnight, when the next crate becomes claimable. */
+export function msUntilNextUtcDay(now: Date = new Date()): number {
+  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  return Math.max(0, next - now.getTime());
+}
