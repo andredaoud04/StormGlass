@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { PlayerProfile } from '../types/game';
 import { sound } from '../services/sound';
+import { getMissions } from '../logic/missions';
 import { RPGModalContainer, RPGInnerPanel, RPGButton } from './RPGModalFrame';
 import { Scroll, Shield, Settings, Volume2, VolumeX, Check, Sparkles } from 'lucide-react';
 
@@ -12,11 +13,7 @@ interface ModalProps {
 
 // 1. MISSIONS MODAL
 export const MissionsModal: React.FC<ModalProps> = ({ profile, onClose, onUpdateProfile }) => {
-  const missions = [
-    { id: 'm2', text: 'Reach Food Level 2 or higher', rewardGems: 30, progress: profile.foodLevel, goal: 2 },
-    { id: 'm3', text: 'Destroy 1 Enemy Fortress Base', rewardGems: 50, progress: profile.clearedEnemyStages.length, goal: 1 },
-    { id: 'm4', text: 'Unlock Slinger or Archer in Upgrades', rewardGems: 40, progress: profile.unlockedTroopIds.length, goal: 2 },
-  ];
+  const missions = getMissions(profile);
 
   const handleClaim = (id: string, gems: number) => {
     const mission = missions.find((m) => m.id === id);
