@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/*
+ * The whole game is one fixed 420×900 logical artboard scaled to the screen (src/logic/viewport.ts),
+ * so viewport breakpoints must not restyle it: an iPad would otherwise render a different layout
+ * inside the same artboard (wrapped stats, resized buttons). Removing the breakpoints keeps every
+ * device pixel-identical to the approved phone composition. Use artboard-relative sizing instead.
+ */
+@theme {
+  --breakpoint-*: initial;
+}
+
 @layer base {
   body {
     background-color: #0d1117;
