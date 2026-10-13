@@ -28,13 +28,16 @@ import { formatCompactNumber } from './logic/formatNumber';
 import { campaignGoldPayout, dungeonEntryKeyCost, settleLegendsFirstClear } from './logic/rules';
 import {
   BattleSimState,
+  Rng,
   SIM_STEP,
   SkillId,
   activateSkill,
+  advanceFrame,
   createBattleState,
+  createRng,
+  deployHero,
   deployPlayerUnit,
   interpolateForRender,
-  stepBattle,
 } from './logic/battleSim';
 import { sound } from './services/sound';
 import { BACKGROUNDS, getBattleBackgroundImage } from './assets/images';
@@ -125,9 +128,10 @@ export default function App() {
   const [battleResult, setBattleResult] = useState<'victory' | 'defeat' | null>(null);
   const battleActiveRef = useRef(false);
   const battleSettledRef = useRef(false);
-  const heroUsedThisBattleRef = useRef(false);
   const simRef = useRef<BattleSimState | null>(null);
   const prevSimRef = useRef<BattleSimState | null>(null);
+  const accumulatorRef = useRef(0);
+  const rngRef = useRef<Rng>(Math.random);
 
   // Passive Card bonuses
   const cardDmgBonus = Object.entries(profile.cards).reduce((acc, [cId, state]) => {
@@ -221,7 +225,6 @@ export default function App() {
       if (needsKey) setProfile((prev) => prev.keys > 0 ? { ...prev, keys: prev.keys - 1 } : prev);
       battleActiveRef.current = true;
       battleSettledRef.current = false;
-      heroUsedThisBattleRef.current = false;
       const playerAgeDef = getAgeDef(profile.armyAge);
       let targetEnemyAgeDef = getAgeByIndex(profile.opponentStage - 1);
 
@@ -259,7 +262,9 @@ export default function App() {
       if (type === 'survival') eMaxHp = Math.round(eMaxHp * (1 + ((options?.survivalWave || 1) - 1) * 0.18));
       setEnemyBaseMaxHp(eMaxHp);
 
+      const seed = (Date.now() ^ Math.floor(Math.random() * 0x7fffffff)) | 0;
       const sim = createBattleState({
+        seed,
         battleType: type,
         foodRate,
         playerBaseHp: pStartHp,
@@ -270,6 +275,8 @@ export default function App() {
       });
       simRef.current = sim;
       prevSimRef.current = null;
+      accumulatorRef.current = 0;
+      rngRef.current = createRng(seed);
       setFood(sim.food);
       setPlayerBaseHp(sim.playerBaseHp);
       setEnemyBaseHp(sim.enemyBaseHp);
@@ -320,15 +327,16 @@ export default function App() {
       goldEarnedInBattle: sim.goldEarnedInBattle,
       normalKills: sim.normalKills,
       tankKills: sim.tankKills,
+      heroUsed: sim.heroUsed,
     }));
   }, []);
 
+  // Commands mutate the simulation ref synchronously, so several in one render compose instead of
+  // overwriting each other. New units have no interpolation base and appear at their spawn point.
   const applyCommand = useCallback((next: BattleSimState) => {
     if (next === simRef.current) return false;
     simRef.current = next;
-    // Commands take effect immediately; drop the interpolation base so new units don't blend from nowhere.
-    prevSimRef.current = null;
-    publishSim(next, null, 1);
+    publishSim(next, prevSimRef.current, accumulatorRef.current / SIM_STEP);
     return true;
   }, [publishSim]);
 
@@ -362,7 +370,7 @@ export default function App() {
   // --- DEPLOY HERO ---
   const handleDeployHero = useCallback(() => {
     const sim = simRef.current;
-    if (!sim || !inBattle || isPaused || battleResult || heroUsedThisBattleRef.current || sessionStats.heroUsed || !profile.equippedHeroId || !profile.heroesUnlocked.includes(profile.equippedHeroId)) return;
+    if (!sim || !inBattle || isPaused || battleResult || sim.heroUsed || !profile.equippedHeroId || !profile.heroesUnlocked.includes(profile.equippedHeroId)) return;
 
     const heroDef = HEROES.find((h) => h.id === profile.equippedHeroId);
     if (!heroDef) return;
@@ -371,7 +379,7 @@ export default function App() {
     const heroHp = Math.round(baseTroop.hp * heroDef.baseMultiplierHp * 2.5 * (1 + cardHpBonus + runeHpBonus));
     const heroDmg = Math.round(baseTroop.damage * heroDef.baseMultiplierDmg * 2.2 * (1 + cardDmgBonus + runeDmgBonus));
 
-    const deployed = applyCommand(deployPlayerUnit(sim, {
+    const deployed = applyCommand(deployHero(sim, {
       unitDefId: heroDef.id,
       name: heroDef.name,
       role: 'hero',
@@ -381,12 +389,9 @@ export default function App() {
       range: 5.5,
       attackSpeed: 0.9,
       projectileType: 'slash',
-    }, 0));
-    if (!deployed) return;
-    heroUsedThisBattleRef.current = true;
-    sound.playHeroDeploy();
-    setSessionStats((prev) => ({ ...prev, heroUsed: true }));
-  }, [inBattle, isPaused, battleResult, sessionStats.heroUsed, profile.equippedHeroId, profile.heroesUnlocked, profile.armyAge, cardHpBonus, runeHpBonus, cardDmgBonus, runeDmgBonus, applyCommand]);
+    }));
+    if (deployed) sound.playHeroDeploy();
+  }, [inBattle, isPaused, battleResult, profile.equippedHeroId, profile.heroesUnlocked, profile.armyAge, cardHpBonus, runeHpBonus, cardDmgBonus, runeDmgBonus, applyCommand]);
 
   // --- SKILL ACTIVATION ---
   const handleActivateSkill = useCallback(
@@ -404,37 +409,36 @@ export default function App() {
 
   // --- COMBAT LOOP ---
   // Fixed 100ms simulation steps, decoupled from display rate; rendering interpolates between steps.
+  // Pause (including tab-hidden auto-pause) tears this loop down, so Food, spawns, cooldowns and the
+  // Rush clock all stop with it; resuming starts from a fresh frame clock with no banked time.
   useEffect(() => {
     if (!inBattle || isPaused || battleResult) return;
     let lastTime = performance.now();
-    let accumulator = 0;
+    accumulatorRef.current = 0;
     let animId: number;
 
     const frame = (now: number) => {
-      // Clamp long frames (tab throttling, debugger) so a stall can't fast-forward the battle.
-      accumulator += Math.min(0.25, (now - lastTime) / 1000);
-      lastTime = now;
-
-      let sim = simRef.current;
-      while (sim && !sim.result && accumulator >= SIM_STEP) {
-        accumulator -= SIM_STEP;
-        prevSimRef.current = sim;
-        const { state, events } = stepBattle(sim, Math.random);
-        sim = state;
-        for (const e of new Set(events)) {
-          if (e === 'melee') sound.playMeleeAttack();
-          else if (e === 'ranged') sound.playRangedAttack();
-          else if (e === 'hit') sound.playHit();
-          else if (e === 'coin') sound.playCoin();
-          else if (e === 'victory') sound.playVictory();
-          else if (e === 'defeat') sound.playDefeat();
-        }
-      }
+      const sim = simRef.current;
       if (!sim) return;
-      simRef.current = sim;
-      publishSim(sim, prevSimRef.current, accumulator / SIM_STEP);
-      if (sim.result) {
-        setBattleResult(sim.result);
+      const result = advanceFrame(sim, accumulatorRef.current, (now - lastTime) / 1000, rngRef.current, {
+        onStep: (_s, events) => {
+          for (const e of new Set(events)) {
+            if (e === 'melee') sound.playMeleeAttack();
+            else if (e === 'ranged') sound.playRangedAttack();
+            else if (e === 'hit') sound.playHit();
+            else if (e === 'coin') sound.playCoin();
+            else if (e === 'victory') sound.playVictory();
+            else if (e === 'defeat') sound.playDefeat();
+          }
+        },
+      });
+      lastTime = now;
+      accumulatorRef.current = result.accumulator;
+      if (result.prev) prevSimRef.current = result.prev;
+      simRef.current = result.state;
+      publishSim(result.state, prevSimRef.current, result.accumulator / SIM_STEP);
+      if (result.state.result) {
+        setBattleResult(result.state.result);
         return;
       }
       animId = requestAnimationFrame(frame);
@@ -449,7 +453,8 @@ export default function App() {
     if (battleSettledRef.current || battleResult !== 'victory') return;
     battleSettledRef.current = true;
     battleActiveRef.current = false;
-    const earnedGold = battleType === 'campaign' ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus, true) : 0;
+    const sim = simRef.current;
+    const earnedGold = sim?.battleType === 'campaign' ? campaignGoldPayout(sim.goldEarnedInBattle, cardCoinBonus + runeCoinBonus, true) : 0;
 
     if (battleType === 'campaign') {
       setProfile((prev) => {
@@ -503,11 +508,12 @@ export default function App() {
 
     setInBattle(false);
     setBattleResult(null);
-  }, [battleType, battleResult, sessionStats.goldEarnedInBattle, sessionStats.legendsChapterId, cardCoinBonus, runeCoinBonus]);
+  }, [battleType, battleResult, sessionStats.legendsChapterId, cardCoinBonus, runeCoinBonus]);
 
   // --- SURVIVAL CONTINUE / CASHOUT ---
   const handleContinueSurvival = useCallback(() => {
-    if (battleResult !== 'victory' || battleType !== 'survival') return;
+    // The sim ref is replaced by startBattle, so a second tap on Continue finds no victory to continue from.
+    if (simRef.current?.result !== 'victory' || battleResult !== 'victory' || battleType !== 'survival') return;
     const nextWave = sessionStats.survivalWave + 1;
     startBattle('survival', { carriedBaseHp: simRef.current?.playerBaseHp ?? playerBaseHp, survivalWave: nextWave });
   }, [battleResult, battleType, sessionStats.survivalWave, playerBaseHp, startBattle]);
@@ -537,13 +543,14 @@ export default function App() {
     if (battleSettledRef.current || battleResult !== 'defeat') return;
     battleSettledRef.current = true;
     battleActiveRef.current = false;
-    const earnedGold = battleType === 'campaign' ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus) : 0;
+    const sim = simRef.current;
+    const earnedGold = sim?.battleType === 'campaign' ? campaignGoldPayout(sim.goldEarnedInBattle, cardCoinBonus + runeCoinBonus) : 0;
     if (earnedGold > 0) {
       setProfile((prev) => ({ ...prev, gold: prev.gold + earnedGold }));
     }
     setInBattle(false);
     setBattleResult(null);
-  }, [sessionStats.goldEarnedInBattle, battleResult, battleType, cardCoinBonus, runeCoinBonus]);
+  }, [battleResult, cardCoinBonus, runeCoinBonus]);
 
   const cancelRetreat = () => {
     setShowRetreatConfirm(false);
@@ -552,11 +559,13 @@ export default function App() {
 
   // --- RETREAT / SURRENDER ---
   const handleRetreat = useCallback(() => {
-    if (battleSettledRef.current || !battleActiveRef.current) return;
+    const sim = simRef.current;
+    // A battle that already reached a result settles through its result screen, never as a retreat.
+    if (battleSettledRef.current || !battleActiveRef.current || !sim || sim.result) return;
     battleSettledRef.current = true;
     battleActiveRef.current = false;
     sound.playDefeat();
-    const earnedGold = battleType === 'campaign' ? campaignGoldPayout(sessionStats.goldEarnedInBattle, cardCoinBonus + runeCoinBonus) : 0;
+    const earnedGold = sim.battleType === 'campaign' ? campaignGoldPayout(sim.goldEarnedInBattle, cardCoinBonus + runeCoinBonus) : 0;
     if (earnedGold > 0) {
       setProfile((prev) => ({ ...prev, gold: prev.gold + earnedGold }));
     }
@@ -564,7 +573,7 @@ export default function App() {
     setIsPaused(false);
     setShowRetreatConfirm(false);
     setBattleResult(null);
-  }, [sessionStats.goldEarnedInBattle, battleType, cardCoinBonus, runeCoinBonus]);
+  }, [cardCoinBonus, runeCoinBonus]);
 
   // --- UPGRADES ---
   const handleUpgradeFood = () => {

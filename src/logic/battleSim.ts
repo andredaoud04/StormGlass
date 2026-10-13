@@ -9,6 +9,18 @@ import type { BattleMode } from './rules';
  * Callers inject randomness and translate returned events into sound.
  */
 export const SIM_STEP = 0.1;
+/** Integer steps per second. Time, Food and the Rush clock derive from the integer tick count so
+ * repeated 0.1 additions cannot drift (50 × 0.1 summed is 4.999…, which would delay a 5-Food troop). */
+export const STEPS_PER_SECOND = 10;
+/** Longest real frame the render loop feeds into the simulation; a stall cannot fast-forward the battle. */
+export const MAX_FRAME_SECONDS = 0.25;
+/**
+ * Engineering limit, not a balance value: the most living non-boss enemies allowed on the lane.
+ * While at the cap the spawn timer holds at "ready" instead of banking extra spawns, so the next
+ * enemy appears only once a slot frees. Tunable for readability/performance; boss spawns ignore it.
+ */
+export const MAX_ALIVE_ENEMIES = 6;
+const EPS = 1e-9;
 export const LANE_PLAYER_BASE = 8;
 export const LANE_ENEMY_BASE = 92;
 const PROJECTILE_SPEED = 2.8; // progress per second
@@ -18,6 +30,17 @@ export type SkillId = 'stasis' | 'volley' | 'rally';
 export type SimEvent = 'melee' | 'ranged' | 'hit' | 'coin' | 'victory' | 'defeat';
 export type Rng = () => number;
 
+/** Small seeded PRNG (mulberry32) so a battle can be replayed from its recorded seed. */
+export function createRng(seed: number): Rng {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 export const SKILL_COOLDOWNS: Record<SkillId, number> = { stasis: 12, volley: 10, rally: 16 };
 
 /** Stats a caller supplies to put a unit on the lane; runtime fields are filled by the simulation. */
@@ -26,9 +49,17 @@ export type UnitSpawn = Pick<BattleUnit, 'unitDefId' | 'name' | 'role' | 'hp' | 
 
 export interface BattleSimState {
   battleType: BattleMode;
+  /** Seed of the RNG the caller steps this battle with (recorded for replayable action traces). */
+  seed: number;
+  /** Completed fixed steps. Authoritative clock; `time` is derived from it. */
+  tick: number;
   time: number;
+  /** Current Food = foodGranted + foodRate × elapsed seconds − foodSpent (fraction retained). */
   food: number;
   foodRate: number;
+  foodSpent: number;
+  /** Food added outside normal generation (0 in normal play; lets tests start with a stockpile). */
+  foodGranted: number;
   playerBaseHp: number;
   playerBaseMaxHp: number;
   enemyBaseHp: number;
@@ -41,7 +72,9 @@ export interface BattleSimState {
   spawnInterval: number;
   spawnTimer: number;
   bossSpawned: boolean;
+  rushDuration: number;
   rushTimerRemaining: number;
+  heroUsed: boolean;
   skillCooldowns: Record<SkillId, number>;
   goldEarnedInBattle: number;
   normalKills: number;
@@ -59,6 +92,7 @@ export interface BattleSetup {
   enemyRoster: UnitDef[];
   timeline: number;
   rushDuration?: number;
+  seed?: number;
 }
 
 export const GATE_COLOSSUS: UnitSpawn = {
@@ -83,9 +117,13 @@ export function enemySpawnInterval(battleType: BattleMode, timeline: number): nu
 export function createBattleState(setup: BattleSetup): BattleSimState {
   return {
     battleType: setup.battleType,
+    seed: setup.seed ?? 0,
+    tick: 0,
     time: 0,
     food: 0,
     foodRate: setup.foodRate,
+    foodSpent: 0,
+    foodGranted: 0,
     playerBaseHp: setup.playerBaseHp,
     playerBaseMaxHp: setup.playerBaseMaxHp,
     enemyBaseHp: setup.enemyBaseMaxHp,
@@ -98,7 +136,9 @@ export function createBattleState(setup: BattleSetup): BattleSimState {
     spawnInterval: enemySpawnInterval(setup.battleType, setup.timeline),
     spawnTimer: 0,
     bossSpawned: false,
+    rushDuration: setup.rushDuration ?? 45,
     rushTimerRemaining: setup.rushDuration ?? 45,
+    heroUsed: false,
     skillCooldowns: { stasis: 0, volley: 0, rally: 0 },
     goldEarnedInBattle: 0,
     normalKills: 0,
@@ -145,12 +185,27 @@ const cloneState = (s: BattleSimState): BattleSimState => ({
 
 const canAct = (s: BattleSimState) => s.result === null;
 
+const elapsedSeconds = (tick: number) => tick / STEPS_PER_SECOND;
+const currentFood = (s: BattleSimState) => s.foodGranted + (s.foodRate * s.tick) / STEPS_PER_SECOND - s.foodSpent;
+/** Counts a timer down one step, snapping float residue to zero so expiry lands on the intended tick. */
+const tickDown = (v: number, dt: number) => (v - dt <= EPS ? 0 : v - dt);
+
 /** Spends Food and places a player troop. Returns the same state when unaffordable or finished. */
 export function deployPlayerUnit(state: BattleSimState, spawn: UnitSpawn, foodCost: number): BattleSimState {
   if (!canAct(state) || !(foodCost >= 0) || state.food < foodCost) return state;
   const next = cloneState(state);
-  next.food -= foodCost;
+  next.foodSpent += foodCost;
+  next.food = currentFood(next);
   next.units.push(makeUnit(next, 'player', spawn));
+  return next;
+}
+
+/** Places the equipped Hero once per battle. Returns the same state if already used or finished. */
+export function deployHero(state: BattleSimState, spawn: UnitSpawn): BattleSimState {
+  if (!canAct(state) || state.heroUsed) return state;
+  const next = cloneState(state);
+  next.heroUsed = true;
+  next.units.push(makeUnit(next, 'player', { ...spawn, role: 'hero' }));
   return next;
 }
 
@@ -196,17 +251,27 @@ function findTarget(units: BattleUnit[], unit: BattleUnit): { target: BattleUnit
 const baseDistance = (unit: BattleUnit) =>
   unit.side === 'player' ? LANE_ENEMY_BASE - unit.x : unit.x - LANE_PLAYER_BASE;
 
+export const livingNonBossEnemies = (units: BattleUnit[]) =>
+  units.reduce((n, u) => (u.side === 'enemy' && !u.isBoss && u.hp > 0 ? n + 1 : n), 0);
+
 function spawnEnemies(s: BattleSimState, dt: number, rng: Rng) {
   s.spawnTimer += dt;
   // Small epsilon keeps accumulated 0.1 steps from missing an exact interval boundary.
-  if (s.spawnTimer + 1e-9 < s.spawnInterval) return;
-  s.spawnTimer = Math.max(0, s.spawnTimer - s.spawnInterval);
+  if (s.spawnTimer + EPS < s.spawnInterval) return;
 
   if (s.battleType === 'bosses' && !s.bossSpawned) {
+    s.spawnTimer = Math.max(0, s.spawnTimer - s.spawnInterval);
     s.bossSpawned = true;
     s.units.push(makeUnit(s, 'enemy', GATE_COLOSSUS));
     return;
   }
+  // Lane full: hold the timer one step short of ready, so the enemy arrives on the first step a slot
+  // is free, then the next waits a full interval. Nothing is banked while held.
+  if (livingNonBossEnemies(s.units) >= MAX_ALIVE_ENEMIES) {
+    s.spawnTimer = s.spawnInterval - dt;
+    return;
+  }
+  s.spawnTimer = Math.max(0, s.spawnTimer - s.spawnInterval);
   if (s.enemyRoster.length === 0) return;
   const roll = rng();
   let def = s.enemyRoster[0];
@@ -216,15 +281,17 @@ function spawnEnemies(s: BattleSimState, dt: number, rng: Rng) {
 }
 
 /** Advances the battle by exactly one fixed step. Input state is not mutated. */
-export function stepBattle(state: BattleSimState, rng: Rng, dt = SIM_STEP): { state: BattleSimState; events: SimEvent[] } {
+export function stepBattle(state: BattleSimState, rng: Rng): { state: BattleSimState; events: SimEvent[] } {
   if (state.result) return { state, events: [] };
+  const dt = SIM_STEP;
   const s = cloneState(state);
   const events: SimEvent[] = [];
-  s.time += dt;
-  s.food += s.foodRate * dt;
+  s.tick += 1;
+  s.time = elapsedSeconds(s.tick);
+  s.food = currentFood(s);
 
-  if (s.battleType === 'rush') s.rushTimerRemaining = Math.max(0, s.rushTimerRemaining - dt);
-  for (const k of Object.keys(s.skillCooldowns) as SkillId[]) s.skillCooldowns[k] = Math.max(0, s.skillCooldowns[k] - dt);
+  if (s.battleType === 'rush') s.rushTimerRemaining = Math.max(0, s.rushDuration - s.time);
+  for (const k of Object.keys(s.skillCooldowns) as SkillId[]) s.skillCooldowns[k] = tickDown(s.skillCooldowns[k], dt);
 
   spawnEnemies(s, dt, rng);
 
@@ -233,19 +300,19 @@ export function stepBattle(state: BattleSimState, rng: Rng, dt = SIM_STEP): { st
   const swinging: BattleUnit[] = [];
   for (const unit of s.units) {
     const wasFrozen = unit.stasisFrozenRemaining > 0;
-    unit.stasisFrozenRemaining = Math.max(0, unit.stasisFrozenRemaining - dt);
-    unit.rallyBuffRemaining = Math.max(0, unit.rallyBuffRemaining - dt);
-    unit.hitFlash = Math.max(0, unit.hitFlash - dt);
+    unit.stasisFrozenRemaining = tickDown(unit.stasisFrozenRemaining, dt);
+    unit.rallyBuffRemaining = tickDown(unit.rallyBuffRemaining, dt);
+    unit.hitFlash = tickDown(unit.hitFlash, dt);
     if (wasFrozen) {
       unit.isWalking = false;
       unit.isAttacking = false;
       continue;
     }
-    const cooldown = Math.max(0, unit.attackCooldown - dt);
+    const cooldown = tickDown(unit.attackCooldown, dt);
     const { target, dist } = findTarget(snapshot, unit);
     if ((target && dist <= unit.range) || baseDistance(unit) <= unit.range) {
       // One swing per cooldown cycle, regardless of step size.
-      const swing = cooldown <= 1e-9;
+      const swing = cooldown === 0;
       if (swing) swinging.push(unit);
       unit.isWalking = false;
       unit.isAttacking = true;
@@ -384,6 +451,47 @@ export function stepBattle(state: BattleSimState, rng: Rng, dt = SIM_STEP): { st
   if (s.result) events.push(s.result);
 
   return { state: s, events };
+}
+
+export interface FrameResult {
+  state: BattleSimState;
+  /** State before the last step taken this frame (interpolation base), or null when no step ran. */
+  prev: BattleSimState | null;
+  accumulator: number;
+  steps: number;
+}
+
+/**
+ * Feeds one rendered frame into the fixed-step simulation. The render loop and the tests share this
+ * function, so display frame rate only changes how many whole steps run per frame, never their size.
+ * While paused nothing advances and leftover partial time is discarded.
+ * `onStep` sees each step (for sounds); `beforeStep` lets a caller inject commands at exact ticks.
+ */
+export function advanceFrame(
+  state: BattleSimState,
+  accumulator: number,
+  frameSeconds: number,
+  rng: Rng,
+  opts: {
+    paused?: boolean;
+    beforeStep?: (s: BattleSimState) => BattleSimState;
+    onStep?: (s: BattleSimState, events: SimEvent[]) => void;
+  } = {},
+): FrameResult {
+  if (opts.paused || state.result) return { state, prev: null, accumulator: 0, steps: 0 };
+  let acc = accumulator + Math.max(0, Math.min(MAX_FRAME_SECONDS, frameSeconds));
+  let prev: BattleSimState | null = null;
+  let steps = 0;
+  while (!state.result && acc + EPS >= SIM_STEP) {
+    acc -= SIM_STEP;
+    if (opts.beforeStep) state = opts.beforeStep(state);
+    prev = state;
+    const r = stepBattle(state, rng);
+    state = r.state;
+    steps += 1;
+    opts.onStep?.(state, r.events);
+  }
+  return { state, prev, accumulator: Math.max(0, acc), steps };
 }
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
