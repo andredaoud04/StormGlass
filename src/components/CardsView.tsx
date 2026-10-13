@@ -536,7 +536,7 @@ export const CardsView: React.FC<CardsViewProps> = ({
           maxWidth="max-w-md"
         >
           <div className="space-y-3">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto p-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[450px] overflow-y-auto p-1">
               {recentPulls.map((card, idx) => {
                 const owned = profile.cards[card.id];
                 const level = owned?.level || 1;

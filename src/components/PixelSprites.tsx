@@ -258,7 +258,7 @@ export const BaseOutpostSprite: React.FC<{
   const roof = theme === 'desert' ? '#dba45b' : theme === 'ice' ? '#dceaf0' : theme === 'hell' ? '#35363f' : '#86583e';
   const percent = Math.max(0, Math.min(100, hpPercent * 100));
   return (
-    <div className="flex flex-col items-center shrink-0 select-none w-[clamp(94px,26vw,142px)] drop-shadow-[0_4px_3px_rgba(0,0,0,.7)]">
+    <div className="flex flex-col items-center shrink-0 select-none w-[109px] drop-shadow-[0_4px_3px_rgba(0,0,0,.7)]">
       <div className="w-[92%] flex flex-col items-center gap-0.5 mb-1">
         <span className="font-pixel text-[10px] sm:text-xs font-bold text-white whitespace-nowrap drop-shadow-[0_2px_2px_#000]">{hpText}</span>
         <div className="w-full h-2.5 bg-stone-950 rounded border-2 border-stone-950 overflow-hidden">
