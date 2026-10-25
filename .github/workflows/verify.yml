@@ -2,7 +2,7 @@ name: Validate Stormglass
 
 on:
   push:
-    branches: [main]
+    branches: [main, rebuild]
   pull_request:
   workflow_dispatch:
 
@@ -16,8 +16,10 @@ jobs:
         with:
           node-version: '22'
       - name: Install
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Typecheck
-        run: npm run lint
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
       - name: Production build
         run: npm run build

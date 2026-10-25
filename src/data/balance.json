@@ -1,0 +1,560 @@
+{
+  "version": 1,
+  "notes": "All numbers are MODEL unless docs/WAW_PARITY.md says otherwise. Change numbers here, never in code. Bump version when a change breaks old tuning.",
+  "sim": {
+    "tickRate": 20,
+    "laneLength": 1000,
+    "spawnOffset": 40,
+    "maxUnitsPerSide": 24,
+    "projectileSpeed": 520
+  },
+  "economy": {
+    "startingGold": 18,
+    "goldPerKill": 1,
+    "goldPerTankKill": 5,
+    "baseGoldSteps": 10
+  },
+  "status": {
+    "poison": {
+      "perStackPctOfAttackerDmgPerSec": 0.08,
+      "durationSec": 4,
+      "maxStacks": 5
+    },
+    "burn": {
+      "pctOfAttackerDmgPerSec": 0.2,
+      "durationSec": 3
+    },
+    "cold": {
+      "slowPerStack": 0.15,
+      "durationSec": 2.5,
+      "maxStacks": 3
+    },
+    "bossMultiplier": 0.5
+  },
+  "ages": [
+    {
+      "id": "stone",
+      "name": "Stone",
+      "fortressHp": 400,
+      "baseGold": 12,
+      "troops": [
+        {
+          "id": "stone_clubber",
+          "name": "Clubber",
+          "kind": "melee",
+          "cost": 5,
+          "hp": 50,
+          "dmg": 10,
+          "interval": 1.0,
+          "range": 100,
+          "speed": 75,
+          "unlockGold": 0
+        },
+        {
+          "id": "stone_slinger",
+          "name": "Slinger",
+          "kind": "ranged",
+          "cost": 8,
+          "hp": 34,
+          "dmg": 8,
+          "interval": 1.0,
+          "range": 320,
+          "speed": 65,
+          "unlockGold": 20
+        },
+        {
+          "id": "stone_brute",
+          "name": "Brute",
+          "kind": "tank",
+          "cost": 12,
+          "hp": 260,
+          "dmg": 22,
+          "interval": 1.4,
+          "range": 110,
+          "speed": 50,
+          "unlockGold": 45
+        }
+      ]
+    },
+    {
+      "id": "ancient",
+      "name": "Ancient",
+      "fortressHp": 720,
+      "baseGold": 20,
+      "troops": [
+        {
+          "id": "ancient_spearman",
+          "name": "Spearman",
+          "kind": "melee",
+          "cost": 6,
+          "hp": 90,
+          "dmg": 18,
+          "interval": 1.0,
+          "range": 110,
+          "speed": 75,
+          "unlockGold": 0
+        },
+        {
+          "id": "ancient_archer",
+          "name": "Archer",
+          "kind": "ranged",
+          "cost": 9,
+          "hp": 54,
+          "dmg": 16,
+          "interval": 1.2,
+          "range": 400,
+          "speed": 65,
+          "unlockGold": 60
+        },
+        {
+          "id": "ancient_guard",
+          "name": "Shieldwall",
+          "kind": "tank",
+          "cost": 14,
+          "hp": 270,
+          "dmg": 32,
+          "interval": 1.6,
+          "range": 110,
+          "speed": 50,
+          "unlockGold": 120
+        }
+      ]
+    },
+    {
+      "id": "crusader",
+      "name": "Crusader",
+      "fortressHp": 1280,
+      "baseGold": 32,
+      "troops": [
+        {
+          "id": "crusader_footman",
+          "name": "Footman",
+          "kind": "melee",
+          "cost": 7,
+          "hp": 160,
+          "dmg": 32,
+          "interval": 1.0,
+          "range": 105,
+          "speed": 75,
+          "unlockGold": 0
+        },
+        {
+          "id": "crusader_crossbow",
+          "name": "Crossbow",
+          "kind": "ranged",
+          "cost": 11,
+          "hp": 96,
+          "dmg": 29,
+          "interval": 1.2,
+          "range": 420,
+          "speed": 65,
+          "unlockGold": 150
+        },
+        {
+          "id": "crusader_knight",
+          "name": "Knight",
+          "kind": "tank",
+          "cost": 16,
+          "hp": 480,
+          "dmg": 58,
+          "interval": 1.6,
+          "range": 115,
+          "speed": 55,
+          "unlockGold": 300
+        }
+      ]
+    },
+    {
+      "id": "gunpowder",
+      "name": "Gunpowder",
+      "fortressHp": 2240,
+      "baseGold": 50,
+      "troops": [
+        {
+          "id": "gunpowder_pikeman",
+          "name": "Pikeman",
+          "kind": "melee",
+          "cost": 8,
+          "hp": 280,
+          "dmg": 56,
+          "interval": 1.0,
+          "range": 115,
+          "speed": 75,
+          "unlockGold": 0
+        },
+        {
+          "id": "gunpowder_musketeer",
+          "name": "Musketeer",
+          "kind": "ranged",
+          "cost": 12,
+          "hp": 168,
+          "dmg": 50,
+          "interval": 1.2,
+          "range": 440,
+          "speed": 65,
+          "unlockGold": 380
+        },
+        {
+          "id": "gunpowder_cannon",
+          "name": "Cannon",
+          "kind": "tank",
+          "cost": 18,
+          "hp": 840,
+          "dmg": 101,
+          "interval": 1.6,
+          "range": 120,
+          "speed": 45,
+          "unlockGold": 760
+        }
+      ]
+    },
+    {
+      "id": "industrial",
+      "name": "Industrial",
+      "fortressHp": 3920,
+      "baseGold": 75,
+      "troops": [
+        {
+          "id": "industrial_trencher",
+          "name": "Trencher",
+          "kind": "melee",
+          "cost": 9,
+          "hp": 490,
+          "dmg": 98,
+          "interval": 1.0,
+          "range": 110,
+          "speed": 75,
+          "unlockGold": 0
+        },
+        {
+          "id": "industrial_rifleman",
+          "name": "Rifleman",
+          "kind": "ranged",
+          "cost": 14,
+          "hp": 294,
+          "dmg": 88,
+          "interval": 1.2,
+          "range": 460,
+          "speed": 65,
+          "unlockGold": 950
+        },
+        {
+          "id": "industrial_walker",
+          "name": "Steam Walker",
+          "kind": "tank",
+          "cost": 20,
+          "hp": 1470,
+          "dmg": 176,
+          "interval": 1.6,
+          "range": 120,
+          "speed": 45,
+          "unlockGold": 1900
+        }
+      ]
+    },
+    {
+      "id": "future",
+      "name": "Future",
+      "fortressHp": 6800,
+      "baseGold": 110,
+      "troops": [
+        {
+          "id": "future_blade",
+          "name": "Ion Blade",
+          "kind": "melee",
+          "cost": 10,
+          "hp": 850,
+          "dmg": 170,
+          "interval": 1.0,
+          "range": 110,
+          "speed": 80,
+          "unlockGold": 0
+        },
+        {
+          "id": "future_gunner",
+          "name": "Lancer",
+          "kind": "ranged",
+          "cost": 16,
+          "hp": 510,
+          "dmg": 153,
+          "interval": 1.2,
+          "range": 480,
+          "speed": 70,
+          "unlockGold": 2400
+        },
+        {
+          "id": "future_mech",
+          "name": "Mech",
+          "kind": "tank",
+          "cost": 23,
+          "hp": 2550,
+          "dmg": 306,
+          "interval": 1.6,
+          "range": 125,
+          "speed": 45,
+          "unlockGold": 4800
+        }
+      ]
+    }
+  ],
+  "waves": {
+    "stone": {
+      "spawns": [
+        [
+          7,
+          "melee"
+        ],
+        [
+          15,
+          "melee"
+        ],
+        [
+          22,
+          "melee"
+        ],
+        [
+          27,
+          "ranged"
+        ],
+        [
+          33,
+          "melee"
+        ],
+        [
+          39,
+          "melee"
+        ],
+        [
+          44,
+          "ranged"
+        ],
+        [
+          49,
+          "melee"
+        ]
+      ],
+      "loopFrom": 4,
+      "loopPeriod": 20
+    },
+    "ancient": {
+      "spawns": [
+        [
+          5,
+          "melee"
+        ],
+        [
+          11,
+          "melee"
+        ],
+        [
+          16,
+          "ranged"
+        ],
+        [
+          21,
+          "melee"
+        ],
+        [
+          27,
+          "melee"
+        ],
+        [
+          31,
+          "ranged"
+        ],
+        [
+          36,
+          "tank"
+        ],
+        [
+          44,
+          "melee"
+        ],
+        [
+          48,
+          "ranged"
+        ]
+      ],
+      "loopFrom": 3,
+      "loopPeriod": 31
+    },
+    "crusader": {
+      "spawns": [
+        [
+          5,
+          "melee"
+        ],
+        [
+          10,
+          "melee"
+        ],
+        [
+          15,
+          "ranged"
+        ],
+        [
+          20,
+          "melee"
+        ],
+        [
+          25,
+          "tank"
+        ],
+        [
+          30,
+          "ranged"
+        ],
+        [
+          34,
+          "melee"
+        ],
+        [
+          40,
+          "melee"
+        ],
+        [
+          45,
+          "tank"
+        ]
+      ],
+      "loopFrom": 2,
+      "loopPeriod": 34
+    },
+    "gunpowder": {
+      "spawns": [
+        [
+          5,
+          "melee"
+        ],
+        [
+          10,
+          "ranged"
+        ],
+        [
+          15,
+          "melee"
+        ],
+        [
+          19,
+          "melee"
+        ],
+        [
+          24,
+          "tank"
+        ],
+        [
+          29,
+          "ranged"
+        ],
+        [
+          34,
+          "melee"
+        ],
+        [
+          38,
+          "ranged"
+        ],
+        [
+          44,
+          "tank"
+        ]
+      ],
+      "loopFrom": 2,
+      "loopPeriod": 33
+    },
+    "industrial": {
+      "spawns": [
+        [
+          5,
+          "melee"
+        ],
+        [
+          9,
+          "melee"
+        ],
+        [
+          14,
+          "ranged"
+        ],
+        [
+          19,
+          "tank"
+        ],
+        [
+          24,
+          "melee"
+        ],
+        [
+          28,
+          "ranged"
+        ],
+        [
+          33,
+          "melee"
+        ],
+        [
+          37,
+          "tank"
+        ],
+        [
+          43,
+          "ranged"
+        ]
+      ],
+      "loopFrom": 2,
+      "loopPeriod": 33
+    },
+    "future": {
+      "spawns": [
+        [
+          5,
+          "melee"
+        ],
+        [
+          9,
+          "ranged"
+        ],
+        [
+          13,
+          "melee"
+        ],
+        [
+          18,
+          "tank"
+        ],
+        [
+          22,
+          "melee"
+        ],
+        [
+          26,
+          "ranged"
+        ],
+        [
+          31,
+          "tank"
+        ],
+        [
+          36,
+          "melee"
+        ],
+        [
+          40,
+          "ranged"
+        ],
+        [
+          45,
+          "tank"
+        ]
+      ],
+      "loopFrom": 1,
+      "loopPeriod": 40
+    }
+  },
+  "timeline": {
+    "enemyStatPerTimeline": 0.6,
+    "enemyFortressPerTimeline": 0.6,
+    "spawnSpeedPerTimeline": 0.08,
+    "enemyPower": 0.85
+  }
+}
