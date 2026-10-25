@@ -22,6 +22,8 @@ export interface AgeDef {
   name: string;
   fortressHp: number;
   baseGold: number;
+  /** Gold to evolve into this Age before its enemy fortress is beaten (then free). */
+  evolveGold: number;
   troops: TroopDef[];
 }
 

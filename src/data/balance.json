@@ -74,7 +74,8 @@
           "speed": 50,
           "unlockGold": 45
         }
-      ]
+      ],
+      "evolveGold": 0
     },
     {
       "id": "ancient",
@@ -118,7 +119,8 @@
           "speed": 50,
           "unlockGold": 120
         }
-      ]
+      ],
+      "evolveGold": 120
     },
     {
       "id": "crusader",
@@ -162,7 +164,8 @@
           "speed": 55,
           "unlockGold": 300
         }
-      ]
+      ],
+      "evolveGold": 400
     },
     {
       "id": "gunpowder",
@@ -206,7 +209,8 @@
           "speed": 45,
           "unlockGold": 760
         }
-      ]
+      ],
+      "evolveGold": 1200
     },
     {
       "id": "industrial",
@@ -250,7 +254,8 @@
           "speed": 45,
           "unlockGold": 1900
         }
-      ]
+      ],
+      "evolveGold": 3200
     },
     {
       "id": "future",
@@ -294,7 +299,8 @@
           "speed": 45,
           "unlockGold": 4800
         }
-      ]
+      ],
+      "evolveGold": 8000
     }
   ],
   "waves": {

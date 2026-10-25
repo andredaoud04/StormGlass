@@ -1,0 +1,1173 @@
+{
+ "version": 1,
+ "assets": {
+  "troop.stone_clubber.blue": {
+   "kind": "sheet",
+   "file": "troops/stone_clubber_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.stone_clubber": {
+   "kind": "image",
+   "file": "portraits/stone_clubber.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.stone_clubber.red": {
+   "kind": "sheet",
+   "file": "troops/stone_clubber_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.stone_slinger.blue": {
+   "kind": "sheet",
+   "file": "troops/stone_slinger_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    6,
+    -22
+   ]
+  },
+  "portrait.stone_slinger": {
+   "kind": "image",
+   "file": "portraits/stone_slinger.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.stone_slinger.red": {
+   "kind": "sheet",
+   "file": "troops/stone_slinger_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    6,
+    -22
+   ]
+  },
+  "troop.stone_brute.blue": {
+   "kind": "sheet",
+   "file": "troops/stone_brute_blue.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.stone_brute": {
+   "kind": "image",
+   "file": "portraits/stone_brute.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.stone_brute.red": {
+   "kind": "sheet",
+   "file": "troops/stone_brute_red.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "env.stone.sky": {
+   "kind": "image",
+   "file": "env/stone/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.stone.far": {
+   "kind": "image",
+   "file": "env/stone/far.png",
+   "w": 256,
+   "h": 128,
+   "anchor": [
+    0,
+    122
+   ]
+  },
+  "env.stone.mid": {
+   "kind": "image",
+   "file": "env/stone/mid.png",
+   "w": 256,
+   "h": 68,
+   "anchor": [
+    0,
+    64
+   ]
+  },
+  "env.stone.ground": {
+   "kind": "image",
+   "file": "env/stone/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.stone.cloud0": {
+   "kind": "image",
+   "file": "env/stone/cloud0.png",
+   "w": 46,
+   "h": 16
+  },
+  "env.stone.cloud1": {
+   "kind": "image",
+   "file": "env/stone/cloud1.png",
+   "w": 34,
+   "h": 12
+  },
+  "env.stone.cloud2": {
+   "kind": "image",
+   "file": "env/stone/cloud2.png",
+   "w": 58,
+   "h": 18
+  },
+  "env.stone.cloud3": {
+   "kind": "image",
+   "file": "env/stone/cloud3.png",
+   "w": 26,
+   "h": 10
+  },
+  "base.stone.blue.0": {
+   "kind": "image",
+   "file": "bases/stone_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.stone.blue.1": {
+   "kind": "image",
+   "file": "bases/stone_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.stone.blue.2": {
+   "kind": "image",
+   "file": "bases/stone_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.stone.blue.3": {
+   "kind": "image",
+   "file": "bases/stone_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "fx.flag.blue": {
+   "kind": "strip",
+   "file": "fx/flag_blue.png",
+   "frameW": 14,
+   "frameH": 12,
+   "frames": 4,
+   "fps": 8,
+   "anchor": [
+    0,
+    11
+   ]
+  },
+  "base.stone.red.0": {
+   "kind": "image",
+   "file": "bases/stone_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.stone.red.1": {
+   "kind": "image",
+   "file": "bases/stone_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.stone.red.2": {
+   "kind": "image",
+   "file": "bases/stone_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.stone.red.3": {
+   "kind": "image",
+   "file": "bases/stone_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "fx.flag.red": {
+   "kind": "strip",
+   "file": "fx/flag_red.png",
+   "frameW": 14,
+   "frameH": 12,
+   "frames": 4,
+   "fps": 8,
+   "anchor": [
+    0,
+    11
+   ]
+  },
+  "font.small": {
+   "kind": "font",
+   "file": "ui/font_small.png",
+   "cellW": 5,
+   "cellH": 6,
+   "glyphs": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,!?:-+/%'()<>#* ",
+   "widths": [
+    4,
+    3,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    3,
+    4,
+    4,
+    4,
+    5,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    3,
+    4,
+    5,
+    5,
+    4,
+    3,
+    4,
+    1,
+    1,
+    1,
+    4,
+    1,
+    3,
+    3,
+    3,
+    4,
+    1,
+    2,
+    2,
+    3,
+    3,
+    5,
+    5,
+    2
+   ],
+   "spacing": 1
+  },
+  "font.big": {
+   "kind": "font",
+   "file": "ui/font_big.png",
+   "cellW": 7,
+   "cellH": 8,
+   "glyphs": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!?.,:-+/%'x ",
+   "widths": [
+    6,
+    4,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    5,
+    5,
+    6,
+    6,
+    4,
+    5,
+    6,
+    5,
+    7,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    7,
+    6,
+    6,
+    6,
+    2,
+    6,
+    2,
+    2,
+    2,
+    4,
+    6,
+    6,
+    6,
+    2,
+    5,
+    3
+   ],
+   "spacing": 1
+  },
+  "icon.gold": {
+   "kind": "image",
+   "file": "icons/gold.png",
+   "w": 11,
+   "h": 10
+  },
+  "icon.gem": {
+   "kind": "image",
+   "file": "icons/gem.png",
+   "w": 11,
+   "h": 8
+  },
+  "icon.key": {
+   "kind": "image",
+   "file": "icons/key.png",
+   "w": 11,
+   "h": 7
+  },
+  "icon.rune": {
+   "kind": "image",
+   "file": "icons/rune.png",
+   "w": 9,
+   "h": 9
+  },
+  "icon.food": {
+   "kind": "image",
+   "file": "icons/food.png",
+   "w": 11,
+   "h": 10
+  },
+  "icon.skull": {
+   "kind": "image",
+   "file": "icons/skull.png",
+   "w": 8,
+   "h": 8
+  },
+  "icon.lock": {
+   "kind": "image",
+   "file": "icons/lock.png",
+   "w": 9,
+   "h": 9
+  },
+  "icon.pause": {
+   "kind": "image",
+   "file": "icons/pause.png",
+   "w": 7,
+   "h": 8
+  },
+  "icon.play": {
+   "kind": "image",
+   "file": "icons/play.png",
+   "w": 7,
+   "h": 7
+  },
+  "icon.heart": {
+   "kind": "image",
+   "file": "icons/heart.png",
+   "w": 9,
+   "h": 8
+  },
+  "icon.star": {
+   "kind": "image",
+   "file": "icons/star.png",
+   "w": 9,
+   "h": 8
+  },
+  "icon.up": {
+   "kind": "image",
+   "file": "icons/up.png",
+   "w": 7,
+   "h": 7
+  },
+  "icon.check": {
+   "kind": "image",
+   "file": "icons/check.png",
+   "w": 8,
+   "h": 7
+  },
+  "icon.cross": {
+   "kind": "image",
+   "file": "icons/cross.png",
+   "w": 7,
+   "h": 7
+  },
+  "icon.flag": {
+   "kind": "image",
+   "file": "icons/flag.png",
+   "w": 8,
+   "h": 9
+  },
+  "icon.sound": {
+   "kind": "image",
+   "file": "icons/sound.png",
+   "w": 8,
+   "h": 8
+  },
+  "icon.mute": {
+   "kind": "image",
+   "file": "icons/mute.png",
+   "w": 10,
+   "h": 8
+  },
+  "icon.gear": {
+   "kind": "image",
+   "file": "icons/gear.png",
+   "w": 9,
+   "h": 9
+  },
+  "icon.timer": {
+   "kind": "image",
+   "file": "icons/timer.png",
+   "w": 7,
+   "h": 7
+  },
+  "icon.clock": {
+   "kind": "image",
+   "file": "icons/clock.png",
+   "w": 7,
+   "h": 7
+  },
+  "icon.hp": {
+   "kind": "image",
+   "file": "icons/hp.png",
+   "w": 9,
+   "h": 8
+  },
+  "icon.sword": {
+   "kind": "image",
+   "file": "icons/sword.png",
+   "w": 9,
+   "h": 9
+  },
+  "icon.fist": {
+   "kind": "image",
+   "file": "icons/fist.png",
+   "w": 7,
+   "h": 7
+  },
+  "icon.tab_battle": {
+   "kind": "image",
+   "file": "icons/tab_battle.png",
+   "w": 14,
+   "h": 14
+  },
+  "icon.tab_upgrades": {
+   "kind": "image",
+   "file": "icons/tab_upgrades.png",
+   "w": 14,
+   "h": 14
+  },
+  "icon.tab_dungeons": {
+   "kind": "image",
+   "file": "icons/tab_dungeons.png",
+   "w": 14,
+   "h": 14
+  },
+  "icon.tab_cards": {
+   "kind": "image",
+   "file": "icons/tab_cards.png",
+   "w": 14,
+   "h": 14
+  },
+  "icon.tab_shop": {
+   "kind": "image",
+   "file": "icons/tab_shop.png",
+   "w": 14,
+   "h": 14
+  },
+  "ui.panel": {
+   "kind": "image",
+   "file": "ui/panel.png",
+   "w": 24,
+   "h": 24,
+   "slice": [
+    7,
+    7,
+    7,
+    7
+   ]
+  },
+  "ui.panel_wood": {
+   "kind": "image",
+   "file": "ui/panel_wood.png",
+   "w": 24,
+   "h": 24,
+   "slice": [
+    6,
+    6,
+    6,
+    6
+   ]
+  },
+  "ui.inset": {
+   "kind": "image",
+   "file": "ui/inset.png",
+   "w": 12,
+   "h": 12,
+   "slice": [
+    3,
+    3,
+    3,
+    3
+   ]
+  },
+  "ui.plaque": {
+   "kind": "image",
+   "file": "ui/plaque.png",
+   "w": 46,
+   "h": 28,
+   "slice": [
+    12,
+    8,
+    12,
+    8
+   ]
+  },
+  "ui.small_plaque": {
+   "kind": "image",
+   "file": "ui/small_plaque.png",
+   "w": 14,
+   "h": 14,
+   "slice": [
+    4,
+    4,
+    4,
+    4
+   ]
+  },
+  "ui.btn_green": {
+   "kind": "image",
+   "file": "ui/btn_green.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_green_down": {
+   "kind": "image",
+   "file": "ui/btn_green_down.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_gold": {
+   "kind": "image",
+   "file": "ui/btn_gold.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_gold_down": {
+   "kind": "image",
+   "file": "ui/btn_gold_down.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_red": {
+   "kind": "image",
+   "file": "ui/btn_red.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_red_down": {
+   "kind": "image",
+   "file": "ui/btn_red_down.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_wood": {
+   "kind": "image",
+   "file": "ui/btn_wood.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_wood_down": {
+   "kind": "image",
+   "file": "ui/btn_wood_down.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.btn_grey": {
+   "kind": "image",
+   "file": "ui/btn_grey.png",
+   "w": 22,
+   "h": 22,
+   "slice": [
+    5,
+    6,
+    5,
+    7
+   ]
+  },
+  "ui.card": {
+   "kind": "image",
+   "file": "ui/card.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_locked": {
+   "kind": "image",
+   "file": "ui/card_locked.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.skill_socket": {
+   "kind": "image",
+   "file": "ui/skill_socket.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_socket": {
+   "kind": "image",
+   "file": "ui/hero_socket.png",
+   "w": 40,
+   "h": 43,
+   "anchor": [
+    20,
+    20
+   ]
+  },
+  "ui.glow_gold": {
+   "kind": "image",
+   "file": "ui/glow_gold.png",
+   "w": 40,
+   "h": 40,
+   "anchor": [
+    20,
+    20
+   ]
+  },
+  "ui.glow_blue": {
+   "kind": "image",
+   "file": "ui/glow_blue.png",
+   "w": 34,
+   "h": 34,
+   "anchor": [
+    17,
+    17
+   ]
+  },
+  "ui.tab": {
+   "kind": "image",
+   "file": "ui/tab.png",
+   "w": 40,
+   "h": 32
+  },
+  "ui.tab_on": {
+   "kind": "image",
+   "file": "ui/tab_on.png",
+   "w": 40,
+   "h": 38
+  },
+  "ui.tabbar": {
+   "kind": "image",
+   "file": "ui/tabbar.png",
+   "w": 16,
+   "h": 16,
+   "slice": [
+    2,
+    3,
+    2,
+    2
+   ]
+  },
+  "ui.wall_stone": {
+   "kind": "image",
+   "file": "ui/wall_stone.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
+  "ui.ribbon_gold": {
+   "kind": "image",
+   "file": "ui/ribbon_gold.png",
+   "w": 42,
+   "h": 24,
+   "slice": [
+    12,
+    6,
+    12,
+    8
+   ]
+  },
+  "ui.ribbon_grey": {
+   "kind": "image",
+   "file": "ui/ribbon_grey.png",
+   "w": 42,
+   "h": 24,
+   "slice": [
+    12,
+    6,
+    12,
+    8
+   ]
+  },
+  "fx.spark": {
+   "kind": "strip",
+   "file": "fx/spark.png",
+   "frameW": 15,
+   "frameH": 15,
+   "frames": 4,
+   "fps": 20,
+   "anchor": [
+    7,
+    7
+   ]
+  },
+  "fx.ring": {
+   "kind": "strip",
+   "file": "fx/ring.png",
+   "frameW": 25,
+   "frameH": 25,
+   "frames": 4,
+   "fps": 18,
+   "anchor": [
+    12,
+    12
+   ]
+  },
+  "fx.dust": {
+   "kind": "strip",
+   "file": "fx/dust.png",
+   "frameW": 16,
+   "frameH": 10,
+   "frames": 5,
+   "fps": 14,
+   "anchor": [
+    8,
+    9
+   ]
+  },
+  "fx.poof": {
+   "kind": "strip",
+   "file": "fx/poof.png",
+   "frameW": 24,
+   "frameH": 24,
+   "frames": 6,
+   "fps": 16,
+   "anchor": [
+    12,
+    16
+   ]
+  },
+  "fx.coin": {
+   "kind": "strip",
+   "file": "fx/coin.png",
+   "frameW": 9,
+   "frameH": 9,
+   "frames": 4,
+   "fps": 12,
+   "anchor": [
+    4,
+    4
+   ]
+  },
+  "fx.smoke": {
+   "kind": "strip",
+   "file": "fx/smoke.png",
+   "frameW": 14,
+   "frameH": 18,
+   "frames": 6,
+   "fps": 8,
+   "anchor": [
+    7,
+    16
+   ]
+  },
+  "fx.flame": {
+   "kind": "strip",
+   "file": "fx/flame.png",
+   "frameW": 5,
+   "frameH": 6,
+   "frames": 4,
+   "fps": 10,
+   "anchor": [
+    2,
+    5
+   ]
+  },
+  "fx.boom": {
+   "kind": "strip",
+   "file": "fx/boom.png",
+   "frameW": 48,
+   "frameH": 48,
+   "frames": 8,
+   "fps": 14,
+   "anchor": [
+    24,
+    34
+   ]
+  },
+  "fx.smear": {
+   "kind": "strip",
+   "file": "fx/smear.png",
+   "frameW": 20,
+   "frameH": 20,
+   "frames": 3,
+   "fps": 20,
+   "anchor": [
+    4,
+    12
+   ]
+  },
+  "fx.debris": {
+   "kind": "strip",
+   "file": "fx/debris.png",
+   "frameW": 4,
+   "frameH": 4,
+   "frames": 4,
+   "fps": 12,
+   "anchor": [
+    2,
+    2
+   ]
+  },
+  "proj.stone": {
+   "kind": "strip",
+   "file": "fx/proj_stone.png",
+   "frameW": 6,
+   "frameH": 6,
+   "frames": 2,
+   "fps": 12,
+   "anchor": [
+    3,
+    3
+   ]
+  }
+ },
+ "sounds": {},
+ "meta": {
+  "env.stone": {
+   "skyTop": "#2f6cc4",
+   "clouds": 4,
+   "volcanoX": 156,
+   "volcanoY": 44
+  },
+  "base.stone": {
+   "flagX": 26,
+   "flagY": 6,
+   "torchX": 10,
+   "torchY": 49,
+   "smokeX": 26,
+   "smokeY": 30
+  }
+ }
+}
