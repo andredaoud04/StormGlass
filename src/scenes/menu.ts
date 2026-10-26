@@ -313,7 +313,12 @@ export class MenuScene implements Scene {
       const ie = app.assets.image('icon.tab_' + t);
       const iy = sel ? y - 2 : y + 6;
       d.image('icon.tab_' + t, Math.round(x + bw / 2 - ie.w / 2), iy, { alpha: sel ? 1 : 0.8 });
-      if (sel) d.text(TAB_LABEL[t], x + bw / 2, y + 16, { align: 'center', color: '#fff1c0' });
+      if (sel) {
+        // Keep the label on screen even for the edge tabs.
+        const lw = d.measure(TAB_LABEL[t]);
+        const lx = Math.max(lw / 2 + 2, Math.min(w - lw / 2 - 2, x + bw / 2));
+        d.text(TAB_LABEL[t], lx, y + 16, { align: 'center', color: '#fff1c0' });
+      }
       const locked = t === 'dungeons' && app.save.prestige < 1;
       if (locked && !sel) d.image('icon.lock', x + bw - 12, y + 4, { alpha: 0.8 });
       app.input.region({

@@ -8,9 +8,11 @@ import type { AnimEntry, AssetEntry, Manifest } from '../../src/engine/manifest'
 import { A, B, G, Img, R } from './img';
 import { INK, TEAM_BLUE, TEAM_RED, MOSS, GOLD, WOOD, STONE } from './palette';
 import { packSheet } from './rig';
-import { STONE_TROOPS } from './troops/catalog';
-import { stoneEnv } from './env/stone';
+import { ALL_TROOPS } from './troops/catalog';
+import { stoneEnv, type EnvArt } from './env/stone';
+import { ancientEnv } from './env/ancient';
 import { BASE_FRONT, BASE_GROUND, flagFrames, stoneFortress } from './bases/stone';
+import { ancientFortress } from './bases/ancient';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
 import * as ui from './ui/ui';
@@ -138,34 +140,44 @@ export function buildAll(): void {
   const reg = new Registry();
 
   // Troops
-  for (const t of STONE_TROOPS) {
+  for (const t of ALL_TROOPS) {
     for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
       const r = t.rig(team);
       const anims = t.anims(r);
       const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
       const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
       reg.sheet(`troop.${t.id}.${teamName}`, `troops/${t.id}_${teamName}.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id} (${teamName} team). Chibi troop, bold outline, lit from the top-left.`, t.muzzle);
-      if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1] };
+      if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.projectile ? { projectile: t.projectile } : {}) };
       if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
     }
   }
 
-  // Environment
-  const env = stoneEnv();
-  for (const [name, layer] of Object.entries(env.layers)) {
-    reg.image(`env.stone.${name}`, `env/stone/${name}.png`, layer.img, `Stone Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
+  // Environments
+  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()]];
+  for (const [age, label, env] of envs) {
+    for (const [name, layer] of Object.entries(env.layers)) {
+      reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
+    }
+    env.clouds.forEach((c, i) => reg.image(`env.${age}.cloud${i}`, `env/${age}/cloud${i}.png`, c, 'Drifting cloud.'));
+    reg.manifest.meta[`env.${age}`] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, ...(env.volcano ? { volcanoX: env.volcano[0], volcanoY: env.volcano[1] } : {}) };
   }
-  env.clouds.forEach((c, i) => reg.image(`env.stone.cloud${i}`, `env/stone/cloud${i}.png`, c, 'Drifting cloud.'));
-  reg.manifest.meta['env.stone'] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, volcanoX: env.volcano![0], volcanoY: env.volcano![1] };
 
   // Fortresses
-  for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
-    for (const d of [0, 1, 2, 3] as const) {
-      reg.image(`base.stone.${teamName}.${d}`, `bases/stone_${teamName}_${d}.png`, stoneFortress(team, d), `Stone Age fortress, ${teamName} team, damage state ${d} (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.`, { anchor: [BASE_FRONT, BASE_GROUND] });
+  const forts: [string, string, typeof stoneFortress, Record<string, number>][] = [
+    ['stone', 'Stone', stoneFortress, { flagX: 26, flagY: 6, torchX: 10, torchY: 49, smokeX: 26, smokeY: 30 }],
+    ['ancient', 'Ancient', ancientFortress, { flagX: 25, flagY: 8, torchX: 7, torchY: 41, smokeX: 25, smokeY: 30 }],
+  ];
+  for (const [age, label, make, meta] of forts) {
+    for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
+      for (const d of [0, 1, 2, 3] as const) {
+        reg.image(`base.${age}.${teamName}.${d}`, `bases/${age}_${teamName}_${d}.png`, make(team, d), `${label} Age fortress, ${teamName} team, damage state ${d} (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.`, { anchor: [BASE_FRONT, BASE_GROUND] });
+      }
     }
+    reg.manifest.meta[`base.${age}`] = meta;
+  }
+  for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
     reg.strip(`fx.flag.${teamName}`, `fx/flag_${teamName}.png`, { frames: flagFrames(team), fps: 8, anchor: [0, 11], desc: `Waving ${teamName} flag, 4 frames; anchor = pole top.` });
   }
-  reg.manifest.meta['base.stone'] = { flagX: 26, flagY: 6, torchX: 10, torchY: 49, smokeX: 26, smokeY: 30 };
 
   // Fonts
   reg.font('font.small', 'ui/font_small.png', smallFont(), 'Small pixel font, caps 5 px. Lowercase renders as caps.');
@@ -199,7 +211,8 @@ export function buildAll(): void {
   put('ui.tab', ui.tabButton(false));
   put('ui.tab_on', ui.tabButton(true));
   put('ui.tabbar', ui.tabBar());
-  put('ui.wall_stone', ui.stoneWall());
+  put('ui.wall_stone', ui.stoneWall(ui.STONE_WALL));
+  put('ui.wall_ancient', ui.stoneWall(ui.SAND_WALL));
   put('ui.ribbon_gold', ui.ribbon(GOLD));
   put('ui.ribbon_grey', ui.ribbon({ hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }));
 
@@ -219,6 +232,8 @@ export function buildAll(): void {
   reg.image('ui.logo', 'ui/logo.png', logo(), 'STORMGLASS title logo.');
   put('ui.wall_bg', ui.wallBackground());
   reg.strip('proj.stone', 'fx/proj_stone.png', fx.stoneProjectile());
+  reg.strip('proj.arrow', 'fx/proj_arrow.png', fx.arrow());
+  reg.manifest.meta['proj.arrow'] = { mode: 'angle', min: -60, step: 15 };
 
   reg.writeAll();
   void INK;

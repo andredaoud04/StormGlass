@@ -21,7 +21,11 @@ export interface AgeDef {
   id: AgeId;
   name: string;
   fortressHp: number;
+  /** Base Food income (Food/s) for an army of this Age, before upgrades. Stone is locked at 1. */
+  foodRate: number;
   baseGold: number;
+  /** Enemy troop strength at this stage on Timeline 1 (x troop stats). Grows per stage so progress needs upgrades. */
+  enemyPower?: number;
   /** Gold to evolve into this Age before its enemy fortress is beaten (then free). */
   evolveGold: number;
   troops: TroopDef[];
@@ -42,7 +46,7 @@ export interface UpgradeDef {
 export interface Balance {
   version: number;
   sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number };
-  economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number };
+  economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number };
   status: StatusRules;
   ages: AgeDef[];
   waves: Record<AgeId, WaveScript>;

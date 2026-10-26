@@ -285,6 +285,290 @@
     }
    }
   },
+  "troop.ancient_spearman.blue": {
+   "kind": "sheet",
+   "file": "troops/ancient_spearman_blue.png",
+   "frameW": 44,
+   "frameH": 38,
+   "anchor": [
+    19,
+    34
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.ancient_spearman": {
+   "kind": "image",
+   "file": "portraits/ancient_spearman.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.ancient_spearman.red": {
+   "kind": "sheet",
+   "file": "troops/ancient_spearman_red.png",
+   "frameW": 44,
+   "frameH": 38,
+   "anchor": [
+    19,
+    34
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.ancient_archer.blue": {
+   "kind": "sheet",
+   "file": "troops/ancient_archer_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    8,
+    -17
+   ]
+  },
+  "portrait.ancient_archer": {
+   "kind": "image",
+   "file": "portraits/ancient_archer.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.ancient_archer.red": {
+   "kind": "sheet",
+   "file": "troops/ancient_archer_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    8,
+    -17
+   ]
+  },
+  "troop.ancient_guard.blue": {
+   "kind": "sheet",
+   "file": "troops/ancient_guard_blue.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.ancient_guard": {
+   "kind": "image",
+   "file": "portraits/ancient_guard.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.ancient_guard.red": {
+   "kind": "sheet",
+   "file": "troops/ancient_guard_red.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -361,6 +645,70 @@
    "w": 40,
    "h": 13
   },
+  "env.ancient.sky": {
+   "kind": "image",
+   "file": "env/ancient/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.ancient.far": {
+   "kind": "image",
+   "file": "env/ancient/far.png",
+   "w": 256,
+   "h": 150,
+   "anchor": [
+    0,
+    160
+   ]
+  },
+  "env.ancient.mid": {
+   "kind": "image",
+   "file": "env/ancient/mid.png",
+   "w": 256,
+   "h": 64,
+   "anchor": [
+    0,
+    60
+   ]
+  },
+  "env.ancient.ground": {
+   "kind": "image",
+   "file": "env/ancient/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.ancient.cloud0": {
+   "kind": "image",
+   "file": "env/ancient/cloud0.png",
+   "w": 52,
+   "h": 14
+  },
+  "env.ancient.cloud1": {
+   "kind": "image",
+   "file": "env/ancient/cloud1.png",
+   "w": 30,
+   "h": 10
+  },
+  "env.ancient.cloud2": {
+   "kind": "image",
+   "file": "env/ancient/cloud2.png",
+   "w": 64,
+   "h": 16
+  },
+  "env.ancient.cloud3": {
+   "kind": "image",
+   "file": "env/ancient/cloud3.png",
+   "w": 24,
+   "h": 9
+  },
   "base.stone.blue.0": {
    "kind": "image",
    "file": "bases/stone_blue_0.png",
@@ -401,18 +749,6 @@
     86
    ]
   },
-  "fx.flag.blue": {
-   "kind": "strip",
-   "file": "fx/flag_blue.png",
-   "frameW": 14,
-   "frameH": 12,
-   "frames": 4,
-   "fps": 8,
-   "anchor": [
-    0,
-    11
-   ]
-  },
   "base.stone.red.0": {
    "kind": "image",
    "file": "bases/stone_red_0.png",
@@ -451,6 +787,98 @@
    "anchor": [
     60,
     86
+   ]
+  },
+  "base.ancient.blue.0": {
+   "kind": "image",
+   "file": "bases/ancient_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.blue.1": {
+   "kind": "image",
+   "file": "bases/ancient_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.blue.2": {
+   "kind": "image",
+   "file": "bases/ancient_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.blue.3": {
+   "kind": "image",
+   "file": "bases/ancient_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.red.0": {
+   "kind": "image",
+   "file": "bases/ancient_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.red.1": {
+   "kind": "image",
+   "file": "bases/ancient_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.red.2": {
+   "kind": "image",
+   "file": "bases/ancient_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.ancient.red.3": {
+   "kind": "image",
+   "file": "bases/ancient_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "fx.flag.blue": {
+   "kind": "strip",
+   "file": "fx/flag_blue.png",
+   "frameW": 14,
+   "frameH": 12,
+   "frames": 4,
+   "fps": 8,
+   "anchor": [
+    0,
+    11
    ]
   },
   "fx.flag.red": {
@@ -1010,6 +1438,16 @@
     6
    ]
   },
+  "ui.wall_ancient": {
+   "kind": "image",
+   "file": "ui/wall_ancient.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
   "ui.ribbon_gold": {
    "kind": "image",
    "file": "ui/ribbon_gold.png",
@@ -1207,6 +1645,18 @@
     3,
     3
    ]
+  },
+  "proj.arrow": {
+   "kind": "strip",
+   "file": "fx/proj_arrow.png",
+   "frameW": 15,
+   "frameH": 15,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    7,
+    7
+   ]
   }
  },
  "sounds": {
@@ -1238,9 +1688,20 @@
    "top": -23
   },
   "troop.stone_slinger": {
-   "top": -23
+   "top": -23,
+   "projectile": "proj.stone"
   },
   "troop.stone_brute": {
+   "top": -28
+  },
+  "troop.ancient_spearman": {
+   "top": -25
+  },
+  "troop.ancient_archer": {
+   "top": -24,
+   "projectile": "proj.arrow"
+  },
+  "troop.ancient_guard": {
    "top": -28
   },
   "env.stone": {
@@ -1249,6 +1710,10 @@
    "volcanoX": 156,
    "volcanoY": 64
   },
+  "env.ancient": {
+   "skyTop": "#3a86d0",
+   "clouds": 4
+  },
   "base.stone": {
    "flagX": 26,
    "flagY": 6,
@@ -1256,6 +1721,19 @@
    "torchY": 49,
    "smokeX": 26,
    "smokeY": 30
+  },
+  "base.ancient": {
+   "flagX": 25,
+   "flagY": 8,
+   "torchX": 7,
+   "torchY": 41,
+   "smokeX": 25,
+   "smokeY": 30
+  },
+  "proj.arrow": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15
   }
  }
 }

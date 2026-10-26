@@ -27,3 +27,7 @@ export const MOUTH = hex('#7c2e30');
 export const TEAM_BLUE = { hl: hex('#a6e2ff'), base: hex('#4aa6ec'), shade: hex('#2d68c2'), deep: hex('#1f3f80') };
 export const TEAM_RED = { hl: hex('#ffb08c'), base: hex('#e64d4d'), shade: hex('#ae2a40'), deep: hex('#6a1a33') };
 export type Ramp = typeof TEAM_BLUE;
+export const BRONZE = { hl: hex('#fff2a6'), base: hex('#e6b84a'), shade: hex('#b07a2c'), deep: hex('#6a3f1c') };
+export const LINEN = { hl: hex('#fffaf0'), base: hex('#ece2cc'), shade: hex('#c4b494'), deep: hex('#8e7e64') };
+export const SAND = { hl: hex('#fbe8b8'), base: hex('#e8c88a'), shade: hex('#c49a5e'), deep: hex('#8e6a3e'), dark: hex('#5e4430') };
+export const STEEL = { hl: hex('#f2f6fa'), base: hex('#b8c2cc'), shade: hex('#7e8a96'), deep: hex('#4e5864') };

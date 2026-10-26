@@ -41,6 +41,8 @@ export interface RigParts {
   back?: Limb;
   /** Optional offhand item (shield) held in the back hand, drawn above the back arm. */
   offhand?: Limb;
+  /** Draw the offhand (shield) in front of the torso instead of behind it. */
+  offhandInFront?: boolean;
   outline?: Color;
 }
 
@@ -113,10 +115,14 @@ export function buildFrame(r: RigParts, pose: Pose): Img {
   if (r.back) place(f, r.back, 0, at(r.neck), ink);
   if (pose.weaponBehind) drawWeapon();
   place(f, r.backArm, ba, bs, ink);
-  if (r.offhand && pose.offhand !== undefined) place(f, r.offhand, pose.offhand, handPos(r.backArm, bs, ba), ink);
+  const drawOffhand = () => {
+    if (r.offhand && pose.offhand !== undefined) place(f, r.offhand, pose.offhand, handPos(r.backArm, bs, ba), ink);
+  };
+  if (!r.offhandInFront) drawOffhand();
   place(f, r.backLeg, 0, legHip(r.backHip, pose.backLeg), ink);
   place(f, r.frontLeg, 0, legHip(r.frontHip, pose.frontLeg), ink);
   place(f, r.torso, 0, hip, ink);
+  if (r.offhandInFront) drawOffhand();
   const head = r.heads[pose.headVariant ?? 'normal'] ?? r.heads.normal;
   place(f, head, 0, at(r.neck, pose.head), ink);
   if (!pose.weaponBehind) drawWeapon();

@@ -44,3 +44,32 @@ export function runBattle(config: BattleConfig, policy: Policy, maxSeconds = 300
     state: s,
   };
 }
+
+/**
+ * A reasonable human-like policy: defend at once when enemies get close to your fortress;
+ * otherwise save up and send a tank first, then melee and ranged behind it.
+ */
+export function smartPolicy(): Policy {
+  let plan: number[] = [];
+  return (s) => {
+    const troops = s.config.playerTroops;
+    const f = food(s);
+    const lane = s.config.laneLength;
+    const threat = s.units.some((u) => u.alive && u.side === 1 && u.x < lane * 0.35);
+    const melee = troops.findIndex((t) => t.kind === 'melee');
+    const ranged = troops.findIndex((t) => t.kind === 'ranged');
+    const tank = troops.findIndex((t) => t.kind === 'tank');
+    if (threat) {
+      const pick = tank >= 0 && f >= troops[tank].cost ? tank : melee;
+      return pick >= 0 && f >= troops[pick].cost ? [{ type: 'deploy', slot: pick }] : [];
+    }
+    if (plan.length === 0) plan = [tank, melee, ranged, melee].filter((i) => i >= 0);
+    const next = plan[0];
+    const groupCost = plan.reduce((a, i) => a + troops[i].cost, 0);
+    if (f >= groupCost || (f >= troops[next].cost && s.units.filter((u) => u.alive && u.side === 0).length > 0)) {
+      plan.shift();
+      return [{ type: 'deploy', slot: next }];
+    }
+    return [];
+  };
+}

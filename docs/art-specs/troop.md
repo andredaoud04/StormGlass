@@ -97,3 +97,101 @@ stone_brute (red team). Chibi troop, bold outline, lit from the top-left.
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (26): #1e1526 #fbf4e0 #b3a486 #e2d6b6 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #e64d4d #7c2e30 #734424 #a86e3e #d6a160 #ae2a40 #ffb08c #f4d494 #7f4428 #ad6a3c #7e7770 #aaa396 #dcd6c8 #575050 #d99a5c ...
+
+## troop.ancient_spearman.blue
+
+ancient_spearman (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/ancient_spearman_blue.png`
+- Frame: 44 x 38, facing right, one animation per row
+- Anchor (feet on ground): (19, 34)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #7f4428 #9a5c34 #ad6a3c #94503f #d99a5c #c98a52
+
+## troop.ancient_spearman.red
+
+ancient_spearman (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/ancient_spearman_red.png`
+- Frame: 44 x 38, facing right, one animation per row
+- Anchor (feet on ground): (19, 34)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #7f4428 #9a5c34 #ad6a3c #94503f #d99a5c #c98a52
+
+## troop.ancient_archer.blue
+
+ancient_archer (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/ancient_archer_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (8, -17)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (22): #1e1526 #6e3a22 #9a5c34 #c98a52 #4aa6ec #a6e2ff #2d68c2 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #fff8ec #b3a486 #ad6a3c #7c2e30 #fffaf0 #ece2cc #7f4428 #94503f #c4b494 #f07a7a
+
+## troop.ancient_archer.red
+
+ancient_archer (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/ancient_archer_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (8, -17)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (22): #1e1526 #6e3a22 #9a5c34 #c98a52 #e64d4d #ffb08c #ae2a40 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #fff8ec #b3a486 #ad6a3c #7c2e30 #fffaf0 #ece2cc #7f4428 #94503f #c4b494 #f07a7a
+
+## troop.ancient_guard.blue
+
+ancient_guard (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/ancient_guard_blue.png`
+- Frame: 52 x 46, facing right, one animation per row
+- Anchor (feet on ground): (24, 41)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #94503f #c98a52
+
+## troop.ancient_guard.red
+
+ancient_guard (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/ancient_guard_red.png`
+- Frame: 52 x 46, facing right, one animation per row
+- Anchor (feet on ground): (24, 41)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #94503f #c98a52

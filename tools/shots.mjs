@@ -64,6 +64,20 @@ const SCENARIOS = [
     await fastForward(p, 2.5, false);
   }],
   ['battle-pause', async (p) => { await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 8); await p.evaluate(() => window.__sg.app.scene.key('p')); await fastForward(p, 0.1, false); }],
+  ['battle-ancient', async (p) => {
+    await setSave(p, { armyAge: 1, enemyAge: 1, beaten: [0], ownedTroops: ['stone_clubber', 'ancient_archer', 'ancient_guard'] });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await fastForward(p, 26);
+  }],
+  ['home-ancient', async (p) => {
+    await setSave(p, { armyAge: 1, enemyAge: 2, beaten: [0, 1], gold: 340, ownedTroops: ['ancient_archer'] });
+    await p.evaluate(() => window.__sg.app.go('menu'));
+  }],
+  ['battle-stone-vs-ancient', async (p) => {
+    await setSave(p, { enemyAge: 1, beaten: [0], ownedTroops: ['stone_clubber', 'stone_slinger', 'stone_brute'] });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await fastForward(p, 20);
+  }],
   ['upgrades', async (p) => { await setSave(p, { gold: 30 }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
   ['dungeons', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'dungeons')); }],
   ['cards', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'cards')); }],

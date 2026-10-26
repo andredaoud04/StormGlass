@@ -1,12 +1,12 @@
 import { Img, hex } from '../img';
 import { TEAM_BLUE, TEAM_RED } from '../palette';
-import { STONE_TROOPS } from '../troops/catalog';
+import { ALL_TROOPS } from '../troops/catalog';
 import { packSheet } from '../rig';
 
 const out = process.argv[2] ?? '/tmp/troop.png';
 const only = process.argv[3];
 const rows: Img[] = [];
-for (const t of STONE_TROOPS) {
+for (const t of ALL_TROOPS) {
   if (only && t.id !== only) continue;
   for (const team of [TEAM_BLUE, TEAM_RED]) {
     const r = t.rig(team);

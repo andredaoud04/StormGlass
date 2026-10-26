@@ -36,7 +36,7 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
   const b = BALANCE;
   const enemy = ageDef(input.enemyAge);
   const tl = Math.max(1, input.timeline) - 1;
-  const enemyMul = b.timeline.enemyPower * (1 + b.timeline.enemyStatPerTimeline * tl);
+  const enemyMul = (enemy.enemyPower ?? b.timeline.enemyPower) * (1 + b.timeline.enemyStatPerTimeline * tl);
   const enemyTroops = {} as Record<TroopKind, TroopStats>;
   for (const t of enemy.troops) enemyTroops[t.kind] = troopStats(t, enemyMul, enemyMul);
   return {
@@ -46,8 +46,8 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     spawnOffset: b.sim.spawnOffset,
     maxUnitsPerSide: b.sim.maxUnitsPerSide,
     projectileSpeed: b.sim.projectileSpeed,
-    foodRateMilli: input.foodRateMilli ?? 1000,
-    playerBaseHp: Math.round(ageDef(input.armyAge).fortressHp * (input.fortressMul ?? 1)),
+    foodRateMilli: input.foodRateMilli ?? Math.round(ageDef(input.armyAge).foodRate * 1000),
+    playerBaseHp: Math.round(ageDef(input.armyAge).fortressHp * b.economy.playerBaseHpMul * (input.fortressMul ?? 1)),
     enemyBaseHp: Math.round(enemy.fortressHp * (1 + b.timeline.enemyFortressPerTimeline * tl)),
     playerTroops: input.loadout.slice(0, 3).map((id) => troopStats(troopDef(id), input.powerMul ?? 1, input.powerMul ?? 1)),
     enemyTroops,

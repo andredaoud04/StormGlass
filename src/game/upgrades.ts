@@ -24,9 +24,10 @@ export function buyUpgrade(s: SaveData, id: UpgradeId): boolean {
   return true;
 }
 
-/** Player Food income in milli-Food per second. Stone base is exactly 1 Food/s. */
+/** Player Food income in milli-Food per second: the army Age's base rate plus the Food upgrade. Stone base is exactly 1 Food/s. */
 export function foodRateMilli(s: SaveData): number {
-  return Math.round(1000 + level(s, 'food') * BALANCE.upgrades.food.perLevel * 1000);
+  const base = BALANCE.ages[s.armyAge]?.foodRate ?? 1;
+  return Math.round((base + level(s, 'food') * BALANCE.upgrades.food.perLevel) * 1000);
 }
 
 export function fortressMul(s: SaveData): number {

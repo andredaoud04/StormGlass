@@ -262,12 +262,24 @@ export function tabBar(): UiPiece {
   return { img, slice: [2, 3, 2, 2], desc: 'Bottom tab bar background. 9-slice.' };
 }
 
-/** Battle HUD wall for the Stone Age: stacked stone blocks under a lashed log beam. */
-export function stoneWall(): UiPiece {
+export interface WallTheme {
+  block: { hl: Color; base: Color; shade: Color; deep: Color };
+  alt: Color;
+  mortar: Color;
+  moss: boolean;
+  beam: 'log' | 'frieze';
+}
+
+export const STONE_WALL: WallTheme = { block: { hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }, alt: hex('#b8a896'), mortar: hex('#3c3236'), moss: true, beam: 'log' };
+export const SAND_WALL: WallTheme = { block: { hl: hex('#fbe8b8'), base: hex('#e2c088'), shade: hex('#c49a5e'), deep: hex('#8e6a3e') }, alt: hex('#f0d2a0'), mortar: hex('#6a4a30'), moss: false, beam: 'frieze' };
+
+/** Battle HUD wall: stacked blocks under a log beam or a carved frieze, themed per Age. */
+export function stoneWall(theme: WallTheme = STONE_WALL): UiPiece {
   const W = 256, H = 220;
   const r = rand(4242);
   const img = new Img(W, H);
-  const mortar = hex('#3c3236');
+  const mortar = theme.mortar;
+  const STONE = theme.block;
   // Stone block courses.
   const beamY = 8;
   let y = beamY + 8;
@@ -278,7 +290,7 @@ export function stoneWall(): UiPiece {
     while (x < W) {
       const bw = 16 + Math.floor(r() * 12);
       const tint = r();
-      const base = tint < 0.33 ? STONE.base : tint < 0.66 ? mix(STONE.base, STONE.shade, 0.35) : mix(STONE.base, hex('#b8a896'), 0.4);
+      const base = tint < 0.33 ? STONE.base : tint < 0.66 ? mix(STONE.base, STONE.shade, 0.35) : mix(STONE.base, theme.alt, 0.4);
       for (let j = 0; j < bh; j++) {
         for (let i = 0; i < bw; i++) {
           const px = x + i;
@@ -296,7 +308,7 @@ export function stoneWall(): UiPiece {
         }
       }
       // Moss tufts on some block tops.
-      if (r() < 0.18) for (let k = 0; k < 4; k++) img.set(x + 2 + Math.floor(r() * (bw - 4)), y + (k % 2), k % 2 ? MOSS.shade : MOSS.base);
+      if (theme.moss && r() < 0.18) for (let k = 0; k < 4; k++) img.set(x + 2 + Math.floor(r() * (bw - 4)), y + (k % 2), k % 2 ? MOSS.shade : MOSS.base);
       x += bw;
     }
     y += bh;
@@ -304,6 +316,23 @@ export function stoneWall(): UiPiece {
   }
   // Shade the wall slightly darker toward the bottom.
   img.map((c, px, py) => (c && py > 60 && bayer(px, py) < Math.min(0.45, (py - 60) / 300) ? mix(c, DARK, 0.35) : c));
+  if (theme.beam === 'frieze') {
+    // Carved frieze: terracotta band with a running key pattern.
+    const T1 = hex('#d0603e'), T2 = hex('#a23f2c'), K = hex('#2a1a1c'), CAP = hex('#fbe8b8');
+    for (let x = 0; x < W; x++) {
+      for (let j = -1; j < 9; j++) {
+        let c = j < 1 ? CAP : j > 6 ? T2 : T1;
+        const kx = x % 8;
+        const ky = j - 2;
+        const key = ky >= 0 && ky < 4 && ((ky === 0 && kx < 6) || (kx === 5 && ky < 3) || (ky === 2 && kx >= 2 && kx <= 5) || (kx === 2 && ky >= 2) || (ky === 3 && kx < 3));
+        if (key) c = K;
+        img.set(x, beamY + j - 1, c);
+      }
+    }
+    img.hline(0, W - 1, beamY - 2, INK);
+    img.hline(0, W - 1, beamY + 8, INK);
+    return { img, anchor: [W / 2, beamY - 2], desc: 'Ancient Age battle HUD wall: sandstone courses under a key-pattern frieze.' };
+  }
   // Log beam across the top.
   for (let x = 0; x < W; x++) {
     for (let j = 0; j < 9; j++) {
@@ -366,8 +395,8 @@ export function smallPlaque(): UiPiece {
 export const RAMPS = { TEAM_BLUE, TEAM_RED, GOLD, MOSS, WOOD, STONE };
 
 /** Seamless stone backdrop for menu pages (no beam). */
-export function wallBackground(): UiPiece {
-  const full = stoneWall().img;
+export function wallBackground(theme: WallTheme = STONE_WALL): UiPiece {
+  const full = stoneWall(theme).img;
   // Take a band of courses below the beam; its height is a multiple of the course pattern.
   const img = full.crop(0, 16, 256, 23 * 8);
   return { img, slice: [0, 0, 0, 0], desc: 'Menu backdrop: stone courses, tiles vertically.' };

@@ -1,5 +1,5 @@
 /** Effect sprites, each a horizontal strip of frames. */
-import { Img, bayer, hex, withAlpha } from './img';
+import { Img, bayer, hex, rotSprite, withAlpha } from './img';
 import { FIRE, GOLD, INK, STONE, WHITE } from './palette';
 import { rand } from './env/paint';
 
@@ -224,4 +224,15 @@ export function ptero(): Strip {
     ['...............', '...............', '....kkkkk......', '..kkkkkkkkk....', '.kk..kkkkkkkk..', 'k.....k.....k..'],
   ];
   return { frames: shapes.map((s) => Img.fromGrid(s, { k })), fps: 7, anchor: [7, 3], desc: 'Distant pterodactyl, 3 wing frames.' };
+}
+
+/** Arrow in flight, pre-rotated from -60 to +60 degrees in 15 degree steps (frame = angle index). */
+export function arrow(): Strip {
+  const base = Img.fromGrid(['......Zq.', 'nnnBBBBqq', '......Zq.'], { B: hex('#ad6a3c'), n: hex('#f4ecd6'), Z: hex('#b8c2cc'), q: hex('#e6eef4') });
+  const frames: Img[] = [];
+  for (let a = -60; a <= 60; a += 15) {
+    const r = rotSprite(base, (a * Math.PI) / 180, 4.5, 1.5, 13, 13, 6.5, 6.5);
+    frames.push(r.outlined(INK).crop(0, 0, 15, 15));
+  }
+  return { frames, fps: 0, anchor: [7, 7], desc: 'Arrow, 9 frames: flight angle -60..60 degrees in 15 degree steps (frame 4 = level).' };
 }

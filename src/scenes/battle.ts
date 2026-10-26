@@ -53,6 +53,7 @@ export class BattleScene implements Scene {
   private hudTop = 0;
   private deployedOnce = false;
   private prevEnemyAge: number;
+  private wallKey = 'ui.wall_stone';
 
   constructor(private app: App) {
     const s = app.save;
@@ -72,13 +73,14 @@ export class BattleScene implements Scene {
       campaign: true,
     });
     this.sim = createBattle(config);
+    this.wallKey = app.assets.has(`ui.wall_${ageDef(this.enemyAge).id}`) ? `ui.wall_${ageDef(this.enemyAge).id}` : 'ui.wall_stone';
     this.view = new BattleView(app, this.sim, this.layout(), ageDef(this.enemyAge).id, {
       onCoin: (x, y, amount) => this.spawnCoins(x, y, amount),
       onImpact: (heavy, kill) => {
         if (app.reducedMotion) return;
         this.freeze = Math.max(this.freeze, heavy ? 0.06 : kill ? 0.035 : 0);
       },
-    });
+    }, ageDef(s.armyAge).id);
     this.deployedOnce = s.seen.includes('deploy');
     app.sfx('fight', { vol: 0.8, jitter: 0 });
   }
@@ -291,7 +293,7 @@ export class BattleScene implements Scene {
     const d = app.draw;
     const { w, h } = app;
     const top = this.hudTop;
-    d.image('ui.wall_stone', Math.floor(w / 2), top);
+    d.image(this.wallKey, Math.floor(w / 2), top);
 
     // Hero medallion, raised on the left (locked until the first Prestige).
     const heroUnlocked = app.save.prestige > 0;

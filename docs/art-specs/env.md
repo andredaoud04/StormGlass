@@ -93,3 +93,79 @@ Drifting cloud.
 - Size: 40 x 13
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #ffffff #eaf4fb #c3dcef
+
+## env.ancient.sky
+
+Ancient Age battlefield layer "sky". Row 232 lines up with the ground line.
+
+- File: `public/assets/env/ancient/sky.png`
+- Size: 256 x 240
+- Anchor: (0, 232)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (9): #3a86d0 #5ea8e2 #d7eef0 #c6e6ee #fff4d8 #fffbea #8ccbec #f4ecd0 #ffe2b4
+
+## env.ancient.far
+
+Ancient Age battlefield layer "far". Row 160 lines up with the ground line.
+
+- File: `public/assets/env/ancient/far.png`
+- Size: 256 x 150
+- Anchor: (0, 160)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #f6f8ff #d6dcf0 #bcc4e4 #a6b0d6 #fbe8b8 #e3c48e #cfa874 #ad9fc6 #c7b8d8 #b98e5e #978ab4 #bbb0d2 #e6e8ee #a79cc2 #d2c6e0 #7fc4e0 #4e9fd0 #e8f8ff #3a84c0
+
+## env.ancient.mid
+
+Ancient Age battlefield layer "mid". Row 60 lines up with the ground line.
+
+- File: `public/assets/env/ancient/mid.png`
+- Size: 256 x 64
+- Anchor: (0, 60)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #5e9a52 #3e7444 #2c5636 #1f3e2a #ffffff #ece2cc #c4d4a0 #98ae78 #78905e #d8d07a #5c7048 #b8b05a #fffaf0 #5a3e2a #7a6248 #5a4634 #98944a #7a7a40
+
+## env.ancient.ground
+
+Ancient Age battlefield layer "ground". Row 22 lines up with the ground line.
+
+- File: `public/assets/env/ancient/ground.png`
+- Size: 256 x 96
+- Anchor: (0, 22)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #e2d886 #c4b860 #827a40 #a49a4c #d2a868 #ecca8c #fbe2ae #dcd6c8 #7e7770 #aaa396 #ffffff #c4b494 #ece2cc #575050 #e88a5a #c4683e #a24e30
+
+## env.ancient.cloud0
+
+Drifting cloud.
+
+- File: `public/assets/env/ancient/cloud0.png`
+- Size: 52 x 14
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #f2f8fc #cfe2f0
+
+## env.ancient.cloud1
+
+Drifting cloud.
+
+- File: `public/assets/env/ancient/cloud1.png`
+- Size: 30 x 10
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #f2f8fc #cfe2f0
+
+## env.ancient.cloud2
+
+Drifting cloud.
+
+- File: `public/assets/env/ancient/cloud2.png`
+- Size: 64 x 16
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #f2f8fc #cfe2f0
+
+## env.ancient.cloud3
+
+Drifting cloud.
+
+- File: `public/assets/env/ancient/cloud3.png`
+- Size: 24 x 9
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #f2f8fc #cfe2f0

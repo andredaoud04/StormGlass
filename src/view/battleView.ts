@@ -88,6 +88,7 @@ export class BattleView {
     public layout: BattleLayout,
     private ageKey: string,
     private hooks: ViewHooks = {},
+    private playerAgeKey: string = ageKey,
   ) {
     this.env = new EnvView(app, ageKey);
     this.fx = new FxSystem((k) => app.assets.strip(k).frames);
@@ -112,8 +113,10 @@ export class BattleView {
     return `troop.${fallback}.${team}`;
   }
 
-  private baseAge(): string {
-    return this.app.assets.has(`base.${this.ageKey}.blue.0`) ? this.ageKey : 'stone';
+  /** Fortress art Age for a side: yours follows your army, the enemy's follows the enemy stage. */
+  private baseAge(side: 0 | 1 = 1): string {
+    const age = side === 0 ? this.playerAgeKey : this.ageKey;
+    return this.app.assets.has(`base.${age}.blue.0`) ? age : 'stone';
   }
 
   private vunit(u: Unit): VUnit {
@@ -164,7 +167,8 @@ export class BattleView {
           const dir = u.side === 0 ? 1 : -1;
           const p = s.projectiles.find((q) => q.id === e.projectile);
           const targetIsBase = p?.target === BASE_TARGET;
-          this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: 'proj.stone', sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G - 12, t: 0 });
+          const projKey = String(this.app.assets.meta(`troop.${v.sheet.split('.')[1]}`).projectile ?? 'proj.stone');
+          this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: projKey, sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G - 12, t: 0 });
           this.app.sfx('sling', { vol: 0.4, minGapMs: 50 });
           break;
         }
@@ -296,8 +300,8 @@ export class BattleView {
         b.smokeT -= dt;
         if (b.smokeT <= 0) {
           b.smokeT = b.state === 2 ? 0.25 : 0.55;
-          const m = this.app.assets.meta(`base.${this.baseAge()}`);
-          const e = this.app.assets.image(`base.${this.baseAge()}.blue.0`);
+          const m = this.app.assets.meta(`base.${this.baseAge(b.side)}`);
+          const e = this.app.assets.image(`base.${this.baseAge(b.side)}.blue.0`);
           const sx = Number(m.smokeX ?? 26) - (e.anchor?.[0] ?? 0);
           const x = b.side === 0 ? this.layout.laneL + sx : this.layout.laneR - sx;
           this.fx.add('fx.smoke', x + (Math.random() * 10 - 5), G - (e.anchor?.[1] ?? 0) + Number(m.smokeY ?? 30), { fps: 6, vx: 4, behind: true, alpha: 0.85 });
@@ -431,7 +435,15 @@ export class BattleView {
       const prog = Math.min(1, Math.abs(cur - p.sx) / total);
       const arc = Math.min(16, total * 0.22);
       const y = p.sy + (p.ty - p.sy) * prog - Math.sin(prog * Math.PI) * arc;
-      d.strip(p.key, Math.floor(p.t * 12), cur + sx, y + sy);
+      const pm = this.app.assets.meta(p.key);
+      if (pm.mode === 'angle') {
+        // Point the projectile along its arc; mirror for the enemy side.
+        const dir = tgt >= p.sx ? 1 : -1;
+        const slope = (p.ty - p.sy) / total - (Math.cos(prog * Math.PI) * Math.PI * arc) / total;
+        const deg = Math.max(-60, Math.min(60, (Math.atan(slope) * 180) / Math.PI));
+        const idx = Math.round((deg - Number(pm.min)) / Number(pm.step));
+        d.strip(p.key, idx, cur + sx, y + sy, { flip: dir < 0 });
+      } else d.strip(p.key, Math.floor(p.t * 12), cur + sx, y + sy);
     }
     this.fx.drawFront(d, sx, sy);
   }
@@ -441,7 +453,7 @@ export class BattleView {
     const b = this.bases[side];
     const G = this.layout.groundY;
     const team = side === 0 ? 'blue' : 'red';
-    const age = this.baseAge();
+    const age = this.baseAge(side);
     const key = `base.${age}.${team}.${b.state}`;
     const jitter = b.shakeT > 0 ? (Math.floor(this.t * 60) % 2 ? 1 : -1) : 0;
     const x = (side === 0 ? this.layout.laneL : this.layout.laneR) + jitter + sx;
