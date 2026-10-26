@@ -1595,13 +1595,13 @@
   "fx.plume": {
    "kind": "strip",
    "file": "fx/plume.png",
-   "frameW": 20,
-   "frameH": 22,
-   "frames": 6,
-   "fps": 3,
+   "frameW": 18,
+   "frameH": 18,
+   "frames": 7,
+   "fps": 2.2,
    "anchor": [
-    10,
-    19
+    9,
+    9
    ]
   },
   "fx.ptero": {

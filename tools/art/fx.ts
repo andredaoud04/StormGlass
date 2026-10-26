@@ -198,21 +198,22 @@ export function debris(): Strip {
 
 void STONE;
 
-/** Soft volcano smoke puff, lighter and larger than battle smoke. */
+/** Soft volcano smoke puff: light, semi-transparent, grows as it rises. */
 export function plume(): Strip {
   const frames: Img[] = [];
-  for (let f = 0; f < 6; f++) {
-    const img = new Img(20, 22);
-    const t = f / 5;
-    const rad = 3 + t * 5;
-    const y = 17 - t * 9;
-    img.ellipse(10, y, rad, rad * 0.9, (px, py, nx, ny) => {
-      if (f >= 4 && bayer(px, py) < (f - 3) * 0.33) return 0;
-      return ny > 0.35 ? hex('#8e86a0') : nx + ny < -0.45 ? hex('#e6e0ee') : hex('#b9b2c8');
+  for (let f = 0; f < 7; f++) {
+    const img = new Img(18, 18);
+    const t = f / 6;
+    const rad = 1.5 + t * 5.5;
+    const alpha = Math.round(230 - t * 120);
+    img.ellipse(9, 9, rad, rad * 0.85, (px, py, nx, ny) => {
+      if (f >= 5 && bayer(px, py) < (f - 4) * 0.3) return 0;
+      const c = ny > 0.4 ? hex('#a59cb6') : nx + ny < -0.5 ? hex('#f2eef6') : hex('#cfc8dc');
+      return withAlpha(c, alpha);
     });
     frames.push(img);
   }
-  return { frames, fps: 3, anchor: [10, 19], desc: 'Volcano smoke plume puff, 6 frames, slow.' };
+  return { frames, fps: 2.2, anchor: [9, 9], desc: 'Volcano smoke plume puff, 7 frames, semi-transparent.' };
 }
 
 /** Distant pterodactyl silhouette, 3 wing frames, flying right. */

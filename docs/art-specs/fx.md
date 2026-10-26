@@ -122,13 +122,13 @@ Wood chip debris, 4 frames (rotating).
 
 ## fx.plume
 
-Volcano smoke plume puff, 6 frames, slow.
+Volcano smoke plume puff, 7 frames, semi-transparent.
 
 - File: `public/assets/fx/plume.png`
-- Frames: 6 x (20 x 22) in one row @ 3 fps
-- Anchor: (10, 19)
+- Frames: 7 x (18 x 18) in one row @ 2.2 fps
+- Anchor: (9, 9)
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (3): #e6e0ee #b9b2c8 #8e86a0
+- Colors (3): #f2eef6 #cfc8dc #a59cb6
 
 ## fx.ptero
 

@@ -54,11 +54,11 @@ export class EnvView {
     if (meta.volcanoX !== undefined) {
       this.smokeTimer -= dt;
       if (this.smokeTimer <= 0) {
-        this.smokeTimer = 1.4;
+        this.smokeTimer = 0.55;
         const far = this.app.assets.image(`env.${this.age}.far`);
         const vx = this.offsetX + Number(meta.volcanoX);
         const vy = groundY - (far.anchor?.[1] ?? 0) + Number(meta.volcanoY) + 2;
-        this.smoke.add('fx.plume', vx, vy, { fps: 1.6, vx: 2.5, vy: -4, alpha: 0.9 });
+        this.smoke.add('fx.plume', vx + (Math.random() * 2 - 1), vy - 2, { fps: 2.2, vx: 2 + Math.random() * 2, vy: -5 - Math.random() * 2 });
       }
     }
     this.smoke.update(dt, (k) => this.app.assets.strip(k).fps);
