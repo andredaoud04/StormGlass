@@ -78,6 +78,11 @@ const SCENARIOS = [
     await p.evaluate(() => window.__sg.app.go('battle'));
     await fastForward(p, 20);
   }],
+  ['battle-crusader', async (p) => {
+    await setSave(p, { armyAge: 2, enemyAge: 2, beaten: [0, 1], ownedTroops: ['crusader_crossbow', 'crusader_knight'] });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await fastForward(p, 26);
+  }],
   ['upgrades', async (p) => { await setSave(p, { gold: 30 }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
   ['dungeons', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'dungeons')); }],
   ['cards', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'cards')); }],

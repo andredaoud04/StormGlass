@@ -169,3 +169,88 @@ Drifting cloud.
 - Size: 24 x 9
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #ffffff #f2f8fc #cfe2f0
+
+## env.crusader.sky
+
+Crusader Age battlefield layer "sky". Row 232 lines up with the ground line.
+
+- File: `public/assets/env/crusader/sky.png`
+- Size: 256 x 240
+- Anchor: (0, 232)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (8): #3c74c4 #cfe2f2 #b8d8ee #fff8e0 #5c94d8 #86b6e6 #e2eef0 #f4f0dc
+
+## env.crusader.far
+
+Crusader Age battlefield layer "far". Row 158 lines up with the ground line.
+
+- File: `public/assets/env/crusader/far.png`
+- Size: 256 x 150
+- Anchor: (0, 158)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (15): #d2daf0 #f4f6ff #9aa8cc #b4c0dc #8692bc #6a5a4a #9cc48c #80ae78 #4e5f88 #a8584a #e8dcc4 #8794ae #6f7d98 #6c9a6c #5c8862
+
+## env.crusader.mid
+
+Crusader Age battlefield layer "mid". Row 60 lines up with the ground line.
+
+- File: `public/assets/env/crusader/mid.png`
+- Size: 256 x 64
+- Anchor: (0, 60)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (14): #8cc85a #5a9e44 #43803c #3f8040 #5fa04a #2f6538 #326434 #a8d870 #244c31 #7cbc54 #6e4a34 #4f3326 #5e9c46 #4a823e
+
+## env.crusader.ground
+
+Crusader Age battlefield layer "ground". Row 22 lines up with the ground line.
+
+- File: `public/assets/env/crusader/ground.png`
+- Size: 256 x 96
+- Anchor: (0, 22)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #b4e070 #b07a46 #8a5a36 #6e4428 #a06a3e #86c452 #64a244 #4c843c #9a7048 #bc9064 #d8b080 #fff1b8 #c8a8ff #dcd6c8 #7e7770 #aaa396 #575050
+
+## env.crusader.cloud0
+
+Drifting cloud.
+
+- File: `public/assets/env/crusader/cloud0.png`
+- Size: 50 x 16
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eef4fa #c8d8e8
+
+## env.crusader.cloud1
+
+Drifting cloud.
+
+- File: `public/assets/env/crusader/cloud1.png`
+- Size: 36 x 12
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eef4fa #c8d8e8
+
+## env.crusader.cloud2
+
+Drifting cloud.
+
+- File: `public/assets/env/crusader/cloud2.png`
+- Size: 62 x 18
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eef4fa #c8d8e8
+
+## env.crusader.cloud3
+
+Drifting cloud.
+
+- File: `public/assets/env/crusader/cloud3.png`
+- Size: 28 x 10
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eef4fa #c8d8e8
+
+## env.crusader.cloud4
+
+Drifting cloud.
+
+- File: `public/assets/env/crusader/cloud4.png`
+- Size: 44 x 14
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eef4fa #c8d8e8

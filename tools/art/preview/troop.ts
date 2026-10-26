@@ -1,6 +1,6 @@
 import { Img, hex } from '../img';
 import { TEAM_BLUE, TEAM_RED } from '../palette';
-import { ALL_TROOPS } from '../troops/catalog';
+import { ALL_TROOPS, makeTroop } from '../troops/catalog';
 import { packSheet } from '../rig';
 
 const out = process.argv[2] ?? '/tmp/troop.png';
@@ -9,8 +9,8 @@ const rows: Img[] = [];
 for (const t of ALL_TROOPS) {
   if (only && t.id !== only) continue;
   for (const team of [TEAM_BLUE, TEAM_RED]) {
-    const r = t.rig(team);
-    rows.push(packSheet(t.anims(r), r.frameW, r.frameH).sheet);
+    const m = makeTroop(t, team);
+    rows.push(packSheet(m.anims, m.frameW, m.frameH).sheet);
   }
 }
 const w = Math.max(...rows.map((r) => r.w));

@@ -53,3 +53,30 @@ ancient_guard card portrait (head and shoulders), fits the card window.
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (18): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34
+
+## portrait.crusader_footman
+
+crusader_footman card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/crusader_footman.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (16): #1e1526 #f2f6fa #b8c2cc #7e8a96 #4e5864 #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #a6e2ff #4aa6ec #2d68c2 #6e3a22 #9a5c34
+
+## portrait.crusader_crossbow
+
+crusader_crossbow card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/crusader_crossbow.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (21): #1e1526 #2d68c2 #4aa6ec #a6e2ff #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #ece2cc #9a5c34 #c98a52 #c4b494 #fffaf0 #ad6a3c #7f4428 #6e3a22 #b3a486 #b8c2cc #7e8a96
+
+## portrait.crusader_knight
+
+crusader_knight card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/crusader_knight.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (10): #1e1526 #a6e2ff #4aa6ec #2d68c2 #f2f6fa #b8c2cc #7e8a96 #4e5864 #fff8ec #ad6a3c

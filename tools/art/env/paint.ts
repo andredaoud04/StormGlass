@@ -181,3 +181,88 @@ export function palm(img: Img, x: number, groundY: number, height: number, lean:
 export function rock(img: Img, x: number, y: number, w: number, h: number, c: { hl: Color; base: Color; shade: Color; deep: Color }): void {
   img.ellipse(x, y - h / 2, w / 2, h / 2, (_x, _y, nx, ny) => (ny > 0.45 ? c.deep : nx + ny < -0.5 ? c.hl : nx > 0.35 ? c.shade : c.base));
 }
+
+export interface GroundCols {
+  dirt: { hl: Color; base: Color; shade: Color; deep: Color };
+  grass: { hl: Color; base: Color; shade: Color; deep: Color };
+}
+
+/** Standard battlefield ground: back verge, lane band (feet on row 22), front verge, meadow. */
+export function laneGround(c: GroundCols, r: Rand, W = 256): { img: Img; groundY: number; tuft: (x: number, y: number, c1: Color, c2: Color) => void } {
+  const ground = new Img(W, 96);
+  const { dirt, grass } = c;
+  for (let x = 0; x < W; x++) {
+    const backEdge = 10 + Math.round(Math.sin(x / 9) * 1.2 + Math.sin(x / 3.7) * 0.6);
+    const frontEdge = 34 + Math.round(Math.sin(x / 11 + 1) * 1.4 + Math.sin(x / 4.3) * 0.7);
+    for (let y = 0; y < 96; y++) {
+      let col: Color;
+      if (y < backEdge - 2) {
+        col = y < 3 ? grass.hl : bayer(x, y) < 0.25 ? grass.hl : grass.base;
+        if (y >= backEdge - 4) col = grass.shade;
+      } else if (y < backEdge) col = grass.deep;
+      else if (y < frontEdge) {
+        const d = y - backEdge;
+        col = d < 2 ? dirt.shade : d < 4 && bayer(x, y) < 0.5 ? dirt.shade : dirt.base;
+        if (d >= 6 && d <= 14 && bayer(x + 1, y) < 0.12) col = dirt.hl;
+        if (y >= frontEdge - 2) col = dirt.hl;
+      } else if (y < frontEdge + 3) col = y === frontEdge ? grass.hl : grass.base;
+      else {
+        const d = y - frontEdge - 3;
+        col = d < 14 ? grass.base : grass.shade;
+        if (d >= 12 && d < 14 && bayer(x, y) < 0.5) col = grass.shade;
+        if (d >= 34) col = d < 36 && bayer(x, y) < 0.5 ? grass.shade : grass.deep;
+      }
+      ground.set(x, y, col);
+    }
+  }
+  const tuft = (x: number, y: number, c1: Color, c2: Color) => {
+    ground.set(x, y, c1);
+    ground.set(x - 1, y - 1, c1);
+    ground.set(x + 1, y - 1, c2);
+    ground.set(x, y - 2, c2);
+  };
+  for (let x = 3; x < W; x += 5 + Math.floor(r() * 6)) tuft(x, 9 + Math.round(Math.sin(x / 9) * 1.2), grass.shade, grass.base);
+  for (let x = 1; x < W; x += 4 + Math.floor(r() * 7)) tuft(x, 37 + Math.round(Math.sin(x / 11 + 1) * 1.4), grass.base, grass.hl);
+  for (let i = 0; i < 34; i++) tuft(Math.floor(r() * W), 44 + Math.floor(r() * 30), grass.shade, grass.hl);
+  return { img: ground, groundY: 22, tuft };
+}
+
+/** Filled ridge layer: rows below `ridge[x]` get a lit top edge and darker depth dithering. */
+export function hillLayer(W: number, H: number, ridge: number[], c: { hl: Color; base: Color; shade: Color; deep: Color }): Img {
+  const img = new Img(W, H);
+  for (let x = 0; x < W; x++) {
+    const top = H - Math.round(ridge[x]);
+    for (let y = top; y < H; y++) {
+      const d = y - top;
+      let col = d < 2 ? c.hl : c.base;
+      if (d >= 2 && d < 4 && bayer(x, y) < 0.5) col = c.hl;
+      if (d > 10 && bayer(x, y) < (d - 10) / 22) col = c.shade;
+      if (d > 20 && bayer(x, y) < (d - 20) / 16) col = c.deep;
+      img.set(x, y, col);
+    }
+  }
+  return img;
+}
+
+/** Snow-capped peak range lit from the left; returns nothing, paints into img above `baseY`. */
+export function peakRange(img: Img, baseY: number, peaks: { x: number; h: number; half: number }[], c: { hl: Color; base: Color; shade: Color; snow?: Color; snowShade?: Color }, snowAbove = 9999, wobble = 0.8): void {
+  for (let x = 0; x < img.w; x++) {
+    let best = 0;
+    let px = x;
+    for (const p of peaks) {
+      const v = p.h * Math.max(0, 1 - Math.abs(x - p.x) / p.half) + Math.sin(x * 0.9) * wobble;
+      if (v > best) {
+        best = v;
+        px = p.x;
+      }
+    }
+    const top = baseY - Math.round(best);
+    for (let y = top; y < baseY; y++) {
+      const depth = y - top;
+      let col = x < px ? c.hl : c.base;
+      if (x >= px && depth > 3 && bayer(x, y) < 0.3) col = c.shade;
+      if (c.snow && best > snowAbove && depth < (best - snowAbove) * 0.6 + (bayer(x, y) < 0.5 ? 1 : 0)) col = x < px ? c.snow : (c.snowShade ?? c.snow);
+      img.set(x, y, col);
+    }
+  }
+}

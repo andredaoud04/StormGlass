@@ -271,6 +271,7 @@ export interface WallTheme {
 }
 
 export const STONE_WALL: WallTheme = { block: { hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }, alt: hex('#b8a896'), mortar: hex('#3c3236'), moss: true, beam: 'log' };
+export const CASTLE_WALL: WallTheme = { block: { hl: hex('#d2d4dc'), base: hex('#a4a7b4'), shade: hex('#7c7f8e'), deep: hex('#585a68') }, alt: hex('#9aa4c0'), mortar: hex('#34343f'), moss: true, beam: 'log' };
 export const SAND_WALL: WallTheme = { block: { hl: hex('#fbe8b8'), base: hex('#e2c088'), shade: hex('#c49a5e'), deep: hex('#8e6a3e') }, alt: hex('#f0d2a0'), mortar: hex('#6a4a30'), moss: false, beam: 'frieze' };
 
 /** Battle HUD wall: stacked blocks under a log beam or a carved frieze, themed per Age. */

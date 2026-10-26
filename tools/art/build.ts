@@ -8,11 +8,13 @@ import type { AnimEntry, AssetEntry, Manifest } from '../../src/engine/manifest'
 import { A, B, G, Img, R } from './img';
 import { INK, TEAM_BLUE, TEAM_RED, MOSS, GOLD, WOOD, STONE } from './palette';
 import { packSheet } from './rig';
-import { ALL_TROOPS } from './troops/catalog';
+import { ALL_TROOPS, makeTroop } from './troops/catalog';
 import { stoneEnv, type EnvArt } from './env/stone';
 import { ancientEnv } from './env/ancient';
+import { crusaderEnv } from './env/crusader';
 import { BASE_FRONT, BASE_GROUND, flagFrames, stoneFortress } from './bases/stone';
 import { ancientFortress } from './bases/ancient';
+import { crusaderFortress } from './bases/crusader';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
 import * as ui from './ui/ui';
@@ -142,18 +144,18 @@ export function buildAll(): void {
   // Troops
   for (const t of ALL_TROOPS) {
     for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
-      const r = t.rig(team);
-      const anims = t.anims(r);
-      const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
-      const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
-      reg.sheet(`troop.${t.id}.${teamName}`, `troops/${t.id}_${teamName}.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id} (${teamName} team). Chibi troop, bold outline, lit from the top-left.`, t.muzzle);
+      const m = makeTroop(t, team);
+      const anims = m.anims;
+      const { sheet, rows } = packSheet(anims, m.frameW, m.frameH);
+      const anchor = m.anchor;
+      reg.sheet(`troop.${t.id}.${teamName}`, `troops/${t.id}_${teamName}.png`, sheet, m.frameW, m.frameH, anchor, rows, `${t.id} (${teamName} team). Chibi troop, bold outline, lit from the top-left.`, t.muzzle);
       if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.projectile ? { projectile: t.projectile } : {}) };
       if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
     }
   }
 
   // Environments
-  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()]];
+  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()]];
   for (const [age, label, env] of envs) {
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
@@ -166,6 +168,7 @@ export function buildAll(): void {
   const forts: [string, string, typeof stoneFortress, Record<string, number>][] = [
     ['stone', 'Stone', stoneFortress, { flagX: 26, flagY: 6, torchX: 10, torchY: 49, smokeX: 26, smokeY: 30 }],
     ['ancient', 'Ancient', ancientFortress, { flagX: 25, flagY: 8, torchX: 7, torchY: 41, smokeX: 25, smokeY: 30 }],
+    ['crusader', 'Crusader', crusaderFortress, { flagX: 23, flagY: 3, torchX: 49, torchY: 38, smokeX: 22, smokeY: 30 }],
   ];
   for (const [age, label, make, meta] of forts) {
     for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
@@ -213,6 +216,7 @@ export function buildAll(): void {
   put('ui.tabbar', ui.tabBar());
   put('ui.wall_stone', ui.stoneWall(ui.STONE_WALL));
   put('ui.wall_ancient', ui.stoneWall(ui.SAND_WALL));
+  put('ui.wall_crusader', ui.stoneWall(ui.CASTLE_WALL));
   put('ui.ribbon_gold', ui.ribbon(GOLD));
   put('ui.ribbon_grey', ui.ribbon({ hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }));
 
