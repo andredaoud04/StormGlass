@@ -562,5 +562,34 @@
     "enemyFortressPerTimeline": 0.6,
     "spawnSpeedPerTimeline": 0.08,
     "enemyPower": 0.85
+  },
+  "upgrades": {
+    "food": {
+      "name": "Food",
+      "icon": "food",
+      "maxLevel": 30,
+      "baseCost": 15,
+      "costGrowth": 1.42,
+      "perLevel": 0.1,
+      "unit": "food/s"
+    },
+    "fortress": {
+      "name": "Base",
+      "icon": "hp",
+      "maxLevel": 40,
+      "baseCost": 12,
+      "costGrowth": 1.38,
+      "perLevel": 0.1,
+      "unit": "x base HP"
+    },
+    "power": {
+      "name": "Power",
+      "icon": "sword",
+      "maxLevel": 40,
+      "baseCost": 20,
+      "costGrowth": 1.45,
+      "perLevel": 0.08,
+      "unit": "x troop HP and damage"
+    }
   }
 }

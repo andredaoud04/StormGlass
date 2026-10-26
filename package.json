@@ -9,7 +9,7 @@
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "art": "tsx tools/art/build.ts",
+    "art": "tsx tools/art/build.ts && tsx tools/sfx/build.ts",
     "sfx": "tsx tools/sfx/build.ts",
     "sim": "tsx tools/sim/pacing.ts",
     "shots": "node tools/shots.mjs",

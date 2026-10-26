@@ -18,6 +18,8 @@ export interface EnvArt {
   clouds: Img[];
   /** Colour to fill above the sky image on tall screens. */
   skyTop: number;
+  /** Crater position in the far layer (for the smoke plume). */
+  volcano?: [number, number];
 }
 
 export function stoneEnv(): EnvArt {
@@ -42,33 +44,33 @@ export function stoneEnv(): EnvArt {
   sky.ellipse(sunX, sunY, 7, 7, hex('#fffbe9'));
 
   // Far mountains + volcano
-  const FH = 128;
+  const FH = 168;
   const far = new Img(W, FH);
   const mtnBack = { hl: hex('#b6c4e2'), base: hex('#93a3cf'), shade: hex('#7a87b8'), snow: hex('#f2f6ff'), snowShade: hex('#c9d4ef') };
   const back = peakRidge(W, [
-    { x: 8, h: 70, half: 44 },
-    { x: 62, h: 92, half: 52 },
-    { x: 112, h: 66, half: 40 },
-    { x: 208, h: 84, half: 50 },
-    { x: 250, h: 62, half: 34 },
+    { x: 4, h: 104, half: 56 },
+    { x: 62, h: 138, half: 66 },
+    { x: 116, h: 92, half: 46 },
+    { x: 206, h: 126, half: 62 },
+    { x: 254, h: 96, half: 44 },
   ], r);
   for (let x = 0; x < W; x++) {
     const top = FH - 4 - Math.round(back.h[x]);
-    const peaks = [8, 62, 112, 208, 250];
+    const peaks = [4, 62, 116, 206, 254];
     const px = peaks[back.peakOf[x]] ?? x;
     for (let y = top; y < FH; y++) {
       const depth = y - top;
       let c = x < px ? mtnBack.hl : mtnBack.base;
       if (x >= px && depth > 3 && bayer(x, y) < 0.35) c = mtnBack.shade;
-      if (back.h[x] > 62 && depth < (back.h[x] - 60) * 0.9 + (bayer(x, y) < 0.5 ? 1 : 0)) c = x < px ? mtnBack.snow : mtnBack.snowShade;
+      if (back.h[x] > 84 && depth < (back.h[x] - 80) * 0.7 + (bayer(x, y) < 0.5 ? 1 : 0)) c = x < px ? mtnBack.snow : mtnBack.snowShade;
       far.set(x, y, c);
     }
   }
   // Volcano (front of the back range).
   const vol = { hl: hex('#8e7fa8'), base: hex('#6e6290'), shade: hex('#574c78'), lava: hex('#ff8f3a'), glow: hex('#ffd36a') };
-  const vx = 156, vTop = 50, vHalfTop = 7;
+  const vx = 156, vTop = FH - 104, vHalfTop = 8;
   for (let y = vTop; y < FH; y++) {
-    const half = vHalfTop + (y - vTop) * 0.95;
+    const half = vHalfTop + (y - vTop) * 0.92;
     for (let x = Math.floor(vx - half); x <= Math.ceil(vx + half); x++) {
       const rel = (x - vx) / half;
       let c = rel < -0.25 ? vol.hl : rel < 0.35 ? vol.base : vol.shade;
@@ -201,7 +203,7 @@ export function stoneEnv(): EnvArt {
   }
 
   const cloudCols = { hl: hex('#ffffff'), base: hex('#eaf4fb'), shade: hex('#c3dcef') };
-  const clouds = [cloud(46, 16, r, cloudCols), cloud(34, 12, r, cloudCols), cloud(58, 18, r, cloudCols), cloud(26, 10, r, cloudCols)];
+  const clouds = [cloud(46, 16, r, cloudCols), cloud(34, 12, r, cloudCols), cloud(58, 18, r, cloudCols), cloud(26, 10, r, cloudCols), cloud(72, 20, r, cloudCols), cloud(40, 13, r, cloudCols)];
 
   return {
     layers: {
@@ -212,5 +214,6 @@ export function stoneEnv(): EnvArt {
     },
     clouds,
     skyTop: hex('#2f6cc4'),
+    volcano: [vx, vTop],
   };
 }

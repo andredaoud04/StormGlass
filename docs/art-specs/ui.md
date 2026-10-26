@@ -255,3 +255,22 @@ Result ribbon. Centre tiles horizontally.
 - 9-slice insets (L,T,R,B): 12, 6, 12, 8; edges and centre tile
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (6): #1e1526 #dcd6c8 #c3bdaf #aaa396 #7e7770 #575050
+
+## ui.logo
+
+STORMGLASS title logo.
+
+- File: `public/assets/ui/logo.png`
+- Size: 168 x 30
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (14): #3b2a40 #1e1526 #5fd8f0 #d6f6ff #fff3a8 #1d528f #fff6b0 #ffd03c #57251f #442021 #311a24 #e09a1e #2c94d0 #a35f16
+
+## ui.wall_bg
+
+Menu backdrop: stone courses, tiles vertically.
+
+- File: `public/assets/ui/wall_bg.png`
+- Size: 256 x 184
+- 9-slice insets (L,T,R,B): 0, 0, 0, 0; edges and centre tile
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (37): #1e1526 #c8c2b4 #aaa396 #857e77 #3c3236 #cac2b4 #b0a596 #887f77 #c2bcaf #9b9489 #7c756f #5e9a40 #948d83 #978e83 #8d867d #918a81 #958c81 #878078 #93c252 #362b33 #6f6765 #655d5d #716765 #6a6261 ...

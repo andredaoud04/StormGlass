@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#1e1526" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Stormglass</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #1e1526; overflow: hidden; overscroll-behavior: none; }
+      body { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+      #game { position: fixed; inset: 0; background: #1e1526 radial-gradient(circle at 50% 40%, #2c2136 0%, #1e1526 70%); }
+      #boot { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 160px; height: 8px; border: 2px solid #3b2a40; background: #120c18; image-rendering: pixelated; }
+      #boot > div { height: 100%; width: 0; background: #ffd03c; }
+    </style>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="boot"><div></div></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

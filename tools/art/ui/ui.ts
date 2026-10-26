@@ -364,3 +364,11 @@ export function smallPlaque(): UiPiece {
 }
 
 export const RAMPS = { TEAM_BLUE, TEAM_RED, GOLD, MOSS, WOOD, STONE };
+
+/** Seamless stone backdrop for menu pages (no beam). */
+export function wallBackground(): UiPiece {
+  const full = stoneWall().img;
+  // Take a band of courses below the beam; its height is a multiple of the course pattern.
+  const img = full.crop(0, 16, 256, 23 * 8);
+  return { img, slice: [0, 0, 0, 0], desc: 'Menu backdrop: stone courses, tiles vertically.' };
+}

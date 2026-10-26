@@ -11,6 +11,10 @@ export interface BattleSetupInput {
   armyAge: number;
   timeline: number;
   foodRateMilli?: number;
+  /** Fortress HP multiplier from upgrades. */
+  fortressMul?: number;
+  /** Troop HP and damage multiplier from upgrades. */
+  powerMul?: number;
   campaign?: boolean;
 }
 
@@ -43,9 +47,9 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     maxUnitsPerSide: b.sim.maxUnitsPerSide,
     projectileSpeed: b.sim.projectileSpeed,
     foodRateMilli: input.foodRateMilli ?? 1000,
-    playerBaseHp: ageDef(input.armyAge).fortressHp,
+    playerBaseHp: Math.round(ageDef(input.armyAge).fortressHp * (input.fortressMul ?? 1)),
     enemyBaseHp: Math.round(enemy.fortressHp * (1 + b.timeline.enemyFortressPerTimeline * tl)),
-    playerTroops: input.loadout.slice(0, 3).map((id) => troopStats(troopDef(id))),
+    playerTroops: input.loadout.slice(0, 3).map((id) => troopStats(troopDef(id), input.powerMul ?? 1, input.powerMul ?? 1)),
     enemyTroops,
     wave: b.waves[enemy.id],
     waveSpeed: 1 + b.timeline.spawnSpeedPerTimeline * tl,

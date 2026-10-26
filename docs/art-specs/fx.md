@@ -119,3 +119,23 @@ Wood chip debris, 4 frames (rotating).
 - Anchor: (2, 2)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (4): #1e1526 #d99a5c #ad6a3c #7f4428
+
+## fx.plume
+
+Volcano smoke plume puff, 6 frames, slow.
+
+- File: `public/assets/fx/plume.png`
+- Frames: 6 x (20 x 22) in one row @ 3 fps
+- Anchor: (10, 19)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #e6e0ee #b9b2c8 #8e86a0
+
+## fx.ptero
+
+Distant pterodactyl, 3 wing frames.
+
+- File: `public/assets/fx/ptero.png`
+- Frames: 3 x (15 x 6) in one row @ 7 fps
+- Anchor: (7, 3)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (1): #4f5a8c

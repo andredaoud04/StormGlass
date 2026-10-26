@@ -197,3 +197,31 @@ export function debris(): Strip {
 }
 
 void STONE;
+
+/** Soft volcano smoke puff, lighter and larger than battle smoke. */
+export function plume(): Strip {
+  const frames: Img[] = [];
+  for (let f = 0; f < 6; f++) {
+    const img = new Img(20, 22);
+    const t = f / 5;
+    const rad = 3 + t * 5;
+    const y = 17 - t * 9;
+    img.ellipse(10, y, rad, rad * 0.9, (px, py, nx, ny) => {
+      if (f >= 4 && bayer(px, py) < (f - 3) * 0.33) return 0;
+      return ny > 0.35 ? hex('#8e86a0') : nx + ny < -0.45 ? hex('#e6e0ee') : hex('#b9b2c8');
+    });
+    frames.push(img);
+  }
+  return { frames, fps: 3, anchor: [10, 19], desc: 'Volcano smoke plume puff, 6 frames, slow.' };
+}
+
+/** Distant pterodactyl silhouette, 3 wing frames, flying right. */
+export function ptero(): Strip {
+  const k = hex('#4f5a8c');
+  const shapes = [
+    ['k...........k..', '.k.........k...', '..kk.....kk....', '....kkkkk......', '.....kkkkkkk...', '......k.......k'],
+    ['...............', '...............', 'kkkkk...kkkkk..', '...kkkkkkk.....', '.....kkkkkkkk..', '......k........'],
+    ['...............', '...............', '....kkkkk......', '..kkkkkkkkk....', '.kk..kkkkkkkk..', 'k.....k.....k..'],
+  ];
+  return { frames: shapes.map((s) => Img.fromGrid(s, { k })), fps: 7, anchor: [7, 3], desc: 'Distant pterodactyl, 3 wing frames.' };
+}

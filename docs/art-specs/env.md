@@ -12,11 +12,11 @@ Stone Age battlefield layer "sky". Row 232 lines up with the ground line.
 
 ## env.stone.far
 
-Stone Age battlefield layer "far". Row 122 lines up with the ground line.
+Stone Age battlefield layer "far". Row 162 lines up with the ground line.
 
 - File: `public/assets/env/stone/far.png`
-- Size: 256 x 128
-- Anchor: (0, 122)
+- Size: 256 x 168
+- Anchor: (0, 162)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (13): #c9d4ef #f2f6ff #574c78 #ffd36a #8e7fa8 #ff8f3a #6e6290 #93a3cf #b6c4e2 #7a87b8 #6b82a6 #5b6f93 #7f98b7
 
@@ -73,5 +73,23 @@ Drifting cloud.
 
 - File: `public/assets/env/stone/cloud3.png`
 - Size: 26 x 10
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eaf4fb #c3dcef
+
+## env.stone.cloud4
+
+Drifting cloud.
+
+- File: `public/assets/env/stone/cloud4.png`
+- Size: 72 x 20
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #eaf4fb #c3dcef
+
+## env.stone.cloud5
+
+Drifting cloud.
+
+- File: `public/assets/env/stone/cloud5.png`
+- Size: 40 x 13
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #ffffff #eaf4fb #c3dcef

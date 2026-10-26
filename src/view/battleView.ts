@@ -103,15 +103,24 @@ export class BattleView {
     return this.laneToPx(u.prevX + (u.x - u.prevX) * alpha);
   }
 
+  /** Sprite sheet for a unit; falls back to the Stone troop of the same role until an Age has art. */
   private sheetFor(u: Unit): string {
-    return `troop.${u.def.id}.${u.side === 0 ? 'blue' : 'red'}`;
+    const team = u.side === 0 ? 'blue' : 'red';
+    const key = `troop.${u.def.id}.${team}`;
+    if (this.app.assets.has(key)) return key;
+    const fallback = { melee: 'stone_clubber', ranged: 'stone_slinger', tank: 'stone_brute' }[u.def.kind];
+    return `troop.${fallback}.${team}`;
+  }
+
+  private baseAge(): string {
+    return this.app.assets.has(`base.${this.ageKey}.blue.0`) ? this.ageKey : 'stone';
   }
 
   private vunit(u: Unit): VUnit {
     let v = this.units.get(u.id);
     if (!v) {
       const sheet = this.sheetFor(u);
-      const meta = this.app.assets.meta(`troop.${u.def.id}`);
+      const meta = this.app.assets.meta(`troop.${sheet.split('.')[1]}`);
       v = {
         id: u.id, side: u.side, sheet, troop: u.def.id, kind: u.def.kind, anim: 'walk', animT: Math.random(), windup: 0.4, flash: 0, knock: 0, hitT: 0, hpShow: 0,
         hp: u.hp, maxHp: u.maxHp, depth: u.depth, top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
@@ -287,8 +296,8 @@ export class BattleView {
         b.smokeT -= dt;
         if (b.smokeT <= 0) {
           b.smokeT = b.state === 2 ? 0.25 : 0.55;
-          const m = this.app.assets.meta(`base.${this.ageKey}`);
-          const e = this.app.assets.image(`base.${this.ageKey}.blue.0`);
+          const m = this.app.assets.meta(`base.${this.baseAge()}`);
+          const e = this.app.assets.image(`base.${this.baseAge()}.blue.0`);
           const sx = Number(m.smokeX ?? 26) - (e.anchor?.[0] ?? 0);
           const x = b.side === 0 ? this.layout.laneL + sx : this.layout.laneR - sx;
           this.fx.add('fx.smoke', x + (Math.random() * 10 - 5), G - (e.anchor?.[1] ?? 0) + Number(m.smokeY ?? 30), { fps: 6, vx: 4, behind: true, alpha: 0.85 });
@@ -432,7 +441,8 @@ export class BattleView {
     const b = this.bases[side];
     const G = this.layout.groundY;
     const team = side === 0 ? 'blue' : 'red';
-    const key = `base.${this.ageKey}.${team}.${b.state}`;
+    const age = this.baseAge();
+    const key = `base.${age}.${team}.${b.state}`;
     const jitter = b.shakeT > 0 ? (Math.floor(this.t * 60) % 2 ? 1 : -1) : 0;
     const x = (side === 0 ? this.layout.laneL : this.layout.laneR) + jitter + sx;
     const y = G + sy;
@@ -441,7 +451,7 @@ export class BattleView {
     if (b.state >= 2) return;
     // Flag on the tower and the wall torch.
     const e = this.app.assets.image(key);
-    const m = this.app.assets.meta(`base.${this.ageKey}`);
+    const m = this.app.assets.meta(`base.${age}`);
     const ax = e.anchor?.[0] ?? 0;
     const ay = e.anchor?.[1] ?? 0;
     const flip = side === 1;
@@ -457,7 +467,7 @@ export class BattleView {
 
   /** Screen y of the top of a fortress (for HP bars). */
   baseTop(): number {
-    const e = this.app.assets.image(`base.${this.ageKey}.blue.0`);
+    const e = this.app.assets.image(`base.${this.baseAge()}.blue.0`);
     return this.layout.groundY - (e.anchor?.[1] ?? 80);
   }
 }

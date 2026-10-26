@@ -15,6 +15,8 @@ export class EnvView {
   private clouds: Cloud[] = [];
   private smoke: FxSystem;
   private smokeTimer = 0;
+  private pteros: { x: number; y: number; vx: number; t: number }[] = [];
+  private pteroTimer = 4;
   readonly age: string;
 
   constructor(
@@ -28,6 +30,8 @@ export class EnvView {
       [150, 70, 3.1],
       [90, 18, 1.6],
       [210, 95, 2.6],
+      [60, 128, 1.2],
+      [180, 150, 1.0],
     ];
     for (let i = 0; i < n; i++) {
       const s = seeds[i % seeds.length];
@@ -50,14 +54,32 @@ export class EnvView {
     if (meta.volcanoX !== undefined) {
       this.smokeTimer -= dt;
       if (this.smokeTimer <= 0) {
-        this.smokeTimer = 0.9;
+        this.smokeTimer = 1.4;
         const far = this.app.assets.image(`env.${this.age}.far`);
         const vx = this.offsetX + Number(meta.volcanoX);
-        const vy = groundY - (far.anchor?.[1] ?? 0) + 50;
-        this.smoke.add('fx.smoke', vx, vy, { fps: 3, vx: 3, vy: -3, alpha: 0.75 });
+        const vy = groundY - (far.anchor?.[1] ?? 0) + Number(meta.volcanoY) + 2;
+        this.smoke.add('fx.plume', vx, vy, { fps: 1.6, vx: 2.5, vy: -4, alpha: 0.9 });
       }
     }
     this.smoke.update(dt, (k) => this.app.assets.strip(k).fps);
+    // Now and then a pterodactyl crosses the sky (Stone Age only).
+    if (this.age === 'stone' && this.app.assets.has('fx.ptero')) {
+      this.pteroTimer -= dt;
+      if (this.pteroTimer <= 0) {
+        this.pteroTimer = 9 + Math.random() * 10;
+        const sky = this.app.assets.image(`env.${this.age}.sky`);
+        const top = groundY - (sky.anchor?.[1] ?? 0);
+        const y = Math.max(20, top + 40 + Math.random() * 90);
+        const n = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < n; i++) this.pteros.push({ x: -20 - i * 14, y: y + i * 5, vx: 16 + Math.random() * 4, t: Math.random() });
+      }
+      for (const p of this.pteros) {
+        p.x += p.vx * dt;
+        p.t += dt;
+        p.y += Math.sin(p.t * 2) * 3 * dt;
+      }
+      this.pteros = this.pteros.filter((p) => p.x < this.app.w + 30);
+    }
   }
 
   /** Draw from the top of the screen down to `bottom`, with the ground line at groundY. */
@@ -73,6 +95,7 @@ export class EnvView {
       const y = skyTop + c.y;
       d.image(`env.${this.age}.cloud${c.i}`, x0 + Math.round(c.x), y);
     }
+    for (const p of this.pteros) d.strip('fx.ptero', Math.floor(p.t * 7), Math.round(p.x) + ox, Math.round(p.y) + oy);
     d.image(`env.${this.age}.far`, x0, groundY + oy);
     this.smoke.drawFront(d, ox, oy);
     d.image(`env.${this.age}.mid`, x0, groundY + oy);

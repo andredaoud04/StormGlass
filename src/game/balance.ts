@@ -27,6 +27,18 @@ export interface AgeDef {
   troops: TroopDef[];
 }
 
+export type UpgradeId = 'food' | 'fortress' | 'power';
+export interface UpgradeDef {
+  name: string;
+  icon: string;
+  maxLevel: number;
+  baseCost: number;
+  costGrowth: number;
+  /** Food: +food/s per level. Fortress and Power: +fraction per level. */
+  perLevel: number;
+  unit: string;
+}
+
 export interface Balance {
   version: number;
   sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number };
@@ -34,6 +46,7 @@ export interface Balance {
   status: StatusRules;
   ages: AgeDef[];
   waves: Record<AgeId, WaveScript>;
+  upgrades: Record<UpgradeId, UpgradeDef>;
   timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number };
 }
 

@@ -15,6 +15,7 @@ import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
 import * as ui from './ui/ui';
 import * as fx from './fx';
+import { logo } from './ui/logo';
 
 const ROOT = join(import.meta.dirname, '../..');
 const OUT = join(ROOT, 'public/assets');
@@ -144,6 +145,7 @@ export function buildAll(): void {
       const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
       const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
       reg.sheet(`troop.${t.id}.${teamName}`, `troops/${t.id}_${teamName}.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id} (${teamName} team). Chibi troop, bold outline, lit from the top-left.`, t.muzzle);
+      if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1] };
       if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
     }
   }
@@ -154,7 +156,7 @@ export function buildAll(): void {
     reg.image(`env.stone.${name}`, `env/stone/${name}.png`, layer.img, `Stone Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
   }
   env.clouds.forEach((c, i) => reg.image(`env.stone.cloud${i}`, `env/stone/cloud${i}.png`, c, 'Drifting cloud.'));
-  reg.manifest.meta['env.stone'] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, volcanoX: 156, volcanoY: 50 - 128 + 122 };
+  reg.manifest.meta['env.stone'] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, volcanoX: env.volcano![0], volcanoY: env.volcano![1] };
 
   // Fortresses
   for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
@@ -212,6 +214,10 @@ export function buildAll(): void {
   reg.strip('fx.boom', 'fx/boom.png', fx.boom());
   reg.strip('fx.smear', 'fx/smear.png', fx.smear());
   reg.strip('fx.debris', 'fx/debris.png', fx.debris());
+  reg.strip('fx.plume', 'fx/plume.png', fx.plume());
+  reg.strip('fx.ptero', 'fx/ptero.png', fx.ptero());
+  reg.image('ui.logo', 'ui/logo.png', logo(), 'STORMGLASS title logo.');
+  put('ui.wall_bg', ui.wallBackground());
   reg.strip('proj.stone', 'fx/proj_stone.png', fx.stoneProjectile());
 
   reg.writeAll();

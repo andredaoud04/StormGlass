@@ -299,10 +299,10 @@
    "kind": "image",
    "file": "env/stone/far.png",
    "w": 256,
-   "h": 128,
+   "h": 168,
    "anchor": [
     0,
-    122
+    162
    ]
   },
   "env.stone.mid": {
@@ -348,6 +348,18 @@
    "file": "env/stone/cloud3.png",
    "w": 26,
    "h": 10
+  },
+  "env.stone.cloud4": {
+   "kind": "image",
+   "file": "env/stone/cloud4.png",
+   "w": 72,
+   "h": 20
+  },
+  "env.stone.cloud5": {
+   "kind": "image",
+   "file": "env/stone/cloud5.png",
+   "w": 40,
+   "h": 13
   },
   "base.stone.blue.0": {
    "kind": "image",
@@ -521,7 +533,7 @@
    "file": "ui/font_big.png",
    "cellW": 7,
    "cellH": 8,
-   "glyphs": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!?.,:-+/%'x ",
+   "glyphs": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!?.,:-+/%'x>< ",
    "widths": [
     6,
     4,
@@ -569,6 +581,8 @@
     6,
     6,
     2,
+    5,
+    5,
     5,
     3
    ],
@@ -1140,6 +1154,48 @@
     2
    ]
   },
+  "fx.plume": {
+   "kind": "strip",
+   "file": "fx/plume.png",
+   "frameW": 20,
+   "frameH": 22,
+   "frames": 6,
+   "fps": 3,
+   "anchor": [
+    10,
+    19
+   ]
+  },
+  "fx.ptero": {
+   "kind": "strip",
+   "file": "fx/ptero.png",
+   "frameW": 15,
+   "frameH": 6,
+   "frames": 3,
+   "fps": 7,
+   "anchor": [
+    7,
+    3
+   ]
+  },
+  "ui.logo": {
+   "kind": "image",
+   "file": "ui/logo.png",
+   "w": 168,
+   "h": 30
+  },
+  "ui.wall_bg": {
+   "kind": "image",
+   "file": "ui/wall_bg.png",
+   "w": 256,
+   "h": 184,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
   "proj.stone": {
    "kind": "strip",
    "file": "fx/proj_stone.png",
@@ -1153,13 +1209,45 @@
    ]
   }
  },
- "sounds": {},
+ "sounds": {
+  "click": "sfx/click.wav",
+  "tab": "sfx/tab.wav",
+  "deploy": "sfx/deploy.wav",
+  "swing": "sfx/swing.wav",
+  "swing_heavy": "sfx/swing_heavy.wav",
+  "sling": "sfx/sling.wav",
+  "hit": "sfx/hit.wav",
+  "hit_heavy": "sfx/hit_heavy.wav",
+  "hit_ranged": "sfx/hit_ranged.wav",
+  "death": "sfx/death.wav",
+  "death_ally": "sfx/death_ally.wav",
+  "base_hit": "sfx/base_hit.wav",
+  "boom": "sfx/boom.wav",
+  "coin": "sfx/coin.wav",
+  "ready": "sfx/ready.wav",
+  "nope": "sfx/nope.wav",
+  "fight": "sfx/fight.wav",
+  "victory": "sfx/victory.wav",
+  "defeat": "sfx/defeat.wav",
+  "unlock": "sfx/unlock.wav",
+  "upgrade": "sfx/upgrade.wav",
+  "evolve": "sfx/evolve.wav"
+ },
  "meta": {
+  "troop.stone_clubber": {
+   "top": -23
+  },
+  "troop.stone_slinger": {
+   "top": -23
+  },
+  "troop.stone_brute": {
+   "top": -28
+  },
   "env.stone": {
    "skyTop": "#2f6cc4",
-   "clouds": 4,
+   "clouds": 6,
    "volcanoX": 156,
-   "volcanoY": 44
+   "volcanoY": 64
   },
   "base.stone": {
    "flagX": 26,
