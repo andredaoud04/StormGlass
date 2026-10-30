@@ -167,8 +167,15 @@ export class BattleView {
           const dir = u.side === 0 ? 1 : -1;
           const p = s.projectiles.find((q) => q.id === e.projectile);
           const targetIsBase = p?.target === BASE_TARGET;
-          const projKey = String(this.app.assets.meta(`troop.${v.sheet.split('.')[1]}`).projectile ?? 'proj.stone');
+          const tmeta = this.app.assets.meta(`troop.${v.sheet.split('.')[1]}`);
+          const projKey = String(tmeta.projectile ?? 'proj.stone');
           this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: projKey, sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G - 12, t: 0 });
+          // Muzzle effects (flash, powder smoke) for gun troops, listed in the troop's manifest meta.
+          if (tmeta.muzzleFx) {
+            for (const k of String(tmeta.muzzleFx).split(',')) {
+              if (this.app.assets.has(k)) this.fx.add(k, v.px + m[0] * dir, G + v.depth + m[1], { fps: this.app.assets.strip(k).fps, flip: dir < 0, vx: k.includes('smoke') ? dir * 6 : 0, vy: k.includes('smoke') ? -3 : 0 });
+            }
+          }
           this.app.sfx('sling', { vol: 0.4, minGapMs: 50 });
           break;
         }
@@ -433,9 +440,10 @@ export class BattleView {
       const tgt = this.laneToPx(sp.targetX);
       const total = Math.max(1, Math.abs(tgt - p.sx));
       const prog = Math.min(1, Math.abs(cur - p.sx) / total);
-      const arc = Math.min(16, total * 0.22);
-      const y = p.sy + (p.ty - p.sy) * prog - Math.sin(prog * Math.PI) * arc;
       const pm = this.app.assets.meta(p.key);
+      // Thrown and loosed missiles arc; bullets and bolts fly almost flat (meta `arc`).
+      const arc = Math.min(Number(pm.arc ?? 16), total * 0.22);
+      const y = p.sy + (p.ty - p.sy) * prog - Math.sin(prog * Math.PI) * arc;
       if (pm.mode === 'angle') {
         // Point the projectile along its arc; mirror for the enemy side.
         const dir = tgt >= p.sx ? 1 : -1;
@@ -474,7 +482,8 @@ export class BattleView {
     d.strip(`fx.flag.${team}`, Math.floor(this.t * 8 + side * 2), flagX + (flip ? 0 : 1), y + fy, { flip });
     const tx = Number(m.torchX) - ax;
     const ty = Number(m.torchY) - ay;
-    d.strip('fx.flame', Math.floor(this.t * 10 + side), flip ? x - tx : x + tx, y + ty, { flip });
+    const torch = String(m.torchFx ?? 'fx.flame');
+    d.strip(torch, Math.floor(this.t * this.app.assets.strip(torch).fps + side), flip ? x - tx : x + tx, y + ty, { flip });
   }
 
   /** Screen y of the top of a fortress (for HP bars). */

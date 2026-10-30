@@ -159,3 +159,83 @@ Ancient Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical, 3
 - Anchor: (60, 86)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (9): #1e1526 #a23f2c #ffffff #ece2cc #fffaf0 #fbe8b8 #e8c88a #c49a5e #8e6a3e
+
+## base.crusader.blue.0
+
+Crusader Age fortress, blue team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_blue_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #1e1526 #ece6d6 #948c7a #c2baa6 #a6e2ff #2d68c2 #4aa6ec #3a3338 #7f4428 #1f3f80 #fffaf0 #655e52 #4a505e #30343f #2b1d22 #6a7280 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.blue.1
+
+Crusader Age fortress, blue team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_blue_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #1e1526 #ece6d6 #948c7a #c2baa6 #a6e2ff #2d68c2 #4aa6ec #655e52 #3a3338 #1f3f80 #7f4428 #fffaf0 #4a505e #30343f #2b1d22 #6a7280 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.blue.2
+
+Crusader Age fortress, blue team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_blue_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #ece6d6 #655e52 #c2baa6 #948c7a #3a3338 #7f4428 #a6e2ff #4aa6ec #2d68c2 #fffaf0 #4a505e #30343f #2b1d22 #6a7280 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.blue.3
+
+Crusader Age fortress, blue team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_blue_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (13): #1e1526 #ece6d6 #c2baa6 #948c7a #ad6a3c #52291b #7f4428 #a6e2ff #4aa6ec #2d68c2 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.red.0
+
+Crusader Age fortress, red team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_red_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #1e1526 #ece6d6 #948c7a #c2baa6 #ffb08c #ae2a40 #e64d4d #3a3338 #7f4428 #6a1a33 #fffaf0 #655e52 #4a505e #30343f #2b1d22 #6a7280 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.red.1
+
+Crusader Age fortress, red team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_red_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #1e1526 #ece6d6 #948c7a #c2baa6 #ffb08c #ae2a40 #e64d4d #655e52 #3a3338 #6a1a33 #7f4428 #fffaf0 #4a505e #30343f #2b1d22 #6a7280 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.red.2
+
+Crusader Age fortress, red team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_red_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #ece6d6 #655e52 #c2baa6 #948c7a #3a3338 #7f4428 #ffb08c #e64d4d #ae2a40 #fffaf0 #4a505e #30343f #2b1d22 #6a7280 #5e9a40 #8a7052 #6e5a44
+
+## base.crusader.red.3
+
+Crusader Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/crusader_red_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (13): #1e1526 #ece6d6 #c2baa6 #948c7a #ad6a3c #52291b #7f4428 #ffb08c #e64d4d #ae2a40 #5e9a40 #8a7052 #6e5a44

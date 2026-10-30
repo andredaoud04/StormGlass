@@ -246,6 +246,16 @@ Ancient Age battle HUD wall: sandstone courses under a key-pattern frieze.
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (37): #1e1526 #fbe8b8 #d0603e #2a1a1c #a23f2c #f1d8a5 #e2c088 #bc9967 #6a4a30 #edd39f #d8b379 #b7925e #f3dba9 #e8c792 #c09d6c #d3ad73 #cea76c #d6b178 #c9a672 #c29d67 #cdab79 #543b2f #9a7e5e #8c7156 ...
 
+## ui.wall_crusader
+
+Crusader Age battle HUD wall: pale ashlar under a stone coping hung with heraldic pennants.
+
+- File: `public/assets/ui/wall_crusader.png`
+- Size: 256 x 220
+- Anchor: (128, 6)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (40): #1e1526 #ece6d6 #c2baa6 #655e52 #cfc7b4 #948c7a #fff3a8 #e09a1e #d9d2c0 #e86a6a #b83a46 #8a2638 #cac0aa #a29987 #4a4038 #d3ccbb #b4ac99 #f4e6a0 #e0b84a #b08430 #9d9584 #948d7d #ddd5c2 #aba390 ...
+
 ## ui.ribbon_gold
 
 Result ribbon. Centre tiles horizontally.

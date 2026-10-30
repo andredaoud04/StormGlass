@@ -195,3 +195,101 @@ ancient_guard (red team). Chibi troop, bold outline, lit from the top-left.
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (20): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #94503f #c98a52
+
+## troop.crusader_footman.blue
+
+crusader_footman (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/crusader_footman_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (22): #1e1526 #d6dce2 #9ea8b2 #6e7884 #474e5a #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #a6e2ff #4aa6ec #fffaf0 #2d68c2 #b07a2c #e6b84a #c98a52 #6e3a22 #9a5c34 #472214
+
+## troop.crusader_footman.red
+
+crusader_footman (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/crusader_footman_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (22): #1e1526 #d6dce2 #9ea8b2 #6e7884 #474e5a #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #ffb08c #e64d4d #fffaf0 #ae2a40 #b07a2c #e6b84a #c98a52 #6e3a22 #9a5c34 #472214
+
+## troop.crusader_crossbow.blue
+
+crusader_crossbow (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/crusader_crossbow_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (14, -11)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (25): #1e1526 #2d68c2 #4aa6ec #a6e2ff #cc7a58 #ffd6ac #f2a97a #ece2cc #1f3f80 #f07a7a #7c2e30 #6e3a22 #6e7884 #9a5c34 #9ea8b2 #fffaf0 #c4b494 #ad6a3c #474e5a #d99a5c #c98a52 #fff2a6 #8e7e64 #472214 ...
+
+## troop.crusader_crossbow.red
+
+crusader_crossbow (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/crusader_crossbow_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (14, -11)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (25): #1e1526 #ae2a40 #e64d4d #ffb08c #cc7a58 #ffd6ac #f2a97a #ece2cc #6a1a33 #f07a7a #7c2e30 #6e3a22 #6e7884 #9a5c34 #9ea8b2 #fffaf0 #c4b494 #ad6a3c #474e5a #d99a5c #c98a52 #fff2a6 #8e7e64 #472214 ...
+
+## troop.crusader_knight.blue
+
+crusader_knight (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/crusader_knight_blue.png`
+- Frame: 52 x 46, facing right, one animation per row
+- Anchor (feet on ground): (24, 41)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (15): #1e1526 #2d68c2 #4aa6ec #a6e2ff #d6dce2 #6e7884 #9ea8b2 #474e5a #e6b84a #fff2a6 #fffaf0 #b07a2c #9a5c34 #6e3a22 #c98a52
+
+## troop.crusader_knight.red
+
+crusader_knight (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/crusader_knight_red.png`
+- Frame: 52 x 46, facing right, one animation per row
+- Anchor (feet on ground): (24, 41)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (15): #1e1526 #ae2a40 #e64d4d #ffb08c #d6dce2 #6e7884 #9ea8b2 #474e5a #e6b84a #fff2a6 #fffaf0 #b07a2c #9a5c34 #6e3a22 #c98a52

@@ -569,6 +569,290 @@
     }
    }
   },
+  "troop.crusader_footman.blue": {
+   "kind": "sheet",
+   "file": "troops/crusader_footman_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.crusader_footman": {
+   "kind": "image",
+   "file": "portraits/crusader_footman.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.crusader_footman.red": {
+   "kind": "sheet",
+   "file": "troops/crusader_footman_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.crusader_crossbow.blue": {
+   "kind": "sheet",
+   "file": "troops/crusader_crossbow_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    14,
+    -11
+   ]
+  },
+  "portrait.crusader_crossbow": {
+   "kind": "image",
+   "file": "portraits/crusader_crossbow.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.crusader_crossbow.red": {
+   "kind": "sheet",
+   "file": "troops/crusader_crossbow_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    14,
+    -11
+   ]
+  },
+  "troop.crusader_knight.blue": {
+   "kind": "sheet",
+   "file": "troops/crusader_knight_blue.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.crusader_knight": {
+   "kind": "image",
+   "file": "portraits/crusader_knight.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.crusader_knight.red": {
+   "kind": "sheet",
+   "file": "troops/crusader_knight_red.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -708,6 +992,76 @@
    "file": "env/ancient/cloud3.png",
    "w": 24,
    "h": 9
+  },
+  "env.crusader.sky": {
+   "kind": "image",
+   "file": "env/crusader/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.crusader.far": {
+   "kind": "image",
+   "file": "env/crusader/far.png",
+   "w": 256,
+   "h": 150,
+   "anchor": [
+    0,
+    160
+   ]
+  },
+  "env.crusader.mid": {
+   "kind": "image",
+   "file": "env/crusader/mid.png",
+   "w": 256,
+   "h": 66,
+   "anchor": [
+    0,
+    62
+   ]
+  },
+  "env.crusader.ground": {
+   "kind": "image",
+   "file": "env/crusader/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.crusader.cloud0": {
+   "kind": "image",
+   "file": "env/crusader/cloud0.png",
+   "w": 54,
+   "h": 16
+  },
+  "env.crusader.cloud1": {
+   "kind": "image",
+   "file": "env/crusader/cloud1.png",
+   "w": 36,
+   "h": 12
+  },
+  "env.crusader.cloud2": {
+   "kind": "image",
+   "file": "env/crusader/cloud2.png",
+   "w": 62,
+   "h": 18
+  },
+  "env.crusader.cloud3": {
+   "kind": "image",
+   "file": "env/crusader/cloud3.png",
+   "w": 28,
+   "h": 10
+  },
+  "env.crusader.cloud4": {
+   "kind": "image",
+   "file": "env/crusader/cloud4.png",
+   "w": 46,
+   "h": 14
   },
   "base.stone.blue.0": {
    "kind": "image",
@@ -862,6 +1216,86 @@
   "base.ancient.red.3": {
    "kind": "image",
    "file": "bases/ancient_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.0": {
+   "kind": "image",
+   "file": "bases/crusader_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.1": {
+   "kind": "image",
+   "file": "bases/crusader_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.2": {
+   "kind": "image",
+   "file": "bases/crusader_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.3": {
+   "kind": "image",
+   "file": "bases/crusader_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.0": {
+   "kind": "image",
+   "file": "bases/crusader_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.1": {
+   "kind": "image",
+   "file": "bases/crusader_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.2": {
+   "kind": "image",
+   "file": "bases/crusader_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.3": {
+   "kind": "image",
+   "file": "bases/crusader_red_3.png",
    "w": 72,
    "h": 96,
    "anchor": [
@@ -1448,6 +1882,16 @@
     6
    ]
   },
+  "ui.wall_crusader": {
+   "kind": "image",
+   "file": "ui/wall_crusader.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
   "ui.ribbon_gold": {
    "kind": "image",
    "file": "ui/ribbon_gold.png",
@@ -1657,6 +2101,102 @@
     7,
     7
    ]
+  },
+  "proj.bolt": {
+   "kind": "strip",
+   "file": "fx/proj_bolt.png",
+   "frameW": 15,
+   "frameH": 15,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    7,
+    7
+   ]
+  },
+  "proj.musket": {
+   "kind": "strip",
+   "file": "fx/proj_musket.png",
+   "frameW": 13,
+   "frameH": 13,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    6,
+    6
+   ]
+  },
+  "proj.bullet": {
+   "kind": "strip",
+   "file": "fx/proj_bullet.png",
+   "frameW": 13,
+   "frameH": 13,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    6,
+    6
+   ]
+  },
+  "proj.energy": {
+   "kind": "strip",
+   "file": "fx/proj_energy.png",
+   "frameW": 15,
+   "frameH": 15,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    7,
+    7
+   ]
+  },
+  "fx.muzzle": {
+   "kind": "strip",
+   "file": "fx/muzzle.png",
+   "frameW": 9,
+   "frameH": 7,
+   "frames": 3,
+   "fps": 24,
+   "anchor": [
+    0,
+    3
+   ]
+  },
+  "fx.gunsmoke": {
+   "kind": "strip",
+   "file": "fx/gunsmoke.png",
+   "frameW": 20,
+   "frameH": 12,
+   "frames": 6,
+   "fps": 10,
+   "anchor": [
+    1,
+    6
+   ]
+  },
+  "fx.steam": {
+   "kind": "strip",
+   "file": "fx/steam.png",
+   "frameW": 12,
+   "frameH": 14,
+   "frames": 5,
+   "fps": 10,
+   "anchor": [
+    6,
+    12
+   ]
+  },
+  "fx.beacon": {
+   "kind": "strip",
+   "file": "fx/beacon.png",
+   "frameW": 7,
+   "frameH": 7,
+   "frames": 4,
+   "fps": 6,
+   "anchor": [
+    3,
+    5
+   ]
   }
  },
  "sounds": {
@@ -1704,6 +2244,16 @@
   "troop.ancient_guard": {
    "top": -28
   },
+  "troop.crusader_footman": {
+   "top": -24
+  },
+  "troop.crusader_crossbow": {
+   "top": -24,
+   "projectile": "proj.bolt"
+  },
+  "troop.crusader_knight": {
+   "top": -28
+  },
   "env.stone": {
    "skyTop": "#2f6cc4",
    "clouds": 6,
@@ -1713,6 +2263,10 @@
   "env.ancient": {
    "skyTop": "#3a86d0",
    "clouds": 4
+  },
+  "env.crusader": {
+   "skyTop": "#3468b8",
+   "clouds": 5
   },
   "base.stone": {
    "flagX": 26,
@@ -1730,10 +2284,42 @@
    "smokeX": 25,
    "smokeY": 30
   },
+  "base.crusader": {
+   "flagX": 27,
+   "flagY": 7,
+   "torchX": 8,
+   "torchY": 54,
+   "smokeX": 22,
+   "smokeY": 30
+  },
   "proj.arrow": {
    "mode": "angle",
    "min": -60,
    "step": 15
+  },
+  "proj.bolt": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 7
+  },
+  "proj.musket": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 4
+  },
+  "proj.bullet": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 2
+  },
+  "proj.energy": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 1
   }
  }
 }

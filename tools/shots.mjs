@@ -33,6 +33,22 @@ async function fastForward(page, seconds, deploy = true) {
   );
 }
 
+/** Like fastForward, but tops up Food so every troop type gets deployed (a full crowd for art review). */
+async function crowd(page, seconds) {
+  await page.evaluate((seconds) => {
+    const { app } = window.__sg;
+    const steps = Math.round(seconds * 60);
+    let k = 0;
+    for (let i = 0; i < steps; i++) {
+      if (i % 70 === 0) {
+        app.scene.sim.foodMilli = Math.max(app.scene.sim.foodMilli, 60000);
+        app.scene.key?.(['3', '2', '1', '2'][k++ % 4]);
+      }
+      app.frame(1 / 60);
+    }
+  }, seconds);
+}
+
 async function setSave(page, patch) {
   await page.evaluate((patch) => {
     const { app } = window.__sg;
@@ -84,6 +100,22 @@ const SCENARIOS = [
   ['shop', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'shop')); }],
   ['settings', async (p) => { await p.evaluate(() => { const s = window.__sg.app.scene; s.settings = true; }); }],
 ];
+
+// Later Ages: a home screen, an early crowd and a late fight (fortress damage) per Age.
+const LATER = [
+  ['crusader', 2, ['crusader_footman', 'crusader_crossbow', 'crusader_knight']],
+  ['gunpowder', 3, ['gunpowder_pikeman', 'gunpowder_musketeer', 'gunpowder_cannon']],
+  ['industrial', 4, ['industrial_trencher', 'industrial_rifleman', 'industrial_walker']],
+  ['future', 5, ['future_blade', 'future_gunner', 'future_mech']],
+];
+for (const [age, n, troops] of LATER) {
+  const beaten = Array.from({ length: n }, (_, i) => i);
+  const save = { armyAge: n, enemyAge: n, beaten, gold: 500, ownedTroops: troops };
+  SCENARIOS.push([`home-${age}`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('menu')); await fastForward(p, 0.5, false); }]);
+  SCENARIOS.push([`battle-${age}-start`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 2.2, false); }]);
+  SCENARIOS.push([`battle-${age}`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('battle')); await crowd(p, 12); }]);
+  SCENARIOS.push([`battle-${age}-late`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 44); }]);
+}
 
 const only = process.env.ONLY?.split(',');
 const browser = await chromium.launch();
