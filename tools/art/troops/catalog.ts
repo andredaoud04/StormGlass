@@ -6,6 +6,7 @@ import { archerRig, shieldwallRig, spearmanRig } from './ancient';
 import { crossbowRig, footmanRig, knightRig } from './crusader';
 import { cannonAnims, cannonRig, musketeerRig, pikemanRig } from './gunpowder';
 import { riflemanRig, trencherRig, walkerAnims, walkerRig } from './industrial';
+import { ionBladeRig, lancerRig, mechAnims, mechRig } from './future';
 import { TEAM_BLUE } from '../palette';
 
 /** Anything with a frame size and a hip point (humanoid rigs and machine rigs). */
@@ -62,4 +63,10 @@ export const INDUSTRIAL_TROOPS: TroopArt[] = [
   { id: 'industrial_walker', rig: walkerRig, anims: walkerAnims, portraitAt: [16, 8] },
 ];
 
-export const ALL_TROOPS: TroopArt[] = [...STONE_TROOPS, ...ANCIENT_TROOPS, ...CRUSADER_TROOPS, ...GUNPOWDER_TROOPS, ...INDUSTRIAL_TROOPS];
+export const FUTURE_TROOPS: TroopArt[] = [
+  { id: 'future_blade', rig: ionBladeRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 50, frontArm: -20 }, ROOMY) },
+  { id: 'future_gunner', rig: lancerRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(lancerRig), projectile: 'proj.energy', muzzleFx: 'fx.zap' },
+  { id: 'future_mech', rig: mechRig, anims: mechAnims, portraitAt: [16, 6] },
+];
+
+export const ALL_TROOPS: TroopArt[] = [...STONE_TROOPS, ...ANCIENT_TROOPS, ...CRUSADER_TROOPS, ...GUNPOWDER_TROOPS, ...INDUSTRIAL_TROOPS, ...FUTURE_TROOPS];

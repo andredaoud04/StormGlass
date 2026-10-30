@@ -19,6 +19,8 @@ import { gunpowderEnv } from './env/gunpowder';
 import { gunpowderFortress } from './bases/gunpowder';
 import { industrialEnv } from './env/industrial';
 import { industrialFortress } from './bases/industrial';
+import { futureEnv } from './env/future';
+import { futureFortress } from './bases/future';
 import * as walls from './ui/walls';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
@@ -160,7 +162,7 @@ export function buildAll(): void {
   }
 
   // Environments
-  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()], ['gunpowder', 'Gunpowder', gunpowderEnv()], ['industrial', 'Industrial', industrialEnv()]];
+  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()], ['gunpowder', 'Gunpowder', gunpowderEnv()], ['industrial', 'Industrial', industrialEnv()], ['future', 'Future', futureEnv()]];
   for (const [age, label, env] of envs) {
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
@@ -176,6 +178,7 @@ export function buildAll(): void {
     ['crusader', 'Crusader', crusaderFortress, { flagX: 27, flagY: 7, torchX: 8, torchY: 54, smokeX: 22, smokeY: 30 }],
     ['gunpowder', 'Gunpowder', gunpowderFortress, { flagX: 21, flagY: 6, torchX: 6, torchY: 54, smokeX: 20, smokeY: 30 }],
     ['industrial', 'Industrial', industrialFortress, { flagX: 33, flagY: 18, torchX: 5, torchY: 56, smokeX: 24, smokeY: 34 }],
+    ['future', 'Future', futureFortress, { flagX: 29, flagY: 11, torchX: 55, torchY: 37, smokeX: 24, smokeY: 34, torchFx: 'fx.beacon' }],
   ];
   for (const [age, label, make, meta] of forts) {
     for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
@@ -226,6 +229,7 @@ export function buildAll(): void {
   put('ui.wall_crusader', walls.crusaderWall());
   put('ui.wall_gunpowder', walls.gunpowderWall());
   put('ui.wall_industrial', walls.industrialWall());
+  put('ui.wall_future', walls.futureWall());
   put('ui.ribbon_gold', ui.ribbon(GOLD));
   put('ui.ribbon_grey', ui.ribbon({ hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }));
 
@@ -260,6 +264,7 @@ export function buildAll(): void {
   reg.strip('fx.gunsmoke', 'fx/gunsmoke.png', fx.gunSmoke());
   reg.strip('fx.steam', 'fx/steam.png', fx.steam());
   reg.strip('fx.beacon', 'fx/beacon.png', fx.beacon());
+  reg.strip('fx.zap', 'fx/zap.png', fx.plasmaFlash());
 
   reg.writeAll();
   void INK;

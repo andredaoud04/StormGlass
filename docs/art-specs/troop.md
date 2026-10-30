@@ -489,3 +489,101 @@ industrial_walker (red team). Chibi troop, bold outline, lit from the top-left.
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (26): #1e1526 #30343f #9aa2ae #6a7280 #4a505e #a8b294 #7c866a #5a624e #fff2a6 #fff8ec #f2a97a #cc7a58 #e64d4d #ae2a40 #e6b84a #ffb08c #b07a2c #6a3f1c #757885 #535665 #3d3e4d #2b2b38 #ffffff #e8eef4 ...
+
+## troop.future_blade.blue
+
+future_blade (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/future_blade_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #f2f6fb #a6e2ff #4aa6ec #2d68c2 #1f3f80 #ffd6ac #f2a97a #ece2cc #cc7a58 #ffffff #f07a7a #7c2e30 #404668 #c6d0dc #5e6688 #c4fbff #2c304e #8e9aae #5a6680
+
+## troop.future_blade.red
+
+future_blade (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/future_blade_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #f2f6fb #ffb08c #e64d4d #ae2a40 #6a1a33 #ffd6ac #f2a97a #ece2cc #cc7a58 #ffffff #f07a7a #7c2e30 #404668 #c6d0dc #5e6688 #c4fbff #2c304e #8e9aae #5a6680
+
+## troop.future_gunner.blue
+
+future_gunner (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/future_gunner_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (12, -13)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #1e1526 #f2f6fb #c6d0dc #8e9aae #5a6680 #ffd6ac #a6e2ff #4aa6ec #f2a97a #cc7a58 #ffffff #f07a7a #7c2e30 #2c304e #404668 #5e6688 #c4fbff #2d68c2 #fff8ec
+
+## troop.future_gunner.red
+
+future_gunner (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/future_gunner_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (12, -13)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #1e1526 #f2f6fb #c6d0dc #8e9aae #5a6680 #ffd6ac #ffb08c #e64d4d #f2a97a #cc7a58 #ffffff #f07a7a #7c2e30 #2c304e #404668 #5e6688 #c4fbff #ae2a40 #fff8ec
+
+## troop.future_mech.blue
+
+future_mech (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/future_mech_blue.png`
+- Frame: 56 x 50, facing right, one animation per row
+- Anchor (feet on ground): (26, 46)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (23): #1e1526 #8e9aae #f2f6fb #c6d0dc #4aa6ec #ffffff #5a6680 #c4fbff #a6e2ff #2c304e #5e6688 #2d68c2 #404668 #1e2038 #b2b3bb #9498a5 #6c7285 #484e65 #2a9cf0 #5ce6ff #fff8ec #f07a7a #ffe68a
+
+## troop.future_mech.red
+
+future_mech (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/future_mech_red.png`
+- Frame: 56 x 50, facing right, one animation per row
+- Anchor (feet on ground): (26, 46)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (23): #1e1526 #8e9aae #f2f6fb #c6d0dc #e64d4d #ffffff #5a6680 #c4fbff #ffb08c #2c304e #5e6688 #ae2a40 #404668 #1e2038 #b2b3bb #9498a5 #6c7285 #484e65 #2a9cf0 #5ce6ff #fff8ec #f07a7a #ffe68a

@@ -399,3 +399,83 @@ Industrial Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical
 - Anchor: (60, 86)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (18): #1e1526 #b8573e #8a7a72 #e28a6a #5e2a26 #8c3d30 #7a6a64 #6a7280 #30343f #d6cc96 #aea46c #807a4c #4a505e #d2ccc2 #aaa498 #837d74 #6a5e56 #4e4440
+
+## base.future.blue.0
+
+Future Age fortress, blue team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_blue_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #ffffff #f2f6fb #5a6680 #c6d0dc #8e9aae #a6e2ff #4aa6ec #c4fbff #404668 #b8c4d8 #3e4664 #8492ae #66729a #5ce6ff #2d68c2 #1e2038 #2c304e
+
+## base.future.blue.1
+
+Future Age fortress, blue team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_blue_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #ffffff #f2f6fb #5a6680 #c6d0dc #8e9aae #a6e2ff #4aa6ec #c4fbff #1e2038 #404668 #ffe68a #ffb04a #2c304e #b8c4d8 #3e4664 #8492ae #66729a #5ce6ff #2d68c2
+
+## base.future.blue.2
+
+Future Age fortress, blue team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_blue_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #f2f6fb #5a6680 #1e2038 #ffe68a #c6d0dc #ffb04a #4aa6ec #8e9aae #a6e2ff #ffffff #c4fbff #404668 #2c304e #b8c4d8 #3e4664 #8492ae #66729a #5ce6ff #2d68c2
+
+## base.future.blue.3
+
+Future Age fortress, blue team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_blue_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (11): #1e1526 #b8c4d8 #8492ae #8e9aae #1e2038 #3e4664 #ffb04a #66729a #c6d0dc #404668 #2c304e
+
+## base.future.red.0
+
+Future Age fortress, red team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_red_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #ffffff #f2f6fb #5a6680 #c6d0dc #8e9aae #ffb08c #e64d4d #c4fbff #404668 #b8c4d8 #3e4664 #8492ae #66729a #5ce6ff #ae2a40 #1e2038 #2c304e
+
+## base.future.red.1
+
+Future Age fortress, red team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_red_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #ffffff #f2f6fb #5a6680 #c6d0dc #8e9aae #ffb08c #e64d4d #c4fbff #1e2038 #404668 #ffe68a #ffb04a #2c304e #b8c4d8 #3e4664 #8492ae #66729a #5ce6ff #ae2a40
+
+## base.future.red.2
+
+Future Age fortress, red team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_red_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #f2f6fb #5a6680 #1e2038 #ffe68a #c6d0dc #ffb04a #e64d4d #8e9aae #ffb08c #ffffff #c4fbff #404668 #2c304e #b8c4d8 #3e4664 #8492ae #66729a #5ce6ff #ae2a40
+
+## base.future.red.3
+
+Future Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/future_red_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (11): #1e1526 #b8c4d8 #8492ae #8e9aae #1e2038 #3e4664 #ffb04a #66729a #c6d0dc #404668 #2c304e

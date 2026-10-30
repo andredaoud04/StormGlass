@@ -276,6 +276,16 @@ Industrial Age battle HUD wall: red brick courses under a riveted steel girder.
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (56): #1e1526 #7a8494 #a8b0bc #3a404c #5a6272 #cf7356 #b8573e #944534 #6a5e58 #ca7055 #ad513c #8d4133 #ffd03c #8c4032 #c96f54 #ab4f3a #544947 #925545 #915444 #955745 #7e3f33 #7f4134 #864436 #753a30 ...
 
+## ui.wall_future
+
+Future Age battle HUD wall: alloy panels with vents and lights under a glowing trim.
+
+- File: `public/assets/ui/wall_future.png`
+- Size: 256 x 220
+- Anchor: (128, 6)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (38): #1e1526 #c6d0dc #5a6680 #f2f6fb #8e9aae #5ce6ff #ffffff #c4fbff #bdc6d4 #9ba7b9 #7e899d #2a2e44 #c2ccd9 #a8b4c4 #8691a4 #c5cddc #adb6cb #8992a8 #525c74 #8d99ad #939fb2 #96a0b6 #6a6e81 #2a293c ...
+
 ## ui.ribbon_gold
 
 Result ribbon. Centre tiles horizontally.

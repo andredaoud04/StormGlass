@@ -179,3 +179,13 @@ Beacon light, 4 frames (pulses); stands in for the torch on the Future fortress.
 - Anchor: (3, 5)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (4): #5ce6ff #2a9cf0 #c4fbff #ffffff
+
+## fx.zap
+
+Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.
+
+- File: `public/assets/fx/zap.png`
+- Frames: 3 x (9 x 7) in one row @ 24 fps
+- Anchor: (0, 3)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #2a9cf0 #5ce6ff #c4fbff #fff8ec

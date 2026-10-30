@@ -10,12 +10,12 @@ How to replace any sprite:
 
 Scale: 1 art pixel = 2 CSS pixels on a 390-wide phone (integer scaled on every device).
 
-- [troop](troop.md): 30 assets
-- [portrait](portrait.md): 15 assets
-- [env](env.md): 46 assets
-- [base](base.md): 40 assets
-- [fx](fx.md): 18 assets
+- [troop](troop.md): 36 assets
+- [portrait](portrait.md): 18 assets
+- [env](env.md): 54 assets
+- [base](base.md): 48 assets
+- [fx](fx.md): 19 assets
 - [font](font.md): 2 assets
 - [icon](icon.md): 28 assets
-- [ui](ui.md): 32 assets
+- [ui](ui.md): 33 assets
 - [proj](proj.md): 6 assets

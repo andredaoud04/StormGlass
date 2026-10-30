@@ -1421,6 +1421,290 @@
     }
    }
   },
+  "troop.future_blade.blue": {
+   "kind": "sheet",
+   "file": "troops/future_blade_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.future_blade": {
+   "kind": "image",
+   "file": "portraits/future_blade.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.future_blade.red": {
+   "kind": "sheet",
+   "file": "troops/future_blade_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.future_gunner.blue": {
+   "kind": "sheet",
+   "file": "troops/future_gunner_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    12,
+    -13
+   ]
+  },
+  "portrait.future_gunner": {
+   "kind": "image",
+   "file": "portraits/future_gunner.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.future_gunner.red": {
+   "kind": "sheet",
+   "file": "troops/future_gunner_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    12,
+    -13
+   ]
+  },
+  "troop.future_mech.blue": {
+   "kind": "sheet",
+   "file": "troops/future_mech_blue.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.future_mech": {
+   "kind": "image",
+   "file": "portraits/future_mech.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.future_mech.red": {
+   "kind": "sheet",
+   "file": "troops/future_mech_red.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -1776,6 +2060,70 @@
    "file": "env/industrial/cloud5.png",
    "w": 40,
    "h": 13
+  },
+  "env.future.sky": {
+   "kind": "image",
+   "file": "env/future/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.future.far": {
+   "kind": "image",
+   "file": "env/future/far.png",
+   "w": 256,
+   "h": 140,
+   "anchor": [
+    0,
+    146
+   ]
+  },
+  "env.future.mid": {
+   "kind": "image",
+   "file": "env/future/mid.png",
+   "w": 256,
+   "h": 64,
+   "anchor": [
+    0,
+    60
+   ]
+  },
+  "env.future.ground": {
+   "kind": "image",
+   "file": "env/future/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.future.cloud0": {
+   "kind": "image",
+   "file": "env/future/cloud0.png",
+   "w": 60,
+   "h": 12
+  },
+  "env.future.cloud1": {
+   "kind": "image",
+   "file": "env/future/cloud1.png",
+   "w": 40,
+   "h": 9
+  },
+  "env.future.cloud2": {
+   "kind": "image",
+   "file": "env/future/cloud2.png",
+   "w": 72,
+   "h": 14
+  },
+  "env.future.cloud3": {
+   "kind": "image",
+   "file": "env/future/cloud3.png",
+   "w": 32,
+   "h": 8
   },
   "base.stone.blue.0": {
    "kind": "image",
@@ -2170,6 +2518,86 @@
   "base.industrial.red.3": {
    "kind": "image",
    "file": "bases/industrial_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.0": {
+   "kind": "image",
+   "file": "bases/future_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.1": {
+   "kind": "image",
+   "file": "bases/future_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.2": {
+   "kind": "image",
+   "file": "bases/future_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.3": {
+   "kind": "image",
+   "file": "bases/future_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.0": {
+   "kind": "image",
+   "file": "bases/future_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.1": {
+   "kind": "image",
+   "file": "bases/future_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.2": {
+   "kind": "image",
+   "file": "bases/future_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.3": {
+   "kind": "image",
+   "file": "bases/future_red_3.png",
    "w": 72,
    "h": 96,
    "anchor": [
@@ -2786,6 +3214,16 @@
     6
    ]
   },
+  "ui.wall_future": {
+   "kind": "image",
+   "file": "ui/wall_future.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
   "ui.ribbon_gold": {
    "kind": "image",
    "file": "ui/ribbon_gold.png",
@@ -3091,6 +3529,18 @@
     3,
     5
    ]
+  },
+  "fx.zap": {
+   "kind": "strip",
+   "file": "fx/zap.png",
+   "frameW": 9,
+   "frameH": 7,
+   "frames": 3,
+   "fps": 24,
+   "anchor": [
+    0,
+    3
+   ]
   }
  },
  "sounds": {
@@ -3170,6 +3620,17 @@
   "troop.industrial_walker": {
    "top": -30
   },
+  "troop.future_blade": {
+   "top": -23
+  },
+  "troop.future_gunner": {
+   "top": -22,
+   "projectile": "proj.energy",
+   "muzzleFx": "fx.zap"
+  },
+  "troop.future_mech": {
+   "top": -30
+  },
   "env.stone": {
    "skyTop": "#2f6cc4",
    "clouds": 6,
@@ -3195,6 +3656,10 @@
    "clouds": 6,
    "volcanoX": 134,
    "volcanoY": 42
+  },
+  "env.future": {
+   "skyTop": "#1c1840",
+   "clouds": 4
   },
   "base.stone": {
    "flagX": 26,
@@ -3235,6 +3700,15 @@
    "torchY": 56,
    "smokeX": 24,
    "smokeY": 34
+  },
+  "base.future": {
+   "flagX": 29,
+   "flagY": 11,
+   "torchX": 55,
+   "torchY": 37,
+   "smokeX": 24,
+   "smokeY": 34,
+   "torchFx": "fx.beacon"
   },
   "proj.arrow": {
    "mode": "angle",

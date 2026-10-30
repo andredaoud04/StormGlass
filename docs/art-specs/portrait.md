@@ -134,3 +134,30 @@ industrial_walker card portrait (head and shoulders), fits the card window.
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (17): #1e1526 #30343f #9aa2ae #6a7280 #4a505e #a8b294 #7c866a #5a624e #fff2a6 #fff8ec #f2a97a #cc7a58 #4aa6ec #2d68c2 #e6b84a #a6e2ff #b07a2c
+
+## portrait.future_blade
+
+future_blade card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/future_blade.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (20): #1e1526 #f2f6fb #a6e2ff #4aa6ec #2d68c2 #1f3f80 #ffd6ac #f2a97a #ece2cc #cc7a58 #ffffff #f07a7a #7c2e30 #404668 #c6d0dc #5e6688 #c4fbff #2c304e #8e9aae #5a6680
+
+## portrait.future_gunner
+
+future_gunner card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/future_gunner.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #f2f6fb #c6d0dc #8e9aae #5a6680 #ffd6ac #a6e2ff #4aa6ec #f2a97a #cc7a58 #ffffff #f07a7a #7c2e30 #2c304e #404668 #5e6688 #c4fbff #2d68c2
+
+## portrait.future_mech
+
+future_mech card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/future_mech.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (13): #1e1526 #8e9aae #f2f6fb #c6d0dc #4aa6ec #ffffff #5a6680 #c4fbff #a6e2ff #2c304e #5e6688 #2d68c2 #404668

@@ -433,3 +433,79 @@ Drifting cloud.
 - Size: 40 x 13
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #d8c4c0 #b4a2aa #8e8090
+
+## env.future.sky
+
+Future Age battlefield layer "sky". Row 232 lines up with the ground line.
+
+- File: `public/assets/env/future/sky.png`
+- Size: 256 x 240
+- Anchor: (0, 232)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #1c1840 #d8dcff #a8b0e8 #ffffff #e0e4ff #9aa0d8 #2e2a62 #f0c8e8 #b088c8 #c49ad0 #7a5aa0 #e8d8f4 #a890c8 #4c3e86 #7a5a9e #c47aa8 #f0a0a0
+
+## env.future.far
+
+Future Age battlefield layer "far". Row 146 lines up with the ground line.
+
+- File: `public/assets/env/future/far.png`
+- Size: 256 x 140
+- Anchor: (0, 146)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (14): #7ab8f0 #b4e8ff #5a7ad0 #9cf4ff #8a8cc8 #5e6098 #4a4c80 #5a5294 #4a4484 #ffd0f4 #403a76 #363068 #7a80c0 #3c3a70
+
+## env.future.mid
+
+Future Age battlefield layer "mid". Row 60 lines up with the ground line.
+
+- File: `public/assets/env/future/mid.png`
+- Size: 256 x 64
+- Anchor: (0, 60)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #5ce6ff #ffffff #6a76a0 #d0d8ec #9aa6c8 #8ad8ff #e0f4ff #4a90e0 #e08ad8 #ffd8f4 #a04ab8 #6e7ab8 #56609e #c4fbff #c8d0e8 #8a94b8 #485088 #3a4070
+
+## env.future.ground
+
+Future Age battlefield layer "ground". Row 22 lines up with the ground line.
+
+- File: `public/assets/env/future/ground.png`
+- Size: 256 x 96
+- Anchor: (0, 22)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #7e8ac4 #5e68a4 #3c4278 #626a8a #c4fbff #5ce6ff #7c84a4 #a8b0cc #ffffff #4c5490 #8ad8ff #e0f4ff #4a90e0 #c8d0e8 #9aa6c8 #ff6a6a #6a76a0
+
+## env.future.cloud0
+
+Drifting cloud.
+
+- File: `public/assets/env/future/cloud0.png`
+- Size: 60 x 12
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d0b4e0 #a088c4 #7a68a8
+
+## env.future.cloud1
+
+Drifting cloud.
+
+- File: `public/assets/env/future/cloud1.png`
+- Size: 40 x 9
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d0b4e0 #a088c4 #7a68a8
+
+## env.future.cloud2
+
+Drifting cloud.
+
+- File: `public/assets/env/future/cloud2.png`
+- Size: 72 x 14
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d0b4e0 #a088c4 #7a68a8
+
+## env.future.cloud3
+
+Drifting cloud.
+
+- File: `public/assets/env/future/cloud3.png`
+- Size: 32 x 8
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d0b4e0 #a088c4 #7a68a8

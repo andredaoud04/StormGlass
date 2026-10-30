@@ -352,3 +352,15 @@ export function beacon(): Strip {
   }
   return { frames, fps: 6, anchor: [3, 5], desc: 'Beacon light, 4 frames (pulses); stands in for the torch on the Future fortress.' };
 }
+
+/** Energy-weapon discharge: a cyan-white star. Faces right; mirrored in game for the enemy. */
+export function plasmaFlash(): Strip {
+  const frames: Img[] = [];
+  const shapes = [
+    ['..h......', '.hfh..h..', 'hfFFfFfh.', 'fFWWWFFfh', 'hfFFfFfh.', '.hfh..h..', '..h......'],
+    ['.........', '..h......', '.hfFh....', 'hFWWFh...', '.hfFh....', '..h......', '.........'],
+    ['.........', '.........', '..h......', '.hFh.....', '..h......', '.........', '.........'],
+  ];
+  for (const s of shapes) frames.push(Img.fromGrid(s, { h: hex('#2a9cf0'), f: hex('#5ce6ff'), F: hex('#c4fbff'), W: WHITE }));
+  return { frames, fps: 24, anchor: [0, 3], desc: 'Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.' };
+}
