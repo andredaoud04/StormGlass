@@ -83,7 +83,7 @@ function prepLimb(l: Limb, deg: number, ink: Color): { img: Img; px: number; py:
   return { img: r.outlined(ink), px: c + 1, py: c + 1 };
 }
 
-function place(frame: Img, l: Limb, deg: number, at: [number, number], ink: Color): void {
+export function place(frame: Img, l: Limb, deg: number, at: [number, number], ink: Color): void {
   const p = prepLimb(l, deg, ink);
   frame.blit(p.img, Math.round(at[0] - p.px), Math.round(at[1] - p.py));
 }

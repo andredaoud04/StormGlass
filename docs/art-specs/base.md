@@ -239,3 +239,83 @@ Crusader Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical, 
 - Anchor: (60, 86)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (13): #1e1526 #ece6d6 #c2baa6 #948c7a #ad6a3c #52291b #7f4428 #ffb08c #e64d4d #ae2a40 #5e9a40 #8a7052 #6e5a44
+
+## base.gunpowder.blue.0
+
+Gunpowder Age fortress, blue team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_blue_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (30): #1e1526 #d8d2c2 #a8a090 #4a5068 #8a92a8 #646c84 #333850 #f4ead2 #7f4428 #ddcfae #b4a484 #e6b84a #3a2d2e #a6e2ff #4aa6ec #2d68c2 #1f3f80 #7c7568 #332c30 #4a505e #9aa2ae #6a7280 #30343f #575148 ...
+
+## base.gunpowder.blue.1
+
+Gunpowder Age fortress, blue team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_blue_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (30): #1e1526 #d8d2c2 #a8a090 #4a5068 #8a92a8 #646c84 #333850 #f4ead2 #7f4428 #ddcfae #575148 #b4a484 #e6b84a #3a2d2e #a6e2ff #4aa6ec #2d68c2 #1f3f80 #7c7568 #332c30 #4a505e #9aa2ae #6a7280 #30343f ...
+
+## base.gunpowder.blue.2
+
+Gunpowder Age fortress, blue team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_blue_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (27): #1e1526 #ddcfae #7f4428 #f4ead2 #b4a484 #8a92a8 #3a2d2e #575148 #d8d2c2 #4a505e #a8a090 #7c7568 #9aa2ae #332c30 #6a7280 #a6e2ff #4aa6ec #2d68c2 #e6b84a #30343f #fff2a6 #1f3f80 #ad6a3c #52291b ...
+
+## base.gunpowder.blue.3
+
+Gunpowder Age fortress, blue team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_blue_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (12): #1e1526 #7c7568 #d8d2c2 #a8a090 #52291b #4a505e #9aa2ae #6a7280 #cfe27a #93c252 #5e9a40 #3b6c38
+
+## base.gunpowder.red.0
+
+Gunpowder Age fortress, red team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_red_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (30): #1e1526 #d8d2c2 #a8a090 #4a5068 #8a92a8 #646c84 #333850 #f4ead2 #7f4428 #ddcfae #b4a484 #e6b84a #3a2d2e #ffb08c #e64d4d #ae2a40 #6a1a33 #7c7568 #332c30 #4a505e #9aa2ae #6a7280 #30343f #575148 ...
+
+## base.gunpowder.red.1
+
+Gunpowder Age fortress, red team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_red_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (30): #1e1526 #d8d2c2 #a8a090 #4a5068 #8a92a8 #646c84 #333850 #f4ead2 #7f4428 #ddcfae #575148 #b4a484 #e6b84a #3a2d2e #ffb08c #e64d4d #ae2a40 #6a1a33 #7c7568 #332c30 #4a505e #9aa2ae #6a7280 #30343f ...
+
+## base.gunpowder.red.2
+
+Gunpowder Age fortress, red team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_red_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (27): #1e1526 #ddcfae #7f4428 #f4ead2 #b4a484 #8a92a8 #3a2d2e #575148 #d8d2c2 #4a505e #a8a090 #7c7568 #9aa2ae #332c30 #6a7280 #ffb08c #e64d4d #ae2a40 #e6b84a #30343f #fff2a6 #6a1a33 #ad6a3c #52291b ...
+
+## base.gunpowder.red.3
+
+Gunpowder Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/gunpowder_red_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (12): #1e1526 #7c7568 #d8d2c2 #a8a090 #52291b #4a505e #9aa2ae #6a7280 #cfe27a #93c252 #5e9a40 #3b6c38

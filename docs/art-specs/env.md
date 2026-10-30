@@ -254,3 +254,88 @@ Drifting cloud.
 - Size: 46 x 14
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #ffffff #f4f0ec #d8d0dc
+
+## env.gunpowder.sky
+
+Gunpowder Age battlefield layer "sky". Row 232 lines up with the ground line.
+
+- File: `public/assets/env/gunpowder/sky.png`
+- Size: 256 x 240
+- Anchor: (0, 232)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (10): #40639a #6486b4 #e6dccc #d4d0c8 #fff0d0 #fffbe9 #94aac4 #c4c6c4 #e8d4b0 #f2c08a
+
+## env.gunpowder.far
+
+Gunpowder Age battlefield layer "far". Row 138 lines up with the ground line.
+
+- File: `public/assets/env/gunpowder/far.png`
+- Size: 256 x 130
+- Anchor: (0, 138)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (15): #b8bed6 #a2a8c6 #9298b8 #b4b4cc #9a7e8e #8288aa #a8b49a #8e90ae #94a088 #ffd36a #7a7c9c #ff9a4a #ffe6a0 #848f7a #76806e
+
+## env.gunpowder.mid
+
+Gunpowder Age battlefield layer "mid". Row 60 lines up with the ground line.
+
+- File: `public/assets/env/gunpowder/mid.png`
+- Size: 256 x 64
+- Anchor: (0, 60)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (24): #9ac46a #6e9e4c #527e40 #7e6e4a #3c6034 #6a5a3e #c8a46a #a07e4a #7a5a36 #4e3826 #d4cc7a #9aa2ae #b4ae5c #6a7280 #6e4a34 #4f3326 #f0d47a #d4b058 #a08a58 #8a7448 #7a6640 #a8823a #96924c #7a7a42
+
+## env.gunpowder.ground
+
+Gunpowder Age battlefield layer "ground". Row 22 lines up with the ground line.
+
+- File: `public/assets/env/gunpowder/ground.png`
+- Size: 256 x 96
+- Anchor: (0, 22)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (19): #bcd078 #94b25a #5a763e #76944a #8e6e4c #b08e62 #4a505e #d0b080 #9aa2ae #6a503a #5a4232 #dcd6c8 #7e7770 #aaa396 #575050 #f0e0c0 #c0504a #6a7280 #ad6a3c
+
+## env.gunpowder.cloud0
+
+Drifting cloud.
+
+- File: `public/assets/env/gunpowder/cloud0.png`
+- Size: 60 x 18
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #e8e6ea #c4c0cc
+
+## env.gunpowder.cloud1
+
+Drifting cloud.
+
+- File: `public/assets/env/gunpowder/cloud1.png`
+- Size: 40 x 14
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #e8e6ea #c4c0cc
+
+## env.gunpowder.cloud2
+
+Drifting cloud.
+
+- File: `public/assets/env/gunpowder/cloud2.png`
+- Size: 70 x 20
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #e8e6ea #c4c0cc
+
+## env.gunpowder.cloud3
+
+Drifting cloud.
+
+- File: `public/assets/env/gunpowder/cloud3.png`
+- Size: 30 x 11
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #e8e6ea #c4c0cc
+
+## env.gunpowder.cloud4
+
+Drifting cloud.
+
+- File: `public/assets/env/gunpowder/cloud4.png`
+- Size: 50 x 15
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #ffffff #e8e6ea #c4c0cc

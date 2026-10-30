@@ -80,3 +80,30 @@ crusader_knight card portrait (head and shoulders), fits the card window.
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (13): #1e1526 #2d68c2 #4aa6ec #a6e2ff #d6dce2 #6e7884 #9ea8b2 #474e5a #e6b84a #fff2a6 #fffaf0 #b07a2c #9a5c34
+
+## portrait.gunpowder_pikeman
+
+gunpowder_pikeman card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/gunpowder_pikeman.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (21): #1e1526 #a6e2ff #d6dce2 #6e7884 #4aa6ec #9ea8b2 #2d68c2 #474e5a #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #221c28 #312838
+
+## portrait.gunpowder_musketeer
+
+gunpowder_musketeer card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/gunpowder_musketeer.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #6a5a6e #45384c #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #4aa6ec #ad6a3c #fffaf0 #a6e2ff #c4b494 #7f4428 #d99a5c ...
+
+## portrait.gunpowder_cannon
+
+gunpowder_cannon card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/gunpowder_cannon.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (30): #1e1526 #45384c #312838 #6a5a6e #e6b84a #6a3f1c #ffd6ac #f2a97a #ece2cc #6f717e #fff2a6 #30343f #ffc33a #cc7a58 #9aa2ae #7c2e30 #d99a5c #4a505e #ad6a3c #7f4428 #b07a2c #a6e2ff #4aa6ec #c4b494 ...

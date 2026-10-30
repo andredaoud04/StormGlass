@@ -235,7 +235,7 @@ crusader_crossbow (blue team). Chibi troop, bold outline, lit from the top-left.
 - File: `public/assets/troops/crusader_crossbow_blue.png`
 - Frame: 40 x 36, facing right, one animation per row
 - Anchor (feet on ground): (18, 32)
-- Projectile release point from anchor: (14, -11)
+- Projectile release point from anchor: (12, -13)
 - Rows:
   - row 0 `idle`: 4 frames @ 5 fps, loops
   - row 1 `walk`: 4 frames @ 8 fps, loops
@@ -252,7 +252,7 @@ crusader_crossbow (red team). Chibi troop, bold outline, lit from the top-left.
 - File: `public/assets/troops/crusader_crossbow_red.png`
 - Frame: 40 x 36, facing right, one animation per row
 - Anchor (feet on ground): (18, 32)
-- Projectile release point from anchor: (14, -11)
+- Projectile release point from anchor: (12, -13)
 - Rows:
   - row 0 `idle`: 4 frames @ 5 fps, loops
   - row 1 `walk`: 4 frames @ 8 fps, loops
@@ -293,3 +293,101 @@ crusader_knight (red team). Chibi troop, bold outline, lit from the top-left.
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (15): #1e1526 #ae2a40 #e64d4d #ffb08c #d6dce2 #6e7884 #9ea8b2 #474e5a #e6b84a #fff2a6 #fffaf0 #b07a2c #9a5c34 #6e3a22 #c98a52
+
+## troop.gunpowder_pikeman.blue
+
+gunpowder_pikeman (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/gunpowder_pikeman_blue.png`
+- Frame: 48 x 38, facing right, one animation per row
+- Anchor (feet on ground): (19, 34)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (24): #1e1526 #a6e2ff #d6dce2 #6e7884 #4aa6ec #9ea8b2 #2d68c2 #474e5a #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #221c28 #312838 #8e7e64 #d99a5c #7c2e30
+
+## troop.gunpowder_pikeman.red
+
+gunpowder_pikeman (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/gunpowder_pikeman_red.png`
+- Frame: 48 x 38, facing right, one animation per row
+- Anchor (feet on ground): (19, 34)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (24): #1e1526 #ffb08c #d6dce2 #6e7884 #e64d4d #9ea8b2 #ae2a40 #474e5a #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #221c28 #312838 #8e7e64 #d99a5c #7c2e30
+
+## troop.gunpowder_musketeer.blue
+
+gunpowder_musketeer (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/gunpowder_musketeer_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (15, -14)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (29): #1e1526 #6a5a6e #45384c #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #4aa6ec #ad6a3c #fffaf0 #a6e2ff #c4b494 #7f4428 #d99a5c ...
+
+## troop.gunpowder_musketeer.red
+
+gunpowder_musketeer (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/gunpowder_musketeer_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (15, -14)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (29): #1e1526 #6a5a6e #45384c #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #e64d4d #ad6a3c #fffaf0 #ffb08c #c4b494 #7f4428 #d99a5c ...
+
+## troop.gunpowder_cannon.blue
+
+gunpowder_cannon (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/gunpowder_cannon_blue.png`
+- Frame: 64 x 46, facing right, one animation per row
+- Anchor (feet on ground): (30, 41)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (43): #1e1526 #6a5a6e #45384c #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #6f717e #30343f #ffc33a #9aa2ae #fff8ec #7c2e30 #d99a5c #4a505e #b07a2c #4aa6ec #ad6a3c ...
+
+## troop.gunpowder_cannon.red
+
+gunpowder_cannon (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/gunpowder_cannon_red.png`
+- Frame: 64 x 46, facing right, one animation per row
+- Anchor (feet on ground): (30, 41)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (43): #1e1526 #6a5a6e #45384c #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #6f717e #30343f #ffc33a #9aa2ae #fff8ec #7c2e30 #d99a5c #4a505e #b07a2c #e64d4d #ad6a3c ...

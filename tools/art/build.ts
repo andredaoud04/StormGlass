@@ -15,6 +15,8 @@ import { BASE_FRONT, BASE_GROUND, flagFrames, stoneFortress } from './bases/ston
 import { ancientFortress } from './bases/ancient';
 import { crusaderEnv } from './env/crusader';
 import { crusaderFortress } from './bases/crusader';
+import { gunpowderEnv } from './env/gunpowder';
+import { gunpowderFortress } from './bases/gunpowder';
 import * as walls from './ui/walls';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
@@ -156,7 +158,7 @@ export function buildAll(): void {
   }
 
   // Environments
-  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()]];
+  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()], ['gunpowder', 'Gunpowder', gunpowderEnv()]];
   for (const [age, label, env] of envs) {
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
@@ -170,6 +172,7 @@ export function buildAll(): void {
     ['stone', 'Stone', stoneFortress, { flagX: 26, flagY: 6, torchX: 10, torchY: 49, smokeX: 26, smokeY: 30 }],
     ['ancient', 'Ancient', ancientFortress, { flagX: 25, flagY: 8, torchX: 7, torchY: 41, smokeX: 25, smokeY: 30 }],
     ['crusader', 'Crusader', crusaderFortress, { flagX: 27, flagY: 7, torchX: 8, torchY: 54, smokeX: 22, smokeY: 30 }],
+    ['gunpowder', 'Gunpowder', gunpowderFortress, { flagX: 21, flagY: 6, torchX: 6, torchY: 54, smokeX: 20, smokeY: 30 }],
   ];
   for (const [age, label, make, meta] of forts) {
     for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
@@ -218,6 +221,7 @@ export function buildAll(): void {
   put('ui.wall_stone', ui.stoneWall(ui.STONE_WALL));
   put('ui.wall_ancient', ui.stoneWall(ui.SAND_WALL));
   put('ui.wall_crusader', walls.crusaderWall());
+  put('ui.wall_gunpowder', walls.gunpowderWall());
   put('ui.ribbon_gold', ui.ribbon(GOLD));
   put('ui.ribbon_grey', ui.ribbon({ hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }));
 

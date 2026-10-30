@@ -256,6 +256,16 @@ Crusader Age battle HUD wall: pale ashlar under a stone coping hung with heraldi
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (40): #1e1526 #ece6d6 #c2baa6 #655e52 #cfc7b4 #948c7a #fff3a8 #e09a1e #d9d2c0 #e86a6a #b83a46 #8a2638 #cac0aa #a29987 #4a4038 #d3ccbb #b4ac99 #f4e6a0 #e0b84a #b08430 #9d9584 #948d7d #ddd5c2 #aba390 ...
 
+## ui.wall_gunpowder
+
+Gunpowder Age battle HUD wall: timber planking strapped with riveted iron under an iron-banded beam.
+
+- File: `public/assets/ui/wall_gunpowder.png`
+- Size: 256 x 220
+- Anchor: (128, 6)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (36): #1e1526 #9aa2ae #6a7280 #4a2c1c #b88458 #6e4428 #8e5e3a #30343f #a9774d #966640 #4a505e #784f32 #2e1c16 #a16f48 #845635 #6d452b #825534 #794d2f #a5734b #734a2e #7e5131 #56372a #614030 #634232 ...
+
 ## ui.ribbon_gold
 
 Result ribbon. Centre tiles horizontally.

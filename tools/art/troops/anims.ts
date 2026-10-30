@@ -4,7 +4,7 @@ import { buildFrame, rotateFrame, type AnimSpec, type Pose, type RigParts } from
 export type AttackStyle = 'swing' | 'sling' | 'throw' | 'shoot' | 'thrust' | 'bow';
 
 /** Standard animation set for a humanoid troop. Timing is tuned for the sim's 0.4 s wind-up. */
-export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pose> = {}): AnimSpec[] {
+export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pose> = {}, opts: { roomyDeath?: boolean } = {}): AnimSpec[] {
   const restWeapon = rest.weapon ?? -35;
   const restArm = rest.frontArm ?? -25;
   const P = (p: Pose): Pose => ({ backArm: 10, frontArm: restArm, weapon: restWeapon, ...rest, ...p });
@@ -95,12 +95,17 @@ export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pos
   const fallBase = buildFrame(r, P({ body: [-1, 0], headVariant: 'hurt', frontArm: -120, weapon: -80, backArm: -140, frontLeg: [1, 0] }));
   const feet: [number, number] = [r.hip[0] - 2, r.frameH - 4];
   const ground = r.hip[1] + 4;
-  const death = [
-    buildFrame(r, hit[0]),
-    toGround(rotateFrame(fallBase, -25, feet[0], feet[1]), ground),
-    toGround(rotateFrame(fallBase, -60, feet[0], feet[1]), ground),
-    toGround(rotateFrame(fallBase, -90, feet[0], feet[1]), ground),
-  ];
+  // roomyDeath (later Ages): rotate on a padded canvas so the fallen body is never clipped by the frame edge.
+  const fall = (deg: number) => {
+    if (!opts.roomyDeath) return toGround(rotateFrame(fallBase, deg, feet[0], feet[1]), ground);
+    const P = 20;
+    const wide = new Img(r.frameW + P, r.frameH);
+    wide.blit(fallBase, P, 0);
+    const g = toGround(rotateFrame(wide, deg, feet[0] + P, feet[1]), ground);
+    const b = g.bounds();
+    return g.crop(Math.min(P, b.x - 1), 0, r.frameW, r.frameH);
+  };
+  const death = [buildFrame(r, hit[0]), fall(-25), fall(-60), fall(-90)];
 
   return [
     { name: 'idle', frames: idle.map((p) => buildFrame(r, p)), fps: 5, loop: true },
@@ -112,7 +117,7 @@ export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pos
 }
 
 /** Shift a frame so its lowest opaque pixel sits on the ground line. */
-function toGround(img: Img, groundY: number): Img {
+export function toGround(img: Img, groundY: number): Img {
   const b = img.bounds();
   const out = new Img(img.w, img.h);
   const dx = b.x < 1 ? 1 - b.x : b.x + b.w > img.w - 1 ? img.w - 1 - (b.x + b.w) : 0;
