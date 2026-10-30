@@ -1,0 +1,9 @@
+{
+  "name": "Stormglass",
+  "short_name": "Stormglass",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#141B33",
+  "theme_color": "#141B33",
+  "start_url": "/"
+}

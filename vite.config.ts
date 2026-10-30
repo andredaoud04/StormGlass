@@ -1,10 +1,8 @@
-import { defineConfig } from 'vitest/config';
-
-import pkg from './package.json' with { type: 'json' };
+import { defineConfig } from 'vite';
+import preact from '@preact/preset-vite';
 
 export default defineConfig({
-  base: './',
-  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
-  build: { target: 'es2020', assetsInlineLimit: 0, sourcemap: false },
-  test: { include: ['tests/**/*.test.ts'], environment: 'node' },
+  plugins: [preact()],
+  build: { target: 'es2022', sourcemap: true },
+  server: { host: true },
 });

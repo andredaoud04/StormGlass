@@ -1,25 +1,37 @@
 {
-  "name": "stormglass",
+  "name": "wearestorm",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
     "test": "vitest run",
-    "art": "tsx tools/art/build.ts && tsx tools/sfx/build.ts",
-    "sfx": "tsx tools/sfx/build.ts",
-    "sim": "tsx tools/sim/pacing.ts",
-    "shots": "node tools/shots.mjs",
-    "check": "npm run typecheck && npm run test && npm run build"
+    "test:watch": "vitest",
+    "harness": "tsx tools/harness/run.ts",
+    "harness:ci": "tsx tools/harness/ci.ts",
+    "screens": "tsx tools/screens/matrix.ts",
+    "e2e": "tsx tools/screens/e2e.ts",
+    "calibrate": "tsx tools/harness/calibrate.ts"
+  },
+  "dependencies": {
+    "@fontsource/lilita-one": "^5.3.0",
+    "@fontsource/nunito": "^5.3.0",
+    "@preact/signals": "^2.11.3",
+    "pixi.js": "^8.22.0",
+    "preact": "^11.0.1"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vite": "^8.3.0",
-    "vitest": "^4.0.0"
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^26.6.5",
+    "eslint": "^10.12.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
   }
 }
