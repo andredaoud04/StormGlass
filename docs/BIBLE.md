@@ -63,19 +63,21 @@ This file is the single source of truth. If code and Bible disagree, fix one of 
 
 ## 3. Current Build Status
 
-Date: 2026-10-26. Branch `rebuild` merged to `main` when M1 passed its checks.
+Date: 2026-10-30. Branch `rebuild` merged to `main` when M1 passed its checks. Later-Age art on branch `claude/sg-era-art` (awaiting Andre's art approval).
 
 | Milestone | Status | Notes |
 |-----------|--------|-------|
 | M1 Core battle, Stone Age | DONE | Lane battle, Food, three Stone troops, authored waves, base-damage Gold, victory, defeat, retreat, Battle home screen, juice (hit flash, sparks, damage numbers, hitstop, shake, slow-motion fortress destruction, coins flying to the counter), sound effects |
 | M2 Progression and economy | DONE (first pass) | Upgrades tab (troop unlocks, Food, Base, Power, Evolution), versioned balance table, headless simulator (`npm run sim`), pacing tests. Prestige rules and tests done; Prestige button arrives with M4 |
-| M3 All six Ages | IN PROGRESS | Stone and Ancient art done (troops, fortress, battlefield, HUD wall). Crusader to Future use Stone art as a placeholder until made |
+| M3 All six Ages | IN PROGRESS | Art done for all six Ages: troops (both teams, full animation set), fortress (four damage states), layered battlefield, HUD wall, projectiles and muzzle effects. Tests prove every Age and troop has its assets. Still to do: authored waves and bosses per later Age |
 | M4 Meta | NOT STARTED | Status effects already in the sim with tests. Skill and Hero sockets shown locked. Dungeons tab shows the four modes with their unlock rules |
 | M5 Live features | NOT STARTED | |
 | M6 Release | NOT STARTED | |
 
 Known gaps:
-- Crusader, Gunpowder, Industrial and Future show Stone sprites, fortress and battlefield (placeholder). The title and stats are correct.
+- Ranged troops of every Age share the one `sling` shot sound and tanks the swing sound (no musket bang, cannon boom or energy zap yet); sound was left unchanged on purpose.
+- The Stone-art fallback in `battleView.ts` stays as a safety net only; no Age uses it now.
+- Stone and Ancient death falls can clip at the frame edge (later Ages use the padded `roomyDeath` fall); left as is so Stone and Ancient look unchanged.
 - Cards and Shop tabs show "arrives in a later update". Shop says "No ads. No purchases."
 - The `legacy-2026-10-25` git tag could not be pushed (the session proxy refused tag pushes). The branch `legacy` holds the same commit. Andre: please create the tag on GitHub (Releases, then "Create tag" on branch `legacy`).
 
@@ -165,7 +167,14 @@ Target: first Prestige about 1 hour without ads. The two bots bracket it. Tests 
 - Reduced motion (Settings and Pause): turns off shake, hitstop and slow motion.
 
 ### HUD walls by Age
-Stone: stone and wood. Ancient: sandstone. Crusader, Gunpowder, Industrial, Future: PROVISIONAL plan in Open Decisions.
+Stone: stone and wood. Ancient: sandstone. Crusader: pale ashlar hung with heraldic pennants. Gunpowder: timber planking with riveted iron straps. Industrial: red brick under a riveted steel girder. Future: alloy panels under a glowing trim (D24).
+
+### Later Ages (Crusader to Future)
+- Troops: same chibi paper-doll rig, frame sizes, anchors, frame counts and timing as Stone and Ancient (idle 4 @ 5 fps, walk 4 @ 8, attack 6 @ 10 with the hit on frame 3, hit 1, death 4 @ 10). Humanoid parts are letter grids in `tools/art/troops/<age>.ts` using `troops/kit.ts` (ramp letter groups, darker back limbs).
+- Non-humanoid tanks have their own rigs: the Cannon (`troops/gunpowder.ts`: wheels turn, gunner pushes, touches off the vent, gun recoils with flash and smoke) and the biped machine rig (`troops/machines.ts`: two-bone legs solved per frame) used by the Steam Walker and the Mech.
+- Gun troops: the muzzle point is computed from the rig on the firing frame. Muzzle effects (`fx.muzzle`, `fx.gunsmoke`, `fx.zap`) and the projectile are named in the troop's manifest meta. Bolts and bullets fly almost flat (projectile meta `arc`).
+- Fortress torch effect is per Age (`base.<age>` meta `torchFx`; the Future citadel uses a blinking beacon). Gunpowder and Industrial battlefields reuse the volcano plume for a burning town and a factory chimney.
+- Review sheets: `npx tsx tools/art/preview/age.ts <dir>` writes troop contact sheets, fortress states and an all-Ages lineup.
 
 ---
 
@@ -182,7 +191,7 @@ Commands:
 - `npm run art`: rebuild all images, the manifest, art specs and sounds.
 - `npm run sim`: pacing report (`-- --cycle` for the simple bot).
 - `npx tsx tools/sim/matchups.ts`: win/loss grid for every army Age against every enemy Age.
-- Screenshots: `npm run build && npx vite preview --port 4173 &` then `node tools/shots.mjs docs/screenshots/<date> http://127.0.0.1:4173/`.
+- Screenshots: `npm run build && npx vite preview --port 4173 &` then `node tools/shots.mjs docs/screenshots/<date> http://127.0.0.1:4173/`. Includes `home-<age>`, `battle-<age>-start`, `battle-<age>` (a crowd: Food is topped up so every troop type deploys) and `battle-<age>-late` for every later Age. `ONLY=a,b` limits the run.
 
 Folders:
 - `src/sim`: pure battle simulation. `src/game`: balance access, progression, upgrades, save, bots.
@@ -207,9 +216,9 @@ Folders:
 
 1. **Campaign shape.** We read rule 6 literally: one enemy fortress per Age, six per Timeline. "Battles 1 to 5" in M1 is read as a new player's first five battles (Stone fortress, then the Ancient fortress). If you wanted several battles per Age, say how many; it is one number in the data.
 2. **Survival unlock.** Rules give unlocks for Rush, Legends and Bosses, not Survival. Proposal: Survival unlocks after the first Prestige with Rush.
-3. **HUD wall material per Age.** You listed four materials for six Ages. Proposal: Stone = stone and wood, Ancient = sandstone, Crusader = stone and wood (castle), Gunpowder = sandstone (coastal fort), Industrial = volcanic rock, Future = ice.
+3. **HUD wall material per Age.** Built per D24 (Crusader stone and banners, Gunpowder timber and iron, Industrial brick and steel, Future alloy). Rule 10 still names ice and volcanic rock; if you want those, say for which Age.
 4. **What Prestige keeps.** We keep Gold and Gold upgrades through Prestige (rule 7 lists only collections and unlocks). Should Gold or upgrades reset?
-5. **Art approval.** Please look at `docs/screenshots/2026-10-26/` and approve the pixel style before we make the other four Ages.
+5. **Art approval.** Please look at `docs/screenshots/2026-10-30/` (every later Age: home, battle start, crowd, late fight; `art/` has troop contact sheets, fortress states and an all-Ages lineup) and approve, or say what to change.
 6. **Legacy tag.** Please create tag `legacy-2026-10-25` on branch `legacy` (our session could not push tags).
 
 ---
@@ -238,3 +247,7 @@ Folders:
 | D18 | 2026-10-26 | Unbuilt tabs say so plainly ("arrives in a later update"). Nothing pretends to work. | PROVISIONAL | Claude |
 | D19 | 2026-10-26 | Sounds are synthesized by our own code (chiptune style) and listed in the manifest like images. | PROVISIONAL | Claude |
 | D20 | 2026-10-26 | Hitstop, slow motion and screen shake are visual only; the sim's fixed ticks are never skipped or changed. | PROVISIONAL | Claude |
+| D21 | 2026-10-30 | Later-Age looks: Crusader = mail, team tabards with a pale cross, kite shields, limestone keep; Gunpowder = morions, tricornes, a crewed bronze cannon, bastion fort; Industrial = steel helmets and puttees, a riveted Steam Walker, brick works; Future = alloy over dark suits, team-glow energy weapons, a Mech, alloy citadel. | PROVISIONAL | Claude |
+| D22 | 2026-10-30 | Non-humanoid tanks get their own rigs (Cannon; biped machine rig for Steam Walker and Mech) but keep the standard animation names, frame counts and timing so the renderer treats them like any troop. | PROVISIONAL | Claude |
+| D23 | 2026-10-30 | Gun effects and per-Age torch are data (manifest meta `muzzleFx`, projectile `arc`, base `torchFx`); the renderer defaults keep Stone and Ancient exactly as before. | PROVISIONAL | Claude |
+| D24 | 2026-10-30 | HUD walls: Crusader stone with heraldic pennants, Gunpowder timber and iron, Industrial red brick and steel girder, Future alloy panels (owner brief for this pass; replaces the Open Decision 3 proposal). | PROVISIONAL | Andre (brief) |
