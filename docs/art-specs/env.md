@@ -339,3 +339,97 @@ Drifting cloud.
 - Size: 50 x 15
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #ffffff #e8e6ea #c4c0cc
+
+## env.industrial.sky
+
+Industrial Age battlefield layer "sky". Row 232 lines up with the ground line.
+
+- File: `public/assets/env/industrial/sky.png`
+- Size: 256 x 240
+- Anchor: (0, 232)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (10): #3c4466 #5c5c7a #8a7a86 #d8a084 #eab08a #ffc890 #ffe2b0 #c4987e #e8b07a #f4c88a
+
+## env.industrial.far
+
+Industrial Age battlefield layer "far". Row 126 lines up with the ground line.
+
+- File: `public/assets/env/industrial/far.png`
+- Size: 256 x 120
+- Anchor: (0, 126)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (8): #9a8a9a #7c6e82 #6a5e72 #ffcf7a #9c8a92 #8a7a86 #7c6e7c #706472
+
+## env.industrial.mid
+
+Industrial Age battlefield layer "mid". Row 58 lines up with the ground line.
+
+- File: `public/assets/env/industrial/mid.png`
+- Size: 256 x 62
+- Anchor: (0, 58)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (11): #4a3a34 #3a2c28 #52291b #3a3236 #a85a46 #7a4a3e #a29a6e #857e58 #3a2a2e #6c6648 #58523c
+
+## env.industrial.ground
+
+Industrial Age battlefield layer "ground". Row 22 lines up with the ground line.
+
+- File: `public/assets/env/industrial/ground.png`
+- Size: 256 x 96
+- Anchor: (0, 22)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (26): #aca46e #8c8658 #58563c #706c48 #6e5a44 #8a7254 #a8906c #4e4034 #8aa0b8 #5e6e88 #c4d4e4 #d99a5c #ad6a3c #52291b #8a8494 #4a4450 #dcd6c8 #7e7770 #aaa396 #575050 #d6cc96 #aea46c #807a4c #6a7280 ...
+
+## env.industrial.cloud0
+
+Drifting cloud.
+
+- File: `public/assets/env/industrial/cloud0.png`
+- Size: 64 x 18
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d8c4c0 #b4a2aa #8e8090
+
+## env.industrial.cloud1
+
+Drifting cloud.
+
+- File: `public/assets/env/industrial/cloud1.png`
+- Size: 44 x 14
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d8c4c0 #b4a2aa #8e8090
+
+## env.industrial.cloud2
+
+Drifting cloud.
+
+- File: `public/assets/env/industrial/cloud2.png`
+- Size: 76 x 20
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (2): #d8c4c0 #b4a2aa
+
+## env.industrial.cloud3
+
+Drifting cloud.
+
+- File: `public/assets/env/industrial/cloud3.png`
+- Size: 34 x 12
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d8c4c0 #b4a2aa #8e8090
+
+## env.industrial.cloud4
+
+Drifting cloud.
+
+- File: `public/assets/env/industrial/cloud4.png`
+- Size: 56 x 16
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d8c4c0 #b4a2aa #8e8090
+
+## env.industrial.cloud5
+
+Drifting cloud.
+
+- File: `public/assets/env/industrial/cloud5.png`
+- Size: 40 x 13
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #d8c4c0 #b4a2aa #8e8090

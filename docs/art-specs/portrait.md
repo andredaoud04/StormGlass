@@ -107,3 +107,30 @@ gunpowder_cannon card portrait (head and shoulders), fits the card window.
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (30): #1e1526 #45384c #312838 #6a5a6e #e6b84a #6a3f1c #ffd6ac #f2a97a #ece2cc #6f717e #fff2a6 #30343f #ffc33a #cc7a58 #9aa2ae #7c2e30 #d99a5c #4a505e #ad6a3c #7f4428 #b07a2c #a6e2ff #4aa6ec #c4b494 ...
+
+## portrait.industrial_trencher
+
+industrial_trencher card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/industrial_trencher.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (27): #1e1526 #a8b294 #7c866a #5a624e #3c4236 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #4aa6ec #a6e2ff #aea46c #2d68c2 #d6cc96 #e6b84a #d6dce2 #807a4c #ad6a3c #9ea8b2 #555234 ...
+
+## portrait.industrial_rifleman
+
+industrial_rifleman card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/industrial_rifleman.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (29): #1e1526 #a8b294 #7c866a #5a624e #3c4236 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #ad6a3c #aea46c #4aa6ec #a6e2ff #2d68c2 #d6cc96 #e6b84a #7f4428 #807a4c ...
+
+## portrait.industrial_walker
+
+industrial_walker card portrait (head and shoulders), fits the card window.
+
+- File: `public/assets/portraits/industrial_walker.png`
+- Size: 32 x 28
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #1e1526 #30343f #9aa2ae #6a7280 #4a505e #a8b294 #7c866a #5a624e #fff2a6 #fff8ec #f2a97a #cc7a58 #4aa6ec #2d68c2 #e6b84a #a6e2ff #b07a2c

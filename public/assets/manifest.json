@@ -1137,6 +1137,290 @@
     }
    }
   },
+  "troop.industrial_trencher.blue": {
+   "kind": "sheet",
+   "file": "troops/industrial_trencher_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.industrial_trencher": {
+   "kind": "image",
+   "file": "portraits/industrial_trencher.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.industrial_trencher.red": {
+   "kind": "sheet",
+   "file": "troops/industrial_trencher_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.industrial_rifleman.blue": {
+   "kind": "sheet",
+   "file": "troops/industrial_rifleman_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    15,
+    -14
+   ]
+  },
+  "portrait.industrial_rifleman": {
+   "kind": "image",
+   "file": "portraits/industrial_rifleman.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.industrial_rifleman.red": {
+   "kind": "sheet",
+   "file": "troops/industrial_rifleman_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    15,
+    -14
+   ]
+  },
+  "troop.industrial_walker.blue": {
+   "kind": "sheet",
+   "file": "troops/industrial_walker_blue.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.industrial_walker": {
+   "kind": "image",
+   "file": "portraits/industrial_walker.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.industrial_walker.red": {
+   "kind": "sheet",
+   "file": "troops/industrial_walker_red.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -1416,6 +1700,82 @@
    "file": "env/gunpowder/cloud4.png",
    "w": 50,
    "h": 15
+  },
+  "env.industrial.sky": {
+   "kind": "image",
+   "file": "env/industrial/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.industrial.far": {
+   "kind": "image",
+   "file": "env/industrial/far.png",
+   "w": 256,
+   "h": 120,
+   "anchor": [
+    0,
+    126
+   ]
+  },
+  "env.industrial.mid": {
+   "kind": "image",
+   "file": "env/industrial/mid.png",
+   "w": 256,
+   "h": 62,
+   "anchor": [
+    0,
+    58
+   ]
+  },
+  "env.industrial.ground": {
+   "kind": "image",
+   "file": "env/industrial/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.industrial.cloud0": {
+   "kind": "image",
+   "file": "env/industrial/cloud0.png",
+   "w": 64,
+   "h": 18
+  },
+  "env.industrial.cloud1": {
+   "kind": "image",
+   "file": "env/industrial/cloud1.png",
+   "w": 44,
+   "h": 14
+  },
+  "env.industrial.cloud2": {
+   "kind": "image",
+   "file": "env/industrial/cloud2.png",
+   "w": 76,
+   "h": 20
+  },
+  "env.industrial.cloud3": {
+   "kind": "image",
+   "file": "env/industrial/cloud3.png",
+   "w": 34,
+   "h": 12
+  },
+  "env.industrial.cloud4": {
+   "kind": "image",
+   "file": "env/industrial/cloud4.png",
+   "w": 56,
+   "h": 16
+  },
+  "env.industrial.cloud5": {
+   "kind": "image",
+   "file": "env/industrial/cloud5.png",
+   "w": 40,
+   "h": 13
   },
   "base.stone.blue.0": {
    "kind": "image",
@@ -1730,6 +2090,86 @@
   "base.gunpowder.red.3": {
    "kind": "image",
    "file": "bases/gunpowder_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.0": {
+   "kind": "image",
+   "file": "bases/industrial_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.1": {
+   "kind": "image",
+   "file": "bases/industrial_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.2": {
+   "kind": "image",
+   "file": "bases/industrial_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.3": {
+   "kind": "image",
+   "file": "bases/industrial_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.0": {
+   "kind": "image",
+   "file": "bases/industrial_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.1": {
+   "kind": "image",
+   "file": "bases/industrial_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.2": {
+   "kind": "image",
+   "file": "bases/industrial_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.3": {
+   "kind": "image",
+   "file": "bases/industrial_red_3.png",
    "w": 72,
    "h": 96,
    "anchor": [
@@ -2336,6 +2776,16 @@
     6
    ]
   },
+  "ui.wall_industrial": {
+   "kind": "image",
+   "file": "ui/wall_industrial.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
   "ui.ribbon_gold": {
    "kind": "image",
    "file": "ui/ribbon_gold.png",
@@ -2709,6 +3159,17 @@
   "troop.gunpowder_cannon": {
    "top": -24
   },
+  "troop.industrial_trencher": {
+   "top": -23
+  },
+  "troop.industrial_rifleman": {
+   "top": -23,
+   "projectile": "proj.bullet",
+   "muzzleFx": "fx.muzzle"
+  },
+  "troop.industrial_walker": {
+   "top": -30
+  },
   "env.stone": {
    "skyTop": "#2f6cc4",
    "clouds": 6,
@@ -2728,6 +3189,12 @@
    "clouds": 5,
    "volcanoX": 192,
    "volcanoY": 96
+  },
+  "env.industrial": {
+   "skyTop": "#3c4466",
+   "clouds": 6,
+   "volcanoX": 134,
+   "volcanoY": 42
   },
   "base.stone": {
    "flagX": 26,
@@ -2760,6 +3227,14 @@
    "torchY": 54,
    "smokeX": 20,
    "smokeY": 30
+  },
+  "base.industrial": {
+   "flagX": 33,
+   "flagY": 18,
+   "torchX": 5,
+   "torchY": 56,
+   "smokeX": 24,
+   "smokeY": 34
   },
   "proj.arrow": {
    "mode": "angle",

@@ -391,3 +391,101 @@ gunpowder_cannon (red team). Chibi troop, bold outline, lit from the top-left.
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (43): #1e1526 #6a5a6e #45384c #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #6f717e #30343f #ffc33a #9aa2ae #fff8ec #7c2e30 #d99a5c #4a505e #b07a2c #e64d4d #ad6a3c ...
+
+## troop.industrial_trencher.blue
+
+industrial_trencher (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/industrial_trencher_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #a8b294 #7c866a #5a624e #3c4236 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #4aa6ec #a6e2ff #aea46c #2d68c2 #d6cc96 #e6b84a #d6dce2 #807a4c #ad6a3c #9ea8b2 #555234 ...
+
+## troop.industrial_trencher.red
+
+industrial_trencher (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/industrial_trencher_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #a8b294 #7c866a #5a624e #3c4236 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #e64d4d #ffb08c #aea46c #ae2a40 #d6cc96 #e6b84a #d6dce2 #807a4c #ad6a3c #9ea8b2 #555234 ...
+
+## troop.industrial_rifleman.blue
+
+industrial_rifleman (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/industrial_rifleman_blue.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (15, -14)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (29): #1e1526 #a8b294 #7c866a #5a624e #3c4236 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #ad6a3c #aea46c #4aa6ec #a6e2ff #2d68c2 #d6cc96 #e6b84a #7f4428 #807a4c ...
+
+## troop.industrial_rifleman.red
+
+industrial_rifleman (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/industrial_rifleman_red.png`
+- Frame: 40 x 36, facing right, one animation per row
+- Anchor (feet on ground): (18, 32)
+- Projectile release point from anchor: (15, -14)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (29): #1e1526 #a8b294 #7c866a #5a624e #3c4236 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #ad6a3c #aea46c #e64d4d #ffb08c #ae2a40 #d6cc96 #e6b84a #7f4428 #807a4c ...
+
+## troop.industrial_walker.blue
+
+industrial_walker (blue team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/industrial_walker_blue.png`
+- Frame: 56 x 50, facing right, one animation per row
+- Anchor (feet on ground): (26, 46)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (26): #1e1526 #30343f #9aa2ae #6a7280 #4a505e #a8b294 #7c866a #5a624e #fff2a6 #fff8ec #f2a97a #cc7a58 #4aa6ec #2d68c2 #e6b84a #a6e2ff #b07a2c #6a3f1c #757885 #535665 #3d3e4d #2b2b38 #ffffff #e8eef4 ...
+
+## troop.industrial_walker.red
+
+industrial_walker (red team). Chibi troop, bold outline, lit from the top-left.
+
+- File: `public/assets/troops/industrial_walker_red.png`
+- Frame: 56 x 50, facing right, one animation per row
+- Anchor (feet on ground): (26, 46)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (26): #1e1526 #30343f #9aa2ae #6a7280 #4a505e #a8b294 #7c866a #5a624e #fff2a6 #fff8ec #f2a97a #cc7a58 #e64d4d #ae2a40 #e6b84a #ffb08c #b07a2c #6a3f1c #757885 #535665 #3d3e4d #2b2b38 #ffffff #e8eef4 ...

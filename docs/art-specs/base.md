@@ -319,3 +319,83 @@ Gunpowder Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical,
 - Anchor: (60, 86)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (12): #1e1526 #7c7568 #d8d2c2 #a8a090 #52291b #4a505e #9aa2ae #6a7280 #cfe27a #93c252 #5e9a40 #3b6c38
+
+## base.industrial.blue.0
+
+Industrial Age fortress, blue team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_blue_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (26): #1e1526 #9aa2ae #4a505e #e28a6a #b8573e #8a7a72 #5e2a26 #7a6a64 #6a7280 #8c3d30 #30343f #ffd98a #d6cc96 #aea46c #807a4c #5c5750 #aaa498 #837d74 #d2ccc2 #a6e2ff #4aa6ec #2d68c2 #34302e #ffd03c ...
+
+## base.industrial.blue.1
+
+Industrial Age fortress, blue team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_blue_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #9aa2ae #4a505e #e28a6a #b8573e #8a7a72 #5e2a26 #7a6a64 #6a7280 #8c3d30 #30343f #ffd98a #2a2226 #2e3040 #d6cc96 #aea46c #807a4c #34302e #5c5750 #aaa498 #837d74 #d2ccc2 #a6e2ff #4aa6ec ...
+
+## base.industrial.blue.2
+
+Industrial Age fortress, blue team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_blue_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #5e2a26 #8a7a72 #7a6a64 #6a7280 #b8573e #8c3d30 #e28a6a #2a2226 #34302e #d6cc96 #4a505e #aea46c #807a4c #ffd98a #2e3040 #5c5750 #aaa498 #837d74 #d2ccc2 #30343f #a6e2ff #4aa6ec #2d68c2 ...
+
+## base.industrial.blue.3
+
+Industrial Age fortress, blue team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_blue_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #b8573e #8a7a72 #e28a6a #5e2a26 #8c3d30 #7a6a64 #6a7280 #30343f #d6cc96 #aea46c #807a4c #4a505e #d2ccc2 #aaa498 #837d74 #6a5e56 #4e4440
+
+## base.industrial.red.0
+
+Industrial Age fortress, red team, damage state 0 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_red_0.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (26): #1e1526 #9aa2ae #4a505e #e28a6a #b8573e #8a7a72 #5e2a26 #7a6a64 #6a7280 #8c3d30 #30343f #ffd98a #d6cc96 #aea46c #807a4c #5c5750 #aaa498 #837d74 #d2ccc2 #ffb08c #e64d4d #ae2a40 #34302e #ffd03c ...
+
+## base.industrial.red.1
+
+Industrial Age fortress, red team, damage state 1 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_red_1.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #9aa2ae #4a505e #e28a6a #b8573e #8a7a72 #5e2a26 #7a6a64 #6a7280 #8c3d30 #30343f #ffd98a #2a2226 #2e3040 #d6cc96 #aea46c #807a4c #34302e #5c5750 #aaa498 #837d74 #d2ccc2 #ffb08c #e64d4d ...
+
+## base.industrial.red.2
+
+Industrial Age fortress, red team, damage state 2 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_red_2.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (28): #1e1526 #5e2a26 #8a7a72 #7a6a64 #6a7280 #b8573e #8c3d30 #e28a6a #2a2226 #34302e #d6cc96 #4a505e #aea46c #807a4c #ffd98a #2e3040 #5c5750 #aaa498 #837d74 #d2ccc2 #30343f #ffb08c #e64d4d #ae2a40 ...
+
+## base.industrial.red.3
+
+Industrial Age fortress, red team, damage state 3 (0 full, 1 damaged, 2 critical, 3 rubble). Faces right; the enemy copy is mirrored in game.
+
+- File: `public/assets/bases/industrial_red_3.png`
+- Size: 72 x 96
+- Anchor: (60, 86)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (18): #1e1526 #b8573e #8a7a72 #e28a6a #5e2a26 #8c3d30 #7a6a64 #6a7280 #30343f #d6cc96 #aea46c #807a4c #4a505e #d2ccc2 #aaa498 #837d74 #6a5e56 #4e4440

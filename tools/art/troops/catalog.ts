@@ -5,6 +5,7 @@ import { bruteRig, clubberRig, slingerRig } from './stone';
 import { archerRig, shieldwallRig, spearmanRig } from './ancient';
 import { crossbowRig, footmanRig, knightRig } from './crusader';
 import { cannonAnims, cannonRig, musketeerRig, pikemanRig } from './gunpowder';
+import { riflemanRig, trencherRig, walkerAnims, walkerRig } from './industrial';
 import { TEAM_BLUE } from '../palette';
 
 /** Anything with a frame size and a hip point (humanoid rigs and machine rigs). */
@@ -55,4 +56,10 @@ export const GUNPOWDER_TROOPS: TroopArt[] = [
   { id: 'gunpowder_cannon', rig: cannonRig, anims: cannonAnims, portraitAt: [10, 14] },
 ];
 
-export const ALL_TROOPS: TroopArt[] = [...STONE_TROOPS, ...ANCIENT_TROOPS, ...CRUSADER_TROOPS, ...GUNPOWDER_TROOPS];
+export const INDUSTRIAL_TROOPS: TroopArt[] = [
+  { id: 'industrial_trencher', rig: trencherRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 110, frontArm: -15 }, ROOMY) },
+  { id: 'industrial_rifleman', rig: riflemanRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(riflemanRig), projectile: 'proj.bullet', muzzleFx: 'fx.muzzle' },
+  { id: 'industrial_walker', rig: walkerRig, anims: walkerAnims, portraitAt: [16, 8] },
+];
+
+export const ALL_TROOPS: TroopArt[] = [...STONE_TROOPS, ...ANCIENT_TROOPS, ...CRUSADER_TROOPS, ...GUNPOWDER_TROOPS, ...INDUSTRIAL_TROOPS];
