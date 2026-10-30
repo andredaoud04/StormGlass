@@ -13,6 +13,15 @@ import { stoneEnv, type EnvArt } from './env/stone';
 import { ancientEnv } from './env/ancient';
 import { BASE_FRONT, BASE_GROUND, flagFrames, stoneFortress } from './bases/stone';
 import { ancientFortress } from './bases/ancient';
+import { crusaderEnv } from './env/crusader';
+import { crusaderFortress } from './bases/crusader';
+import { gunpowderEnv } from './env/gunpowder';
+import { gunpowderFortress } from './bases/gunpowder';
+import { industrialEnv } from './env/industrial';
+import { industrialFortress } from './bases/industrial';
+import { futureEnv } from './env/future';
+import { futureFortress } from './bases/future';
+import * as walls from './ui/walls';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
 import * as ui from './ui/ui';
@@ -147,13 +156,13 @@ export function buildAll(): void {
       const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
       const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
       reg.sheet(`troop.${t.id}.${teamName}`, `troops/${t.id}_${teamName}.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id} (${teamName} team). Chibi troop, bold outline, lit from the top-left.`, t.muzzle);
-      if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.projectile ? { projectile: t.projectile } : {}) };
-      if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
+      if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.projectile ? { projectile: t.projectile } : {}), ...(t.muzzleFx ? { muzzleFx: t.muzzleFx } : {}) };
+      if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, t.portraitAt ? anims[0].frames[0].crop(t.portraitAt[0], t.portraitAt[1], 32, 28) : portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
     }
   }
 
   // Environments
-  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()]];
+  const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()], ['gunpowder', 'Gunpowder', gunpowderEnv()], ['industrial', 'Industrial', industrialEnv()], ['future', 'Future', futureEnv()]];
   for (const [age, label, env] of envs) {
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
@@ -163,9 +172,13 @@ export function buildAll(): void {
   }
 
   // Fortresses
-  const forts: [string, string, typeof stoneFortress, Record<string, number>][] = [
+  const forts: [string, string, typeof stoneFortress, Record<string, number | string>][] = [
     ['stone', 'Stone', stoneFortress, { flagX: 26, flagY: 6, torchX: 10, torchY: 49, smokeX: 26, smokeY: 30 }],
     ['ancient', 'Ancient', ancientFortress, { flagX: 25, flagY: 8, torchX: 7, torchY: 41, smokeX: 25, smokeY: 30 }],
+    ['crusader', 'Crusader', crusaderFortress, { flagX: 27, flagY: 7, torchX: 8, torchY: 54, smokeX: 22, smokeY: 30 }],
+    ['gunpowder', 'Gunpowder', gunpowderFortress, { flagX: 21, flagY: 6, torchX: 6, torchY: 54, smokeX: 20, smokeY: 30 }],
+    ['industrial', 'Industrial', industrialFortress, { flagX: 33, flagY: 18, torchX: 5, torchY: 56, smokeX: 24, smokeY: 34 }],
+    ['future', 'Future', futureFortress, { flagX: 29, flagY: 11, torchX: 55, torchY: 37, smokeX: 24, smokeY: 34, torchFx: 'fx.beacon' }],
   ];
   for (const [age, label, make, meta] of forts) {
     for (const [teamName, team] of [['blue', TEAM_BLUE], ['red', TEAM_RED]] as const) {
@@ -213,6 +226,10 @@ export function buildAll(): void {
   put('ui.tabbar', ui.tabBar());
   put('ui.wall_stone', ui.stoneWall(ui.STONE_WALL));
   put('ui.wall_ancient', ui.stoneWall(ui.SAND_WALL));
+  put('ui.wall_crusader', walls.crusaderWall());
+  put('ui.wall_gunpowder', walls.gunpowderWall());
+  put('ui.wall_industrial', walls.industrialWall());
+  put('ui.wall_future', walls.futureWall());
   put('ui.ribbon_gold', ui.ribbon(GOLD));
   put('ui.ribbon_grey', ui.ribbon({ hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }));
 
@@ -234,6 +251,20 @@ export function buildAll(): void {
   reg.strip('proj.stone', 'fx/proj_stone.png', fx.stoneProjectile());
   reg.strip('proj.arrow', 'fx/proj_arrow.png', fx.arrow());
   reg.manifest.meta['proj.arrow'] = { mode: 'angle', min: -60, step: 15 };
+  // Later Ages: bolts and bullets fly nearly flat; guns flash and smoke at the muzzle.
+  const flat = (key: string, file: string, s: fx.Strip, arc: number) => {
+    reg.strip(key, file, s);
+    reg.manifest.meta[key] = { mode: 'angle', min: -60, step: 15, arc };
+  };
+  flat('proj.bolt', 'fx/proj_bolt.png', fx.bolt(), 7);
+  flat('proj.musket', 'fx/proj_musket.png', fx.musketBall(), 4);
+  flat('proj.bullet', 'fx/proj_bullet.png', fx.bullet(), 2);
+  flat('proj.energy', 'fx/proj_energy.png', fx.energyBolt(), 1);
+  reg.strip('fx.muzzle', 'fx/muzzle.png', fx.muzzleFlash());
+  reg.strip('fx.gunsmoke', 'fx/gunsmoke.png', fx.gunSmoke());
+  reg.strip('fx.steam', 'fx/steam.png', fx.steam());
+  reg.strip('fx.beacon', 'fx/beacon.png', fx.beacon());
+  reg.strip('fx.zap', 'fx/zap.png', fx.plasmaFlash());
 
   reg.writeAll();
   void INK;

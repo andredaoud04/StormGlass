@@ -139,3 +139,53 @@ Distant pterodactyl, 3 wing frames.
 - Anchor: (7, 3)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (1): #4f5a8c
+
+## fx.muzzle
+
+Gun muzzle flash, 3 fast frames; anchor at the muzzle, faces right.
+
+- File: `public/assets/fx/muzzle.png`
+- Frames: 3 x (9 x 7) in one row @ 24 fps
+- Anchor: (0, 3)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #d23c1e #ffc33a #fff6b0 #fff8ec
+
+## fx.gunsmoke
+
+Gun smoke puff, 6 frames; anchor at the muzzle, blooms forward.
+
+- File: `public/assets/fx/gunsmoke.png`
+- Frames: 6 x (20 x 12) in one row @ 10 fps
+- Anchor: (1, 6)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #fff8ec #dcd6e4 #a8a0b4
+
+## fx.steam
+
+Steam puff, 5 frames.
+
+- File: `public/assets/fx/steam.png`
+- Frames: 5 x (12 x 14) in one row @ 10 fps
+- Anchor: (6, 12)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #fff8ec #e8eef4 #c4ccd8
+
+## fx.beacon
+
+Beacon light, 4 frames (pulses); stands in for the torch on the Future fortress.
+
+- File: `public/assets/fx/beacon.png`
+- Frames: 4 x (7 x 7) in one row @ 6 fps
+- Anchor: (3, 5)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #5ce6ff #2a9cf0 #c4fbff #ffffff
+
+## fx.zap
+
+Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.
+
+- File: `public/assets/fx/zap.png`
+- Frames: 3 x (9 x 7) in one row @ 24 fps
+- Anchor: (0, 3)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #2a9cf0 #5ce6ff #c4fbff #fff8ec

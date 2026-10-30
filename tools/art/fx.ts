@@ -236,3 +236,131 @@ export function arrow(): Strip {
   }
   return { frames, fps: 0, anchor: [7, 7], desc: 'Arrow, 9 frames: flight angle -60..60 degrees in 15 degree steps (frame 4 = level).' };
 }
+
+// ---------- Later Ages: projectiles and muzzle effects ----------
+
+/** Pre-rotate a projectile drawn pointing right into 9 flight angles (-60..60, 15 degree steps). */
+function angled(base: Img, px: number, py: number, size: number, outline = true): Img[] {
+  const frames: Img[] = [];
+  const c = Math.floor(size / 2);
+  for (let a = -60; a <= 60; a += 15) {
+    const r = rotSprite(base, (a * Math.PI) / 180, px, py, size, size, c + 0.5, c + 0.5);
+    frames.push(outline ? r.outlined(INK).crop(0, 0, size + 2, size + 2) : r);
+  }
+  return frames;
+}
+
+/** Crossbow bolt: short, heavy, steel head, leather vanes. */
+export function bolt(): Strip {
+  const base = Img.fromGrid(['l.....q..', 'lLBBBBgqq', 'l.....q..'], { B: hex('#ad6a3c'), L: hex('#9a5c34'), l: hex('#c98a52'), g: hex('#7e8a96'), q: hex('#e6eef4') });
+  return { frames: angled(base, 4.5, 1.5, 13), fps: 0, anchor: [7, 7], desc: 'Crossbow bolt, 9 frames: flight angle -60..60 degrees in 15 degree steps (frame 4 = level).' };
+}
+
+/** Musket ball with a short smoky streak behind it. */
+export function musketBall(): Strip {
+  const base = new Img(9, 3);
+  base.hline(0, 2, 1, withAlpha(hex('#c8c0cc'), 120));
+  base.hline(3, 5, 1, withAlpha(hex('#e8e2ec'), 200));
+  base.rect(6, 0, 3, 3, hex('#4a505e'));
+  base.set(6, 0, 0);
+  base.set(8, 2, 0);
+  base.set(7, 0, hex('#9aa2ae'));
+  base.set(6, 1, hex('#6a7280'));
+  return { frames: angled(base, 7, 1.5, 13, false), fps: 0, anchor: [6, 6], desc: 'Musket ball with a smoke streak, 9 angle frames (frame 4 = level).' };
+}
+
+/** Rifle bullet: bright tracer streak. */
+export function bullet(): Strip {
+  const base = new Img(10, 2);
+  base.hline(0, 3, 0, withAlpha(FIRE.base, 110));
+  base.hline(4, 7, 0, FIRE.hl);
+  base.hline(8, 9, 0, WHITE);
+  base.hline(2, 8, 1, withAlpha(FIRE.shade, 160));
+  return { frames: angled(base, 8, 1, 13, false), fps: 0, anchor: [6, 6], desc: 'Rifle tracer bullet, 9 angle frames (frame 4 = level).' };
+}
+
+/** Energy bolt: white-hot core in a cyan glow. */
+export function energyBolt(): Strip {
+  const base = new Img(11, 5);
+  base.hline(1, 9, 2, hex('#5ce6ff'));
+  base.hline(3, 9, 1, withAlpha(hex('#5ce6ff'), 170));
+  base.hline(3, 9, 3, withAlpha(hex('#5ce6ff'), 170));
+  base.hline(4, 10, 2, hex('#c4fbff'));
+  base.hline(6, 10, 2, WHITE);
+  base.set(0, 2, withAlpha(hex('#2a9cf0'), 160));
+  base.set(10, 1, withAlpha(hex('#c4fbff'), 200));
+  base.set(10, 3, withAlpha(hex('#c4fbff'), 200));
+  return { frames: angled(base, 8, 2.5, 15, false), fps: 0, anchor: [7, 7], desc: 'Energy bolt, 9 angle frames (frame 4 = level).' };
+}
+
+/** Muzzle flash: a hot star that shrinks fast. Faces right; mirrored in game for the enemy. */
+export function muzzleFlash(): Strip {
+  const frames: Img[] = [];
+  const shapes = [
+    ['..h......', '.hfh.h...', 'hfFFfFfh.', 'fFWWWFFfh', 'hfFFfFfh.', '.hfh.h...', '..h......'],
+    ['.........', '..h......', '.hfFfh...', 'hfWWFfh..', '.hfFfh...', '..h......', '.........'],
+    ['.........', '.........', '..hf.....', '.hfFh....', '..hf.....', '.........', '.........'],
+  ];
+  for (const s of shapes) frames.push(Img.fromGrid(s, { h: FIRE.deep, f: FIRE.base, F: FIRE.hl, W: WHITE }));
+  return { frames, fps: 24, anchor: [0, 3], desc: 'Gun muzzle flash, 3 fast frames; anchor at the muzzle, faces right.' };
+}
+
+/** Black-powder smoke puff that blooms forward and drifts. */
+export function gunSmoke(): Strip {
+  const frames: Img[] = [];
+  const blobs: [number, number, number][] = [[3, 6, 2.2], [7, 5, 2.8], [11, 6, 2.4], [8, 3, 2]];
+  for (let f = 0; f < 6; f++) {
+    const img = new Img(20, 12);
+    const grow = 0.7 + f * 0.22;
+    for (const [bx, by, br] of blobs) {
+      img.ellipse(bx + f * 0.9, by - f * 0.3, br * grow, br * grow * 0.85, (px, py, nx, ny) => {
+        if (f >= 3 && bayer(px, py) < (f - 2) * 0.26) return 0;
+        return ny > 0.35 ? hex('#a8a0b4') : nx + ny < -0.4 ? WHITE : hex('#dcd6e4');
+      });
+    }
+    frames.push(img);
+  }
+  return { frames, fps: 10, anchor: [1, 6], desc: 'Gun smoke puff, 6 frames; anchor at the muzzle, blooms forward.' };
+}
+
+/** Puff of white steam (walker vents, cannon fuse). */
+export function steam(): Strip {
+  const frames: Img[] = [];
+  for (let f = 0; f < 5; f++) {
+    const img = new Img(12, 14);
+    const t = f / 4;
+    const rad = 1.6 + t * 3;
+    img.ellipse(6, 11 - t * 7, rad, rad, (px, py, nx, ny) => {
+      if (f >= 3 && bayer(px, py) < (f - 2) * 0.4) return 0;
+      return ny > 0.4 ? hex('#c4ccd8') : nx + ny < -0.4 ? WHITE : hex('#e8eef4');
+    });
+    frames.push(img);
+  }
+  return { frames, fps: 10, anchor: [6, 12], desc: 'Steam puff, 5 frames.' };
+}
+
+/** Blinking beacon light for the Future fortress (replaces the torch flame). */
+export function beacon(): Strip {
+  const frames: Img[] = [];
+  const cols = [[hex('#ffffff'), hex('#c4fbff'), hex('#5ce6ff')], [hex('#c4fbff'), hex('#5ce6ff'), hex('#2a9cf0')], [hex('#5ce6ff'), hex('#2a9cf0'), 0], [hex('#2a9cf0'), 0, 0]];
+  for (const [a, b, c] of cols) {
+    const img = new Img(7, 7);
+    if (c) for (const [x, y] of [[3, 0], [0, 3], [6, 3], [3, 6], [1, 1], [5, 1], [1, 5], [5, 5]]) img.set(x, y, withAlpha(c, 150));
+    if (b) img.ellipse(3.5, 3.5, 2.5, 2.5, b);
+    img.ellipse(3.5, 3.5, 1.5, 1.5, a);
+    frames.push(img);
+  }
+  return { frames, fps: 6, anchor: [3, 5], desc: 'Beacon light, 4 frames (pulses); stands in for the torch on the Future fortress.' };
+}
+
+/** Energy-weapon discharge: a cyan-white star. Faces right; mirrored in game for the enemy. */
+export function plasmaFlash(): Strip {
+  const frames: Img[] = [];
+  const shapes = [
+    ['..h......', '.hfh..h..', 'hfFFfFfh.', 'fFWWWFFfh', 'hfFFfFfh.', '.hfh..h..', '..h......'],
+    ['.........', '..h......', '.hfFh....', 'hFWWFh...', '.hfFh....', '..h......', '.........'],
+    ['.........', '.........', '..h......', '.hFh.....', '..h......', '.........', '.........'],
+  ];
+  for (const s of shapes) frames.push(Img.fromGrid(s, { h: hex('#2a9cf0'), f: hex('#5ce6ff'), F: hex('#c4fbff'), W: WHITE }));
+  return { frames, fps: 24, anchor: [0, 3], desc: 'Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.' };
+}

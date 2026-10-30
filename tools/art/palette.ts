@@ -31,3 +31,14 @@ export const BRONZE = { hl: hex('#fff2a6'), base: hex('#e6b84a'), shade: hex('#b
 export const LINEN = { hl: hex('#fffaf0'), base: hex('#ece2cc'), shade: hex('#c4b494'), deep: hex('#8e7e64') };
 export const SAND = { hl: hex('#fbe8b8'), base: hex('#e8c88a'), shade: hex('#c49a5e'), deep: hex('#8e6a3e'), dark: hex('#5e4430') };
 export const STEEL = { hl: hex('#f2f6fa'), base: hex('#b8c2cc'), shade: hex('#7e8a96'), deep: hex('#4e5864') };
+
+// Later Ages (Crusader to Future). Same ramp shape: highlight -> base -> shade -> deep.
+export const MAIL = { hl: hex('#d6dce2'), base: hex('#9ea8b2'), shade: hex('#6e7884'), deep: hex('#474e5a') };
+export const IRON = { hl: hex('#9aa2ae'), base: hex('#6a7280'), shade: hex('#4a505e'), deep: hex('#30343f') };
+export const FELT = { hl: hex('#6a5a6e'), base: hex('#45384c'), shade: hex('#312838'), deep: hex('#221c28') };
+export const KHAKI = { hl: hex('#d6cc96'), base: hex('#aea46c'), shade: hex('#807a4c'), deep: hex('#555234') };
+export const DRAB = { hl: hex('#a8b294'), base: hex('#7c866a'), shade: hex('#5a624e'), deep: hex('#3c4236') };
+export const BRICK = { hl: hex('#e28a6a'), base: hex('#b8573e'), shade: hex('#8c3d30'), deep: hex('#5e2a26') };
+export const ALLOY = { hl: hex('#f2f6fb'), base: hex('#c6d0dc'), shade: hex('#8e9aae'), deep: hex('#5a6680') };
+export const SUIT = { hl: hex('#5e6688'), base: hex('#404668'), shade: hex('#2c304e'), deep: hex('#1e2038') };
+export const PLASMA = { hl: hex('#ffffff'), base: hex('#c4fbff'), shade: hex('#5ce6ff'), deep: hex('#2a9cf0') };

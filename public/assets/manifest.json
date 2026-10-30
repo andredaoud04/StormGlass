@@ -569,6 +569,1142 @@
     }
    }
   },
+  "troop.crusader_footman.blue": {
+   "kind": "sheet",
+   "file": "troops/crusader_footman_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.crusader_footman": {
+   "kind": "image",
+   "file": "portraits/crusader_footman.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.crusader_footman.red": {
+   "kind": "sheet",
+   "file": "troops/crusader_footman_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.crusader_crossbow.blue": {
+   "kind": "sheet",
+   "file": "troops/crusader_crossbow_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    12,
+    -13
+   ]
+  },
+  "portrait.crusader_crossbow": {
+   "kind": "image",
+   "file": "portraits/crusader_crossbow.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.crusader_crossbow.red": {
+   "kind": "sheet",
+   "file": "troops/crusader_crossbow_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    12,
+    -13
+   ]
+  },
+  "troop.crusader_knight.blue": {
+   "kind": "sheet",
+   "file": "troops/crusader_knight_blue.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.crusader_knight": {
+   "kind": "image",
+   "file": "portraits/crusader_knight.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.crusader_knight.red": {
+   "kind": "sheet",
+   "file": "troops/crusader_knight_red.png",
+   "frameW": 52,
+   "frameH": 46,
+   "anchor": [
+    24,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.gunpowder_pikeman.blue": {
+   "kind": "sheet",
+   "file": "troops/gunpowder_pikeman_blue.png",
+   "frameW": 48,
+   "frameH": 38,
+   "anchor": [
+    19,
+    34
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.gunpowder_pikeman": {
+   "kind": "image",
+   "file": "portraits/gunpowder_pikeman.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.gunpowder_pikeman.red": {
+   "kind": "sheet",
+   "file": "troops/gunpowder_pikeman_red.png",
+   "frameW": 48,
+   "frameH": 38,
+   "anchor": [
+    19,
+    34
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.gunpowder_musketeer.blue": {
+   "kind": "sheet",
+   "file": "troops/gunpowder_musketeer_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    15,
+    -14
+   ]
+  },
+  "portrait.gunpowder_musketeer": {
+   "kind": "image",
+   "file": "portraits/gunpowder_musketeer.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.gunpowder_musketeer.red": {
+   "kind": "sheet",
+   "file": "troops/gunpowder_musketeer_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    15,
+    -14
+   ]
+  },
+  "troop.gunpowder_cannon.blue": {
+   "kind": "sheet",
+   "file": "troops/gunpowder_cannon_blue.png",
+   "frameW": 64,
+   "frameH": 46,
+   "anchor": [
+    30,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.gunpowder_cannon": {
+   "kind": "image",
+   "file": "portraits/gunpowder_cannon.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.gunpowder_cannon.red": {
+   "kind": "sheet",
+   "file": "troops/gunpowder_cannon_red.png",
+   "frameW": 64,
+   "frameH": 46,
+   "anchor": [
+    30,
+    41
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.industrial_trencher.blue": {
+   "kind": "sheet",
+   "file": "troops/industrial_trencher_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.industrial_trencher": {
+   "kind": "image",
+   "file": "portraits/industrial_trencher.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.industrial_trencher.red": {
+   "kind": "sheet",
+   "file": "troops/industrial_trencher_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.industrial_rifleman.blue": {
+   "kind": "sheet",
+   "file": "troops/industrial_rifleman_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    15,
+    -14
+   ]
+  },
+  "portrait.industrial_rifleman": {
+   "kind": "image",
+   "file": "portraits/industrial_rifleman.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.industrial_rifleman.red": {
+   "kind": "sheet",
+   "file": "troops/industrial_rifleman_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    15,
+    -14
+   ]
+  },
+  "troop.industrial_walker.blue": {
+   "kind": "sheet",
+   "file": "troops/industrial_walker_blue.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.industrial_walker": {
+   "kind": "image",
+   "file": "portraits/industrial_walker.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.industrial_walker.red": {
+   "kind": "sheet",
+   "file": "troops/industrial_walker_red.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.future_blade.blue": {
+   "kind": "sheet",
+   "file": "troops/future_blade_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.future_blade": {
+   "kind": "image",
+   "file": "portraits/future_blade.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.future_blade.red": {
+   "kind": "sheet",
+   "file": "troops/future_blade_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.future_gunner.blue": {
+   "kind": "sheet",
+   "file": "troops/future_gunner_blue.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    12,
+    -13
+   ]
+  },
+  "portrait.future_gunner": {
+   "kind": "image",
+   "file": "portraits/future_gunner.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.future_gunner.red": {
+   "kind": "sheet",
+   "file": "troops/future_gunner_red.png",
+   "frameW": 40,
+   "frameH": 36,
+   "anchor": [
+    18,
+    32
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   },
+   "muzzle": [
+    12,
+    -13
+   ]
+  },
+  "troop.future_mech.blue": {
+   "kind": "sheet",
+   "file": "troops/future_mech_blue.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.future_mech": {
+   "kind": "image",
+   "file": "portraits/future_mech.png",
+   "w": 32,
+   "h": 28
+  },
+  "troop.future_mech.red": {
+   "kind": "sheet",
+   "file": "troops/future_mech_red.png",
+   "frameW": 56,
+   "frameH": 50,
+   "anchor": [
+    26,
+    46
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -708,6 +1844,286 @@
    "file": "env/ancient/cloud3.png",
    "w": 24,
    "h": 9
+  },
+  "env.crusader.sky": {
+   "kind": "image",
+   "file": "env/crusader/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.crusader.far": {
+   "kind": "image",
+   "file": "env/crusader/far.png",
+   "w": 256,
+   "h": 150,
+   "anchor": [
+    0,
+    160
+   ]
+  },
+  "env.crusader.mid": {
+   "kind": "image",
+   "file": "env/crusader/mid.png",
+   "w": 256,
+   "h": 66,
+   "anchor": [
+    0,
+    62
+   ]
+  },
+  "env.crusader.ground": {
+   "kind": "image",
+   "file": "env/crusader/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.crusader.cloud0": {
+   "kind": "image",
+   "file": "env/crusader/cloud0.png",
+   "w": 54,
+   "h": 16
+  },
+  "env.crusader.cloud1": {
+   "kind": "image",
+   "file": "env/crusader/cloud1.png",
+   "w": 36,
+   "h": 12
+  },
+  "env.crusader.cloud2": {
+   "kind": "image",
+   "file": "env/crusader/cloud2.png",
+   "w": 62,
+   "h": 18
+  },
+  "env.crusader.cloud3": {
+   "kind": "image",
+   "file": "env/crusader/cloud3.png",
+   "w": 28,
+   "h": 10
+  },
+  "env.crusader.cloud4": {
+   "kind": "image",
+   "file": "env/crusader/cloud4.png",
+   "w": 46,
+   "h": 14
+  },
+  "env.gunpowder.sky": {
+   "kind": "image",
+   "file": "env/gunpowder/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.gunpowder.far": {
+   "kind": "image",
+   "file": "env/gunpowder/far.png",
+   "w": 256,
+   "h": 130,
+   "anchor": [
+    0,
+    138
+   ]
+  },
+  "env.gunpowder.mid": {
+   "kind": "image",
+   "file": "env/gunpowder/mid.png",
+   "w": 256,
+   "h": 64,
+   "anchor": [
+    0,
+    60
+   ]
+  },
+  "env.gunpowder.ground": {
+   "kind": "image",
+   "file": "env/gunpowder/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.gunpowder.cloud0": {
+   "kind": "image",
+   "file": "env/gunpowder/cloud0.png",
+   "w": 60,
+   "h": 18
+  },
+  "env.gunpowder.cloud1": {
+   "kind": "image",
+   "file": "env/gunpowder/cloud1.png",
+   "w": 40,
+   "h": 14
+  },
+  "env.gunpowder.cloud2": {
+   "kind": "image",
+   "file": "env/gunpowder/cloud2.png",
+   "w": 70,
+   "h": 20
+  },
+  "env.gunpowder.cloud3": {
+   "kind": "image",
+   "file": "env/gunpowder/cloud3.png",
+   "w": 30,
+   "h": 11
+  },
+  "env.gunpowder.cloud4": {
+   "kind": "image",
+   "file": "env/gunpowder/cloud4.png",
+   "w": 50,
+   "h": 15
+  },
+  "env.industrial.sky": {
+   "kind": "image",
+   "file": "env/industrial/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.industrial.far": {
+   "kind": "image",
+   "file": "env/industrial/far.png",
+   "w": 256,
+   "h": 120,
+   "anchor": [
+    0,
+    126
+   ]
+  },
+  "env.industrial.mid": {
+   "kind": "image",
+   "file": "env/industrial/mid.png",
+   "w": 256,
+   "h": 62,
+   "anchor": [
+    0,
+    58
+   ]
+  },
+  "env.industrial.ground": {
+   "kind": "image",
+   "file": "env/industrial/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.industrial.cloud0": {
+   "kind": "image",
+   "file": "env/industrial/cloud0.png",
+   "w": 64,
+   "h": 18
+  },
+  "env.industrial.cloud1": {
+   "kind": "image",
+   "file": "env/industrial/cloud1.png",
+   "w": 44,
+   "h": 14
+  },
+  "env.industrial.cloud2": {
+   "kind": "image",
+   "file": "env/industrial/cloud2.png",
+   "w": 76,
+   "h": 20
+  },
+  "env.industrial.cloud3": {
+   "kind": "image",
+   "file": "env/industrial/cloud3.png",
+   "w": 34,
+   "h": 12
+  },
+  "env.industrial.cloud4": {
+   "kind": "image",
+   "file": "env/industrial/cloud4.png",
+   "w": 56,
+   "h": 16
+  },
+  "env.industrial.cloud5": {
+   "kind": "image",
+   "file": "env/industrial/cloud5.png",
+   "w": 40,
+   "h": 13
+  },
+  "env.future.sky": {
+   "kind": "image",
+   "file": "env/future/sky.png",
+   "w": 256,
+   "h": 240,
+   "anchor": [
+    0,
+    232
+   ]
+  },
+  "env.future.far": {
+   "kind": "image",
+   "file": "env/future/far.png",
+   "w": 256,
+   "h": 140,
+   "anchor": [
+    0,
+    146
+   ]
+  },
+  "env.future.mid": {
+   "kind": "image",
+   "file": "env/future/mid.png",
+   "w": 256,
+   "h": 64,
+   "anchor": [
+    0,
+    60
+   ]
+  },
+  "env.future.ground": {
+   "kind": "image",
+   "file": "env/future/ground.png",
+   "w": 256,
+   "h": 96,
+   "anchor": [
+    0,
+    22
+   ]
+  },
+  "env.future.cloud0": {
+   "kind": "image",
+   "file": "env/future/cloud0.png",
+   "w": 60,
+   "h": 12
+  },
+  "env.future.cloud1": {
+   "kind": "image",
+   "file": "env/future/cloud1.png",
+   "w": 40,
+   "h": 9
+  },
+  "env.future.cloud2": {
+   "kind": "image",
+   "file": "env/future/cloud2.png",
+   "w": 72,
+   "h": 14
+  },
+  "env.future.cloud3": {
+   "kind": "image",
+   "file": "env/future/cloud3.png",
+   "w": 32,
+   "h": 8
   },
   "base.stone.blue.0": {
    "kind": "image",
@@ -862,6 +2278,326 @@
   "base.ancient.red.3": {
    "kind": "image",
    "file": "bases/ancient_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.0": {
+   "kind": "image",
+   "file": "bases/crusader_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.1": {
+   "kind": "image",
+   "file": "bases/crusader_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.2": {
+   "kind": "image",
+   "file": "bases/crusader_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.blue.3": {
+   "kind": "image",
+   "file": "bases/crusader_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.0": {
+   "kind": "image",
+   "file": "bases/crusader_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.1": {
+   "kind": "image",
+   "file": "bases/crusader_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.2": {
+   "kind": "image",
+   "file": "bases/crusader_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.crusader.red.3": {
+   "kind": "image",
+   "file": "bases/crusader_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.blue.0": {
+   "kind": "image",
+   "file": "bases/gunpowder_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.blue.1": {
+   "kind": "image",
+   "file": "bases/gunpowder_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.blue.2": {
+   "kind": "image",
+   "file": "bases/gunpowder_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.blue.3": {
+   "kind": "image",
+   "file": "bases/gunpowder_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.red.0": {
+   "kind": "image",
+   "file": "bases/gunpowder_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.red.1": {
+   "kind": "image",
+   "file": "bases/gunpowder_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.red.2": {
+   "kind": "image",
+   "file": "bases/gunpowder_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.gunpowder.red.3": {
+   "kind": "image",
+   "file": "bases/gunpowder_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.0": {
+   "kind": "image",
+   "file": "bases/industrial_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.1": {
+   "kind": "image",
+   "file": "bases/industrial_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.2": {
+   "kind": "image",
+   "file": "bases/industrial_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.blue.3": {
+   "kind": "image",
+   "file": "bases/industrial_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.0": {
+   "kind": "image",
+   "file": "bases/industrial_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.1": {
+   "kind": "image",
+   "file": "bases/industrial_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.2": {
+   "kind": "image",
+   "file": "bases/industrial_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.industrial.red.3": {
+   "kind": "image",
+   "file": "bases/industrial_red_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.0": {
+   "kind": "image",
+   "file": "bases/future_blue_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.1": {
+   "kind": "image",
+   "file": "bases/future_blue_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.2": {
+   "kind": "image",
+   "file": "bases/future_blue_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.blue.3": {
+   "kind": "image",
+   "file": "bases/future_blue_3.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.0": {
+   "kind": "image",
+   "file": "bases/future_red_0.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.1": {
+   "kind": "image",
+   "file": "bases/future_red_1.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.2": {
+   "kind": "image",
+   "file": "bases/future_red_2.png",
+   "w": 72,
+   "h": 96,
+   "anchor": [
+    60,
+    86
+   ]
+  },
+  "base.future.red.3": {
+   "kind": "image",
+   "file": "bases/future_red_3.png",
    "w": 72,
    "h": 96,
    "anchor": [
@@ -1448,6 +3184,46 @@
     6
    ]
   },
+  "ui.wall_crusader": {
+   "kind": "image",
+   "file": "ui/wall_crusader.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
+  "ui.wall_gunpowder": {
+   "kind": "image",
+   "file": "ui/wall_gunpowder.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
+  "ui.wall_industrial": {
+   "kind": "image",
+   "file": "ui/wall_industrial.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
+  "ui.wall_future": {
+   "kind": "image",
+   "file": "ui/wall_future.png",
+   "w": 256,
+   "h": 220,
+   "anchor": [
+    128,
+    6
+   ]
+  },
   "ui.ribbon_gold": {
    "kind": "image",
    "file": "ui/ribbon_gold.png",
@@ -1657,6 +3433,114 @@
     7,
     7
    ]
+  },
+  "proj.bolt": {
+   "kind": "strip",
+   "file": "fx/proj_bolt.png",
+   "frameW": 15,
+   "frameH": 15,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    7,
+    7
+   ]
+  },
+  "proj.musket": {
+   "kind": "strip",
+   "file": "fx/proj_musket.png",
+   "frameW": 13,
+   "frameH": 13,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    6,
+    6
+   ]
+  },
+  "proj.bullet": {
+   "kind": "strip",
+   "file": "fx/proj_bullet.png",
+   "frameW": 13,
+   "frameH": 13,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    6,
+    6
+   ]
+  },
+  "proj.energy": {
+   "kind": "strip",
+   "file": "fx/proj_energy.png",
+   "frameW": 15,
+   "frameH": 15,
+   "frames": 9,
+   "fps": 0,
+   "anchor": [
+    7,
+    7
+   ]
+  },
+  "fx.muzzle": {
+   "kind": "strip",
+   "file": "fx/muzzle.png",
+   "frameW": 9,
+   "frameH": 7,
+   "frames": 3,
+   "fps": 24,
+   "anchor": [
+    0,
+    3
+   ]
+  },
+  "fx.gunsmoke": {
+   "kind": "strip",
+   "file": "fx/gunsmoke.png",
+   "frameW": 20,
+   "frameH": 12,
+   "frames": 6,
+   "fps": 10,
+   "anchor": [
+    1,
+    6
+   ]
+  },
+  "fx.steam": {
+   "kind": "strip",
+   "file": "fx/steam.png",
+   "frameW": 12,
+   "frameH": 14,
+   "frames": 5,
+   "fps": 10,
+   "anchor": [
+    6,
+    12
+   ]
+  },
+  "fx.beacon": {
+   "kind": "strip",
+   "file": "fx/beacon.png",
+   "frameW": 7,
+   "frameH": 7,
+   "frames": 4,
+   "fps": 6,
+   "anchor": [
+    3,
+    5
+   ]
+  },
+  "fx.zap": {
+   "kind": "strip",
+   "file": "fx/zap.png",
+   "frameW": 9,
+   "frameH": 7,
+   "frames": 3,
+   "fps": 24,
+   "anchor": [
+    0,
+    3
+   ]
   }
  },
  "sounds": {
@@ -1704,6 +3588,49 @@
   "troop.ancient_guard": {
    "top": -28
   },
+  "troop.crusader_footman": {
+   "top": -24
+  },
+  "troop.crusader_crossbow": {
+   "top": -24,
+   "projectile": "proj.bolt"
+  },
+  "troop.crusader_knight": {
+   "top": -28
+  },
+  "troop.gunpowder_pikeman": {
+   "top": -25
+  },
+  "troop.gunpowder_musketeer": {
+   "top": -24,
+   "projectile": "proj.musket",
+   "muzzleFx": "fx.muzzle,fx.gunsmoke"
+  },
+  "troop.gunpowder_cannon": {
+   "top": -24
+  },
+  "troop.industrial_trencher": {
+   "top": -23
+  },
+  "troop.industrial_rifleman": {
+   "top": -23,
+   "projectile": "proj.bullet",
+   "muzzleFx": "fx.muzzle"
+  },
+  "troop.industrial_walker": {
+   "top": -30
+  },
+  "troop.future_blade": {
+   "top": -23
+  },
+  "troop.future_gunner": {
+   "top": -22,
+   "projectile": "proj.energy",
+   "muzzleFx": "fx.zap"
+  },
+  "troop.future_mech": {
+   "top": -30
+  },
   "env.stone": {
    "skyTop": "#2f6cc4",
    "clouds": 6,
@@ -1712,6 +3639,26 @@
   },
   "env.ancient": {
    "skyTop": "#3a86d0",
+   "clouds": 4
+  },
+  "env.crusader": {
+   "skyTop": "#3468b8",
+   "clouds": 5
+  },
+  "env.gunpowder": {
+   "skyTop": "#40639a",
+   "clouds": 5,
+   "volcanoX": 192,
+   "volcanoY": 96
+  },
+  "env.industrial": {
+   "skyTop": "#3c4466",
+   "clouds": 6,
+   "volcanoX": 134,
+   "volcanoY": 42
+  },
+  "env.future": {
+   "skyTop": "#1c1840",
    "clouds": 4
   },
   "base.stone": {
@@ -1730,10 +3677,67 @@
    "smokeX": 25,
    "smokeY": 30
   },
+  "base.crusader": {
+   "flagX": 27,
+   "flagY": 7,
+   "torchX": 8,
+   "torchY": 54,
+   "smokeX": 22,
+   "smokeY": 30
+  },
+  "base.gunpowder": {
+   "flagX": 21,
+   "flagY": 6,
+   "torchX": 6,
+   "torchY": 54,
+   "smokeX": 20,
+   "smokeY": 30
+  },
+  "base.industrial": {
+   "flagX": 33,
+   "flagY": 18,
+   "torchX": 5,
+   "torchY": 56,
+   "smokeX": 24,
+   "smokeY": 34
+  },
+  "base.future": {
+   "flagX": 29,
+   "flagY": 11,
+   "torchX": 55,
+   "torchY": 37,
+   "smokeX": 24,
+   "smokeY": 34,
+   "torchFx": "fx.beacon"
+  },
   "proj.arrow": {
    "mode": "angle",
    "min": -60,
    "step": 15
+  },
+  "proj.bolt": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 7
+  },
+  "proj.musket": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 4
+  },
+  "proj.bullet": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 2
+  },
+  "proj.energy": {
+   "mode": "angle",
+   "min": -60,
+   "step": 15,
+   "arc": 1
   }
  }
 }

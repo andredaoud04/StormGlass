@@ -83,7 +83,7 @@ function prepLimb(l: Limb, deg: number, ink: Color): { img: Img; px: number; py:
   return { img: r.outlined(ink), px: c + 1, py: c + 1 };
 }
 
-function place(frame: Img, l: Limb, deg: number, at: [number, number], ink: Color): void {
+export function place(frame: Img, l: Limb, deg: number, at: [number, number], ink: Color): void {
   const p = prepLimb(l, deg, ink);
   frame.blit(p.img, Math.round(at[0] - p.px), Math.round(at[1] - p.py));
 }
@@ -155,4 +155,19 @@ export function packSheet(anims: AnimSpec[], fw: number, fh: number): { sheet: I
     rows[a.name] = { row, frames: a.frames.length, fps: a.fps, loop: a.loop, ...(a.hitFrame !== undefined ? { hitFrame: a.hitFrame } : {}) };
   });
   return { sheet, rows };
+}
+
+/**
+ * Where the weapon's tip sits for a pose, relative to the sheet anchor (feet), facing right.
+ * Used to place the projectile release point exactly at the muzzle.
+ */
+export function weaponTip(r: RigParts, pose: Pose): [number, number] {
+  const [bx, by] = pose.body ?? [0, 0];
+  const fs: [number, number] = [r.hip[0] + bx + r.frontShoulder[0], r.hip[1] + by + r.frontShoulder[1]];
+  const hand = handPos(r.frontArm, fs, pose.frontArm ?? 0);
+  const w = r.weapon;
+  if (!w) return [hand[0] - r.hip[0], hand[1] - r.hip[1] - 4];
+  const tip = w.tip ?? [w.pivot[0], 0];
+  const [dx, dy] = rotPoint(tip[0] - w.pivot[0], tip[1] - w.pivot[1], pose.weapon ?? 0);
+  return [Math.round(hand[0] + dx - r.hip[0]), Math.round(hand[1] + dy - (r.hip[1] + 4))];
 }
