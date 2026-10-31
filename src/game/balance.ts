@@ -68,6 +68,7 @@ export interface Balance {
   camp: CampRules;
   campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[] };
   bosses: Record<AgeId, BossInfo>;
+  skills: { stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
   timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number; goldGrowthPerTimeline: number };
 }
 

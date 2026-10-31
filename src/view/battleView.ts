@@ -84,6 +84,8 @@ export class BattleView {
   /** Boss telegraphs: where a strike will land and when. */
   private marks: { x: number; r: number; t: number; dur: number; move: string }[] = [];
   private wardFlash = 0;
+  /** Screen flash (Stormcall). */
+  private flash = 0;
   private wardBroken = 0;
   private bossDash = 0;
 
@@ -272,6 +274,17 @@ export class BattleView {
           this.projs.delete(e.projectile);
           break;
         }
+        case 'skill': {
+          const cx = this.laneToPx(e.x);
+          this.fx.add('fx.lightning', cx, G + 2);
+          this.fx.add('fx.ring', cx, G - 2);
+          for (let k = 0; k < 6; k++) this.fx.add('fx.debris', cx, G - 2, { vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, gravity: 300, life: 0.7, fps: 14 });
+          this.flash = 0.18;
+          this.shake.add(5, 0.35);
+          this.hooks.onImpact?.(true, true);
+          this.app.sfx('thunder', { vol: 1 });
+          break;
+        }
         case 'bossSpawn': {
           this.shake.add(4, 0.5);
           this.app.sfx('roar', { vol: 0.9 });
@@ -410,6 +423,7 @@ export class BattleView {
     for (const m of this.marks) m.t += adt;
     this.marks = this.marks.filter((m) => m.t < m.dur + 0.2);
     this.wardFlash = Math.max(0, this.wardFlash - dt);
+    this.flash = Math.max(0, this.flash - dt);
     this.wardBroken = Math.max(0, this.wardBroken - dt);
     if (this.bossDash > 0) {
       this.bossDash -= adt;

@@ -1,4 +1,4 @@
-import type { BattleConfig, TroopKind, TroopStats } from '../sim/types';
+import type { BattleConfig, SkillConfig, TroopKind, TroopStats } from '../sim/types';
 import { BALANCE, ageDef, troopDef, type TroopDef } from './balance';
 
 export function isBossStage(stage: number): boolean {
@@ -45,6 +45,8 @@ export interface BattleSetupInput {
   /** Extra HP and damage multiplier per troop kind (Age Camp). */
   kindMul?: Partial<Record<TroopKind, number>>;
   campaign?: boolean;
+  /** Stormcall is unlocked for this player. */
+  stormcall?: boolean;
 }
 
 export function troopStats(d: TroopDef, hpMul = 1, dmgMul = 1): TroopStats {
@@ -59,6 +61,13 @@ export function troopStats(d: TroopDef, hpMul = 1, dmgMul = 1): TroopStats {
     speed: d.speed,
     tank: d.kind === 'tank',
   };
+}
+
+export function stormcallConfig(armyAge: number, mul: number): SkillConfig {
+  const sk = BALANCE.skills.stormcall;
+  const tank = ageDef(armyAge).troops.find((t) => t.kind === 'tank')!;
+  const tr = BALANCE.sim.tickRate;
+  return { dmg: Math.round(tank.dmg * sk.dmgMul * mul), radius: sk.radius, cooldownTicks: Math.round(sk.cooldownSec * tr), firstTicks: Math.round(sk.firstReadySec * tr), bossMul: sk.bossMul };
 }
 
 export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
@@ -98,5 +107,6 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     baseGoldSteps: b.economy.baseGoldSteps,
     status: b.status,
     boss: isBossStage(stage) ? bossStats(input.enemyAge, timelineMul, goldMul) : undefined,
+    skill: input.stormcall ? stormcallConfig(input.armyAge, Math.max(kindMul('melee'), kindMul('ranged'), kindMul('tank'))) : undefined,
   };
 }

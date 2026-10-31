@@ -11,6 +11,8 @@ export interface Settings {
   sound: boolean;
   /** Turns off screen shake and big flashes. */
   reducedMotion: boolean;
+  /** Battles run at double speed (once unlocked). */
+  fast: boolean;
 }
 
 export interface Stats {
@@ -69,7 +71,7 @@ export function newSave(now = 0): SaveData {
     camp: {},
     battleNo: 0,
     stats: { battles: 0, wins: 0, losses: 0, retreats: 0, goldEarned: 0, kills: 0 },
-    settings: { sound: true, reducedMotion: false },
+    settings: { sound: true, reducedMotion: false, fast: false },
     seen: [],
   };
 }
@@ -167,7 +169,7 @@ export function repair(s: AnySave): SaveData {
       goldEarned: int(stats.goldEarned, 0, 0, 1e12),
       kills: int(stats.kills, 0, 0, 1e12),
     },
-    settings: { sound: settings.sound !== false, reducedMotion: settings.reducedMotion === true },
+    settings: { sound: settings.sound !== false, reducedMotion: settings.reducedMotion === true, fast: settings.fast === true },
     seen: Array.isArray(s.seen) ? (s.seen as unknown[]).filter((x): x is string => typeof x === 'string') : [],
   };
 }

@@ -700,5 +700,18 @@
       "gold": 260,
       "strikes": 2
     }
+  },
+  "skills": {
+    "notes": "Stormcall: a lightning strike on the enemy closest to your fortress. Damage = your Age's tank damage x dmgMul x your best Camp troop multiplier.",
+    "stormcall": {
+      "name": "Stormcall",
+      "dmgMul": 2.5,
+      "radius": 70,
+      "cooldownSec": 20,
+      "firstReadySec": 6,
+      "bossMul": 0.5,
+      "unlockStage": 4
+    },
+    "speedUnlockStage": 3
   }
 }

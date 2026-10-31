@@ -254,3 +254,47 @@ describe('bosses', () => {
     expect(stateHash(a.state)).toBe(stateHash(b.state));
   });
 });
+
+describe('Stormcall', () => {
+  const withSkill = () => buildBattleConfig({ seed: 5, loadout: ['stone_clubber'], enemyAge: 0, armyAge: 0, timeline: 1, stormcall: true });
+
+  it('is absent until unlocked', () => {
+    const s = createBattle(config());
+    const ev = stepBattle(s, [{ type: 'skill' }]);
+    expect(ev.some((e) => e.type === 'skillFail' && e.reason === 'locked')).toBe(true);
+  });
+
+  it('waits for its first charge, then strikes the enemy nearest your fortress', () => {
+    const cfg = withSkill();
+    const s = createBattle(cfg);
+    const early = stepBattle(s, [{ type: 'skill' }]);
+    expect(early.some((e) => e.type === 'skillFail' && e.reason === 'cooldown')).toBe(true);
+    while (s.skillCooldown > 0 || !s.units.some((u) => u.side === 1)) stepBattle(s);
+    const enemy = s.units.find((u) => u.side === 1 && u.alive)!;
+    const hp = enemy.hp;
+    const ev = stepBattle(s, [{ type: 'skill' }]);
+    expect(ev.some((e) => e.type === 'skill')).toBe(true);
+    expect(enemy.hp).toBeLessThan(hp);
+    expect(s.skillCooldown).toBe(cfg.skill!.cooldownTicks - 1);
+    expect(s.skillsUsed).toBe(1);
+  });
+
+  it('does not spend its charge when there is nothing to hit', () => {
+    const cfg = withSkill();
+    const s = createBattle({ ...cfg, skill: { ...cfg.skill!, firstTicks: 0 } });
+    const ev = stepBattle(s, [{ type: 'skill' }]);
+    expect(ev.some((e) => e.type === 'skillFail' && e.reason === 'target')).toBe(true);
+    expect(s.skillsUsed).toBe(0);
+  });
+
+  it('bosses take reduced damage', () => {
+    const cfg = buildBattleConfig({ seed: 5, loadout: ['stone_clubber'], enemyAge: 0, armyAge: 0, stage: 4, timeline: 1, stormcall: true });
+    const s = createBattle({ ...cfg, wave: { spawns: [[999, 'melee']], loopFrom: 0, loopPeriod: 999 } });
+    while (!s.bossSpawned) stepBattle(s);
+    while (s.skillCooldown > 0) stepBattle(s);
+    const boss = s.units.find((u) => u.id === s.bossId)!;
+    const hp = boss.hp;
+    stepBattle(s, [{ type: 'skill' }]);
+    expect(Math.round(hp - boss.hp)).toBe(Math.round(cfg.skill!.dmg * cfg.skill!.bossMul));
+  });
+});

@@ -46,6 +46,8 @@ export function createBattle(config: BattleConfig): BattleState {
     bossId: 0,
     bossSpawned: false,
     bossMilestonesPaid: 0,
+    skillCooldown: config.skill?.firstTicks ?? 0,
+    skillsUsed: 0,
     baseMilestonesPaid: 0,
     kills: 0,
     tankKills: 0,
@@ -123,6 +125,10 @@ function applyCommand(s: BattleState, cmd: Command): void {
     s.events.push({ type: 'end', result: 'retreat' });
     return;
   }
+  if (cmd.type === 'skill') {
+    castStormcall(s);
+    return;
+  }
   const def = s.config.playerTroops[cmd.slot];
   if (!def) {
     s.events.push({ type: 'deployFail', slot: cmd.slot, reason: 'slot' });
@@ -141,6 +147,35 @@ function applyCommand(s: BattleState, cmd: Command): void {
   s.foodSpentMilli += costMilli;
   s.deployed++;
   spawnUnit(s, 0, def);
+}
+
+/** Lightning on the enemy closest to your fortress; everything within the radius is hit. */
+function castStormcall(s: BattleState): void {
+  const sk = s.config.skill;
+  if (!sk) {
+    s.events.push({ type: 'skillFail', reason: 'locked' });
+    return;
+  }
+  if (s.skillCooldown > 0) {
+    s.events.push({ type: 'skillFail', reason: 'cooldown' });
+    return;
+  }
+  let target: Unit | null = null;
+  for (const u of s.units) if (u.alive && u.side === 1 && (!target || u.x < target.x || (u.x === target.x && u.id < target.id))) target = u;
+  if (!target) {
+    // Nothing to strike: the charge is not spent.
+    s.events.push({ type: 'skillFail', reason: 'target' });
+    return;
+  }
+  const x = target.x;
+  s.skillCooldown = sk.cooldownTicks;
+  s.skillsUsed++;
+  s.events.push({ type: 'skill', x, radius: sk.radius });
+  const bolt: TroopStats = { id: 'stormcall', kind: 'ranged', cost: 0, hp: 0, dmg: sk.dmg, interval: 1, range: 0, speed: 0, tank: true };
+  for (const u of s.units) {
+    if (!u.alive || u.side !== 1 || Math.abs(u.x - x) > sk.radius) continue;
+    hitUnit(s, 0, bolt, u, u.def.bossDef ? Math.round(sk.dmg * sk.bossMul) : sk.dmg, true);
+  }
 }
 
 function distanceToBase(s: BattleState, u: Unit): number {
@@ -365,6 +400,7 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
   if (s.result) return s.events;
 
   s.tick++;
+  if (s.skillCooldown > 0) s.skillCooldown--;
   stepFood(s);
   stepEnemySpawns(s);
   for (const u of s.units) if (u.alive) tickStatus(s, u);

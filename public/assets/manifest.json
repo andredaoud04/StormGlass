@@ -3148,6 +3148,12 @@
    "w": 7,
    "h": 7
   },
+  "icon.storm": {
+   "kind": "image",
+   "file": "icons/storm.png",
+   "w": 9,
+   "h": 10
+  },
   "icon.bow": {
    "kind": "image",
    "file": "icons/bow.png",
@@ -3811,6 +3817,18 @@
     0,
     3
    ]
+  },
+  "fx.lightning": {
+   "kind": "strip",
+   "file": "fx/lightning.png",
+   "frameW": 40,
+   "frameH": 128,
+   "frames": 6,
+   "fps": 14,
+   "anchor": [
+    20,
+    125
+   ]
   }
  },
  "sounds": {
@@ -3846,7 +3864,8 @@
   "zap_heavy": "sfx/zap_heavy.wav",
   "roar": "sfx/roar.wav",
   "ward_hit": "sfx/ward_hit.wav",
-  "ward_break": "sfx/ward_break.wav"
+  "ward_break": "sfx/ward_break.wav",
+  "thunder": "sfx/thunder.wav"
  },
  "meta": {
   "troop.stone_clubber": {

@@ -2,7 +2,7 @@
 import type { App, Scene } from '../app';
 import { BALANCE, ageDef } from '../game/balance';
 import { buildBattleConfig, isBossStage } from '../game/battleSetup';
-import { applyOutcome, bossBeaten, loadout, STAGES, type BattleOutcome } from '../game/progress';
+import { applyOutcome, bossBeaten, loadout, speedUnlocked, STAGES, stormcallUnlocked, type BattleOutcome } from '../game/progress';
 import { foodRateMilli, fortressMul, kindMul } from '../game/upgrades';
 import { createBattle, food, stepBattle, totalGold } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
@@ -75,6 +75,7 @@ export class BattleScene implements Scene {
       fortressMul: fortressMul(s),
       kindMul: kindMul(s),
       campaign: true,
+      stormcall: stormcallUnlocked(s),
     });
     this.sim = createBattle(config);
     this.wallKey = app.assets.has(`ui.wall_${ageDef(this.enemyAge).id}`) ? `ui.wall_${ageDef(this.enemyAge).id}` : 'ui.wall_stone';
@@ -114,6 +115,7 @@ export class BattleScene implements Scene {
 
   key(k: string): void {
     if (k === '1' || k === '2' || k === '3') this.deploy(Number(k) - 1);
+    if (k === '4' || k === 'q') this.cast();
     if (k === 'Escape' || k === 'p') this.paused = !this.paused;
     if (k === 'blur' && this.phase === 'play') this.paused = true;
   }
@@ -133,6 +135,19 @@ export class BattleScene implements Scene {
       this.deployedOnce = true;
       this.app.save.seen.push('deploy');
     }
+  }
+
+  private skillShake = 0;
+
+  /** Stormcall: queue the cast; the sim decides if it fires (ready, a target in reach). */
+  private cast(): void {
+    if (this.phase !== 'play' || this.paused || !this.sim.config.skill) return;
+    if (this.sim.skillCooldown > 0 || !this.sim.units.some((u) => u.alive && u.side === 1)) {
+      this.skillShake = 0.25;
+      this.app.sfx('nope', { vol: 0.5 });
+      return;
+    }
+    if (!this.pending.some((c) => c.type === 'skill')) this.pending.push({ type: 'skill' });
   }
 
   private spawnCoins(x: number, y: number, amount: number): void {
@@ -177,6 +192,7 @@ export class BattleScene implements Scene {
     this.goldBump = Math.max(0, this.goldBump - dt);
     this.foodBump = Math.max(0, this.foodBump - dt);
     for (let i = 0; i < 3; i++) this.cardShake[i] = Math.max(0, this.cardShake[i] - dt);
+    this.skillShake = Math.max(0, this.skillShake - dt);
     if (this.phase === 'result') this.resultT += dt;
     if (this.paused) return;
 
@@ -189,12 +205,15 @@ export class BattleScene implements Scene {
       this.slowmo -= dt;
       simDt *= 0.35;
     }
+    // Double speed runs twice the ticks per second; the battle itself is identical.
+    const fast = this.app.save.settings.fast && speedUnlocked(this.app.save) && this.phase === 'play';
+    if (fast) simDt *= 2;
 
     if (this.phase === 'play') {
       const tick = 1 / this.sim.config.tickRate;
       this.acc += simDt;
       let steps = 0;
-      while (this.acc >= tick && steps < MAX_STEPS_PER_FRAME) {
+      while (this.acc >= tick && steps < MAX_STEPS_PER_FRAME * (fast ? 2 : 1)) {
         const events = stepBattle(this.sim, this.pending.splice(0));
         this.view.onEvents(events);
         for (const e of events) {
@@ -212,7 +231,7 @@ export class BattleScene implements Scene {
         steps++;
         if (this.phase !== 'play') break;
       }
-      if (steps === MAX_STEPS_PER_FRAME) this.acc = 0;
+      if (steps === MAX_STEPS_PER_FRAME * (fast ? 2 : 1)) this.acc = 0;
     } else if (this.phase === 'ending') {
       this.endT += dt;
       const times = [0, 0.22, 0.45, 0.7, 0.95, 1.2];
@@ -331,7 +350,16 @@ export class BattleScene implements Scene {
     d.nine('ui.plaque', Math.round(app.w / 2 - pw / 2), 3, pw, 24);
     d.text(title, app.w / 2, 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
     this.drawPips(app.w / 2, 30);
-    if (this.phase === 'play') iconButton(app, 'pause', app.w - 24, 4, 20, 'pause', () => (this.paused = true));
+    if (this.phase === 'play') {
+      iconButton(app, 'pause', app.w - 24, 4, 20, 'pause', () => (this.paused = true));
+      if (speedUnlocked(app.save)) {
+        const on = app.save.settings.fast;
+        button(app, 'speed', app.w - 48, 4, 22, 20, on ? 'X2' : 'X1', () => {
+          app.save.settings.fast = !app.save.settings.fast;
+          app.persist();
+        }, { style: on ? 'gold' : 'wood', font: 'small' });
+      }
+    }
   }
 
   /** Stage pips: one per stage, the last one a skull for the boss. */
@@ -392,11 +420,36 @@ export class BattleScene implements Scene {
     d.image('ui.hero_socket', 24, top + 4);
     d.image('icon.lock', 20, top + 1, { alpha: heroUnlocked ? 0 : 0.75 });
 
-    // Three Skill sockets in a row on the right.
+    // Three Skill sockets in a row on the right; the first (leftmost) holds Stormcall once unlocked.
     for (let i = 0; i < 3; i++) {
       const cx = w - 18 - i * 30;
-      d.image('ui.skill_socket', cx, top + 20);
-      d.image('icon.lock', cx - 4, top + 17, { alpha: 0.55 });
+      const storm = i === 2 && !!this.sim.config.skill;
+      const sh = storm && this.skillShake > 0 ? Math.round(Math.sin(this.skillShake * 80) * 2) : 0;
+      d.image('ui.skill_socket', cx + sh, top + 20);
+      if (!storm) {
+        d.image('icon.lock', cx - 4, top + 17, { alpha: 0.55 });
+        continue;
+      }
+      const sk = this.sim.config.skill!;
+      const total = this.sim.skillsUsed === 0 ? sk.firstTicks : sk.cooldownTicks;
+      const frac = total > 0 ? this.sim.skillCooldown / total : 0;
+      const ready = frac <= 0 && this.phase === 'play';
+      const ie = app.assets.image('icon.storm');
+      d.image('icon.storm', Math.round(cx - ie.w / 2) + sh, Math.round(top + 20 - ie.h / 2) - 4, { alpha: ready ? 1 : 0.55 });
+      if (!ready) {
+        // Cooldown: a dark curtain that lifts as the charge returns.
+        const ch = Math.round(22 * frac);
+        d.rect(cx - 11 + sh, top + 20 - 15, 22, ch, '#1e1526', 0.55);
+        d.text(String(Math.ceil(this.sim.skillCooldown / this.sim.config.tickRate)), cx + sh, top + 22, { align: 'center', color: '#e8dcc8' });
+      } else {
+        const pulse = 0.4 + 0.4 * Math.sin(app.time * 6);
+        for (let a = 0; a < 24; a++) {
+          const th = (a / 24) * Math.PI * 2;
+          d.rect(Math.round(cx + Math.cos(th) * 14) + sh, Math.round(top + 16 + Math.sin(th) * 14), 1, 1, '#9fe8ff', pulse);
+        }
+        d.text('STORM', cx, top + 34, { align: 'center', color: '#bfe8ff' });
+      }
+      if (this.phase === 'play' && !this.paused) app.input.region({ id: 'skill', x: cx - 14, y: top + 2, w: 28, h: 36, onTap: () => this.cast(), onDown: true });
     }
 
     // Food and rate, lower left.

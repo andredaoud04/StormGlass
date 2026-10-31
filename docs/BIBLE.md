@@ -95,7 +95,7 @@ All battle logic is in `src/sim`. It is pure and deterministic: the same seed an
 - **End**: the battle ends when a fortress reaches 0 HP. If both fall on the same tick, it is a victory. Retreat ends at once and keeps Gold.
 - **Gold**: paid at the moment of each kill (1, or 5 for a tank) and for each tenth of enemy fortress HP removed. Every payment happens exactly once (tested).
 - **Status effects**: `src/sim/status.ts`. Bounded by design and proven by tests (cap stacks, expiry, Cold never stops a unit, bosses at half strength).
-- **Commands**: `deploy(slot)` and `retreat`. Skills and Hero commands come with M4.
+- **Commands**: `deploy(slot)`, `skill` (Stormcall) and `retreat`. A Stormcall with no enemy on the field fails without spending its charge. Hero commands come with M4.
 
 ---
 
@@ -262,4 +262,5 @@ Folders:
 | D28 | 2026-10-31 | "The UI and progression in the GPT version is far better. I also love the gradually showing new tabs." Release scope "Campaign + Prestige": Age Camp upgrades that reset each Age, permanent Ranged/Tank slots, tabs revealed one by one. Per-troop Gold unlocks and permanent Food/Base/Power upgrades are retired. | LOCKED | Andre |
 | D29 | 2026-10-31 | "Do it like We Are Warriors scaling" for HUD, UI and unit size. First pass: the battle world (and the home meadow) is drawn on its own layer at about 1.33x the UI pixel size (always whole device pixels), fortresses partly off the screen edges, the HUD unchanged. To be checked against a We Are Warriors screenshot from Andre. | PROVISIONAL | Andre |
 | D30 | 2026-10-31 | Era attack sounds: bow, crossbow, musket, cannon, rifle, steam, energy zap; boss roar on arrival; ward ting and shatter. Listed per troop as manifest meta `sfx`. | PROVISIONAL | Claude |
+| D31 | 2026-10-31 | Release skill and speed (scope "Campaign + Prestige"): Stormcall, a lightning strike on the enemy nearest your fortress (your Age's tank damage x2.5 x your best Camp troop track, radius 70, first charge 6 s, cooldown 20 s, bosses take half), in the leftmost Skill socket from Stone stage 4. Double speed (X1/X2 in the battle header, remembered) from Stone stage 3. Both stay unlocked for good. | PROVISIONAL | Claude |
 | D24 | 2026-10-30 | HUD walls: Crusader stone with heraldic pennants, Gunpowder timber and iron, Industrial red brick and steel girder, Future alloy panels (owner brief for this pass; replaces the Open Decision 3 proposal). | PROVISIONAL | Andre (brief) |

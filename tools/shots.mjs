@@ -89,6 +89,20 @@ const SCENARIOS = [
     await setSave(p, { armyAge: 1, enemyAge: 1, stage: 2, beaten: [0], gold: 340, slots: ['ranged'], stats: { battles: 8, wins: 7, losses: 1, retreats: 0, goldEarned: 0, kills: 0 } });
     await p.evaluate(() => window.__sg.app.go('menu'));
   }],
+  ['battle-storm', async (p) => {
+    await setSave(p, { stage: 3, slots: ['ranged', 'tank'] });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await fastForward(p, 14);
+    await p.evaluate(() => window.__sg.app.scene.key('q'));
+    await fastForward(p, 0.12, false);
+  }],
+  ['battle-storm-cooldown', async (p) => {
+    await setSave(p, { stage: 3, slots: ['ranged', 'tank'], settings: { sound: true, reducedMotion: false, fast: true } });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await fastForward(p, 14);
+    await p.evaluate(() => window.__sg.app.scene.key('q'));
+    await fastForward(p, 3, false);
+  }],
   ['home-after-battle1', async (p) => {
     await setSave(p, { stage: 1, gold: 54, stats: { battles: 1, wins: 1, losses: 0, retreats: 0, goldEarned: 36, kills: 9 } });
     await p.evaluate(() => window.__sg.app.go('menu'));

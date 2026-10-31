@@ -137,6 +137,7 @@ const SOUNDS: Record<string, () => Float32Array> = {
   roar: () => { const b = buf(1.1); tone(b, 0, 1.0, 90, 55, 'saw', 0.5, 0.15); tone(b, 0, 1.0, 93, 57, 'square', 0.2, 0.15); hiss(b, 0, 0.9, 0.35, 900, 300, 0.9); return b; },
   ward_hit: () => { const b = buf(0.2); tone(b, 0, 0.18, 1760, 1700, 'sine', 0.35); tone(b, 0, 0.12, 2640, 2600, 'tri', 0.15); return b; },
   ward_break: () => { const b = buf(0.9); for (let i = 0; i < 7; i++) tone(b, i * 0.05, 0.3, 2600 - i * 220, 1800 - i * 150, 'tri', 0.22); hiss(b, 0, 0.6, 0.5, 9000, 2500, 1.2); tone(b, 0, 0.4, 110, 40, 'sine', 0.6); return b; },
+  thunder: () => { const b = buf(1.4); tone(b, 0, 0.04, 3000, 1500, 'square', 0.3); hiss(b, 0, 0.25, 1, 9000, 2500, 1.4); hiss(b, 0.08, 1.25, 0.9, 900, 70, 1.1); tone(b, 0.05, 0.9, 60, 30, 'sine', 0.8); return b; },
 };
 
 mkdirSync(OUT, { recursive: true });

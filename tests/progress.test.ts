@@ -118,3 +118,20 @@ describe('prestige (endless Timelines)', () => {
     expect(s.timeline).toBe(21);
   });
 });
+
+describe('unlocks by campaign progress', () => {
+  it('double speed from Stone stage 3, Stormcall from Stone stage 4, and they stay', async () => {
+    const { speedUnlocked, stormcallUnlocked } = await import('../src/game/progress');
+    const s = newSave();
+    expect(speedUnlocked(s)).toBe(false);
+    expect(stormcallUnlocked(s)).toBe(false);
+    s.stage = 2;
+    expect(speedUnlocked(s)).toBe(true);
+    expect(stormcallUnlocked(s)).toBe(false);
+    s.stage = 3;
+    expect(stormcallUnlocked(s)).toBe(true);
+    s.enemyAge = 1;
+    s.stage = 0;
+    expect(speedUnlocked(s) && stormcallUnlocked(s)).toBe(true);
+  });
+});

@@ -93,3 +93,13 @@ export function prestige(s: SaveData): boolean {
   s.beaten = [];
   return true;
 }
+
+/** Stormcall unlocks on Stone stage 4 and stays unlocked. */
+export function stormcallUnlocked(s: SaveData): boolean {
+  return s.timeline > 1 || s.enemyAge > 0 || s.stage >= BALANCE.skills.stormcall.unlockStage - 1;
+}
+
+/** Double speed unlocks on Stone stage 3 and stays unlocked. */
+export function speedUnlocked(s: SaveData): boolean {
+  return s.timeline > 1 || s.enemyAge > 0 || s.stage >= BALANCE.skills.speedUnlockStage - 1;
+}

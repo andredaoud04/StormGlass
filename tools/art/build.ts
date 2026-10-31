@@ -276,6 +276,7 @@ export function buildAll(): void {
   reg.strip('fx.steam', 'fx/steam.png', fx.steam());
   reg.strip('fx.beacon', 'fx/beacon.png', fx.beacon());
   reg.strip('fx.zap', 'fx/zap.png', fx.plasmaFlash());
+  reg.strip('fx.lightning', 'fx/lightning.png', fx.lightning());
 
   reg.writeAll();
   void INK;

@@ -119,6 +119,18 @@ export interface BattleConfig {
   status: StatusRules;
   /** Boss stage: the boss troop, and a ward that keeps the enemy fortress safe until it falls. */
   boss?: TroopStats;
+  /** Stormcall, once unlocked: a lightning strike on the enemy nearest your fortress. */
+  skill?: SkillConfig;
+}
+
+export interface SkillConfig {
+  dmg: number;
+  radius: number;
+  cooldownTicks: number;
+  /** Ticks after the battle starts before the first use. */
+  firstTicks: number;
+  /** Damage multiplier against bosses. */
+  bossMul: number;
 }
 
 export interface PoisonState { stacks: number; ticks: number; dpsPerStack: number }
@@ -171,6 +183,7 @@ export type BattleResult = 'victory' | 'defeat' | 'retreat' | null;
 
 export type Command =
   | { type: 'deploy'; slot: number }
+  | { type: 'skill' }
   | { type: 'retreat' };
 
 export type SimEvent =
@@ -190,6 +203,8 @@ export type SimEvent =
   | { type: 'bossStrike'; id: number; move: BossMove; x: number; radius: number }
   | { type: 'bossDash'; id: number }
   | { type: 'bossBlink'; id: number; from: number; to: number }
+  | { type: 'skill'; x: number; radius: number }
+  | { type: 'skillFail'; reason: 'locked' | 'cooldown' | 'target' }
   | { type: 'wardHit'; dmg: number }
   | { type: 'wardBreak' }
   | { type: 'deployFail'; slot: number; reason: 'food' | 'cap' | 'slot' }
@@ -217,6 +232,9 @@ export interface BattleState {
   bossSpawned: boolean;
   /** Boss Gold is paid in steps as the boss is worn down (healing never pays twice). */
   bossMilestonesPaid: number;
+  /** Ticks until Stormcall is ready. */
+  skillCooldown: number;
+  skillsUsed: number;
   baseMilestonesPaid: number;
   kills: number;
   tankKills: number;
