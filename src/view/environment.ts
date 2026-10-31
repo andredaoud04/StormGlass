@@ -94,15 +94,32 @@ export class EnvView {
     const sky = this.app.assets.image(`env.${this.age}.sky`);
     const skyTop = groundY - (sky.anchor?.[1] ?? 0) + oy;
     if (skyTop > 0) d.rect(0, 0, this.app.w, skyTop + 1, String(meta.skyTop ?? '#2f6cc4'));
-    d.image(`env.${this.age}.sky`, x0, groundY + oy);
+    this.layer('sky', x0, groundY + oy);
     for (const c of this.clouds) {
       const y = skyTop + c.y;
       d.image(`env.${this.age}.cloud${c.i}`, x0 + Math.round(c.x), y);
     }
     for (const p of this.pteros) d.strip('fx.ptero', Math.floor(p.t * 7), Math.round(p.x) + ox, Math.round(p.y) + oy);
-    d.image(`env.${this.age}.far`, x0, groundY + oy);
+    this.layer('far', x0, groundY + oy);
     this.smoke.drawFront(d, ox, oy);
-    d.image(`env.${this.age}.mid`, x0, groundY + oy);
-    d.image(`env.${this.age}.ground`, x0, groundY + oy);
+    this.layer('mid', x0, groundY + oy);
+    this.layer('ground', x0, groundY + oy);
+    // The meadow continues under the ground layer down to the bottom of the screen.
+    const g = this.app.assets.image(`env.${this.age}.ground`);
+    const fieldTop = groundY + oy + g.h - (g.anchor?.[1] ?? 0);
+    const fk = `env.${this.age}.field`;
+    if (this.app.assets.has(fk) && fieldTop < this.app.h) {
+      const f = this.app.assets.image(fk);
+      for (let y = fieldTop; y < this.app.h; y += f.h) for (let x = (x0 % f.w) - f.w; x < this.app.w; x += f.w) d.image(fk, x, y);
+    }
+  }
+
+  /** A 256-wide layer, mirrored at both edges so wider screens never show a gap. */
+  private layer(name: string, x: number, y: number): void {
+    const d = this.app.draw;
+    const key = `env.${this.age}.${name}`;
+    d.image(key, x, y);
+    if (x > 0) d.image(key, x, y, { flip: true });
+    if (x + ENV_W < this.app.w) d.image(key, x + 2 * ENV_W - 1, y, { flip: true });
   }
 }

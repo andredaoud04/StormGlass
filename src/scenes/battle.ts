@@ -11,7 +11,10 @@ import { BattleView } from '../view/battleView';
 
 const MAX_STEPS_PER_FRAME = 6;
 /** World pixels of each fortress left on screen in front of its anchor (the rest is off the edge). */
-const BASE_INSET = 30;
+const BASE_INSET = 26;
+/** UI heights: the thin top bar and the slim bottom bar that holds Food and the cards. */
+const TOP_BAR = 26;
+const BOTTOM_BAR = 46;
 
 interface Coin {
   x: number;
@@ -99,11 +102,13 @@ export class BattleScene implements Scene {
   /** Layout in world pixels; the HUD (UI pixels) sits under the ground line. */
   private layout() {
     const { h } = this.app;
-    const hudH = Math.max(98, Math.min(112, Math.round(h * 0.24)));
-    this.hudTop = h - hudH;
+    // Skill sockets float over the meadow just above the bottom bar.
+    this.hudTop = h - BOTTOM_BAR - 46;
     const k = this.app.worldToUi;
     const ww = this.app.screen.size.ww;
-    return { groundY: Math.floor((this.hudTop - 22) / k), laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
+    // The lane sits a little below the middle of the screen, as in We Are Warriors.
+    const groundUi = Math.round(TOP_BAR + (h - TOP_BAR - BOTTOM_BAR) * 0.56);
+    return { groundY: Math.floor(groundUi / k), laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
   }
 
   /** World x/y to UI x/y. */
@@ -327,7 +332,7 @@ export class BattleScene implements Scene {
     const max = boss?.maxHp ?? 1;
     const bw = Math.min(150, app.w - 40);
     const x = Math.round(app.w / 2 - bw / 2);
-    const y = 40 - Math.round((1 - this.bossBarShown) * 10);
+    const y = TOP_BAR + 26 - Math.round((1 - this.bossBarShown) * 10);
     const a = this.bossBarShown;
     d.image('icon.skull', x - 11, y - 2, { alpha: a });
     d.rect(x - 1, y - 1, bw + 2, 7, '#1e1526', a);
@@ -342,23 +347,24 @@ export class BattleScene implements Scene {
     d.text(`${this.bossName}  ${tag}`, app.w / 2, y + 8, { align: 'center', color: boss?.alive ? '#fff8ec' : '#a8e070', alpha: a });
   }
 
+  /** Thin top bar: Gold, the battle number, pause; double speed and the stage pips just under it. */
   private drawHeader(): void {
     const app = this.app;
     const d = app.draw;
+    d.rect(0, 0, app.w, TOP_BAR, '#2a2236');
+    d.rect(0, TOP_BAR, app.w, 1, '#1e1526');
+    d.rect(0, TOP_BAR - 1, app.w, 1, '#3e3450');
     const bump = this.goldBump > 0 ? -1 : 0;
-    counter(app, 10, 5 + bump, 40, 'gold', '+' + fmt(this.goldShown), '#ffe68a');
-    const title = ageDef(this.enemyAge).name.toUpperCase() + ' AGE';
-    const tw = d.measure(title, 'big');
-    const pw = Math.min(app.w - 110, Math.max(72, tw + 28));
-    d.nine('ui.plaque', Math.round(app.w / 2 - pw / 2), 3, pw, 24);
-    d.text(title, app.w / 2, 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    this.drawPips(app.w / 2 + 14, 30);
-    d.text(`BATTLE ${battleNumber({ age: this.enemyAge, stage: this.stage })}`, app.w / 2 - 10, 30, { align: 'right', color: this.replay ? '#cfe0a0' : '#fff8ec' });
+    counter(app, 6, 6 + bump, 44, 'gold', '+' + fmt(this.goldShown), '#ffe68a');
+    const n = battleNumber({ age: this.enemyAge, stage: this.stage });
+    d.text(`BATTLE ${n}`, app.w / 2, 7, { font: 'big', align: 'center', color: this.replay ? '#cfe0a0' : '#fff8ec', shadow: true });
+    d.text(ageDef(this.enemyAge).name.toUpperCase() + (this.replay ? ' REPLAY' : ''), app.w / 2, TOP_BAR + 4, { align: 'center', color: '#fff8ec' });
+    this.drawPips(app.w / 2, TOP_BAR + 13);
     if (this.phase === 'play') {
-      iconButton(app, 'pause', app.w - 24, 4, 20, 'pause', () => (this.paused = true));
+      iconButton(app, 'pause', app.w - 24, 3, 20, 'pause', () => (this.paused = true));
       if (speedUnlocked(app.save)) {
         const on = app.save.settings.fast;
-        button(app, 'speed', app.w - 48, 4, 22, 20, on ? 'X2' : 'X1', () => {
+        button(app, 'speed', 6, TOP_BAR + 4, 26, 16, on ? 'X2' : 'X1', () => {
           app.save.settings.fast = !app.save.settings.fast;
           app.persist();
         }, { style: on ? 'gold' : 'wood', font: 'small' });
@@ -417,7 +423,10 @@ export class BattleScene implements Scene {
     const d = app.draw;
     const { w, h } = app;
     const top = this.hudTop;
-    d.image(this.wallKey, Math.floor(w / 2), top);
+    // Slim bottom bar in the Age's own wall material.
+    const barTop = h - BOTTOM_BAR;
+    d.image(this.wallKey, Math.floor(w / 2), barTop);
+    d.rect(0, barTop - 1, w, 1, '#1e1526', 0.6);
 
     // Hero medallion, raised on the left (locked until the first Prestige).
     const heroUnlocked = app.save.prestige > 0;
@@ -458,7 +467,7 @@ export class BattleScene implements Scene {
 
     // Food and rate, lower left.
     const fx = 5;
-    const fy = h - 50;
+    const fy = h - BOTTOM_BAR + 1;
     const fw = 48;
     d.nine('ui.small_plaque', fx, fy, fw, 45);
     const f = food(this.sim);
@@ -477,7 +486,8 @@ export class BattleScene implements Scene {
     const cw = 38;
     const gap = 3;
     const x0 = w - 5 - (3 * cw + 2 * gap) - 2;
-    const cy = h - 52;
+    // Cards stand up out of the bar.
+    const cy = h - BOTTOM_BAR - 8;
     for (let i = 0; i < 3; i++) {
       const x = x0 + i * (cw + gap);
       const id = this.troops[i];

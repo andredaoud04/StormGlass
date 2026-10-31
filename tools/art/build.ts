@@ -144,6 +144,52 @@ function portrait(frame: Img, w: number, h: number): Img {
   return frame.crop(cx - Math.floor(w / 2), b.y - 2, w, h);
 }
 
+/**
+ * A seamless 64x64 meadow tile that continues an Age's ground layer downward: its base colour is
+ * the ground layer's bottom row, with that layer's own lighter and darker tones as speckles,
+ * tufts and pebbles (positions wrap, so the tile repeats without seams).
+ */
+function fieldTile(ground: Img): Img {
+  const count = (y0: number, y1: number) => {
+    const m = new Map<number, number>();
+    for (let y = y0; y < y1; y++) for (let x = 0; x < ground.w; x++) {
+      const c = ground.get(x, y);
+      if (c) m.set(c, (m.get(c) ?? 0) + 1);
+    }
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([c]) => c);
+  };
+  const base = count(ground.h - 2, ground.h)[0];
+  const lum = (c: number) => ((c >>> 24) & 255) * 0.3 + ((c >>> 16) & 255) * 0.59 + ((c >>> 8) & 255) * 0.11;
+  const tones = count(ground.h - 30, ground.h).filter((c) => c !== base).slice(0, 6);
+  const light = tones.filter((c) => lum(c) > lum(base)).sort((a, b) => lum(a) - lum(b))[0] ?? base;
+  const dark = tones.filter((c) => lum(c) < lum(base)).sort((a, b) => lum(b) - lum(a))[0] ?? base;
+  const S = 64;
+  const img = new Img(S, S).fill(base);
+  let seed = 9;
+  const r = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+  const put = (x: number, y: number, c: number) => img.set(((x % S) + S) % S, ((y % S) + S) % S, c);
+  for (let i = 0; i < 70; i++) put(Math.floor(r() * S), Math.floor(r() * S), r() < 0.5 ? light : dark);
+  for (let i = 0; i < 7; i++) {
+    // Tuft: a small V of the light tone with a dark root.
+    const x = Math.floor(r() * S);
+    const y = Math.floor(r() * S);
+    put(x, y, dark);
+    put(x - 1, y - 1, light);
+    put(x + 1, y - 1, light);
+    put(x, y - 2, light);
+  }
+  for (let i = 0; i < 3; i++) {
+    // Pebble.
+    const x = Math.floor(r() * S);
+    const y = Math.floor(r() * S);
+    put(x, y, light);
+    put(x + 1, y, light);
+    put(x, y + 1, dark);
+    put(x + 1, y + 1, dark);
+  }
+  return img;
+}
+
 export function buildAll(): void {
   rmSync(OUT, { recursive: true, force: true });
   mkdirSync(OUT, { recursive: true });
@@ -178,6 +224,8 @@ export function buildAll(): void {
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
     }
+    const g = env.layers.ground.img;
+    reg.image(`env.${age}.field`, `env/${age}/field.png`, fieldTile(g), `${label} Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.`);
     env.clouds.forEach((c, i) => reg.image(`env.${age}.cloud${i}`, `env/${age}/cloud${i}.png`, c, 'Drifting cloud.'));
     reg.manifest.meta[`env.${age}`] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, ...(env.volcano ? { volcanoX: env.volcano[0], volcanoY: env.volcano[1] } : {}) };
   }
