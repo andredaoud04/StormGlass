@@ -1,5 +1,5 @@
 import raw from '../data/balance.json';
-import type { StatusRules, TroopKind, WaveScript } from '../sim/types';
+import type { BossDef, StatusRules, TroopKind, WaveScript } from '../sim/types';
 
 export type AgeId = 'stone' | 'ancient' | 'crusader' | 'gunpowder' | 'industrial' | 'future';
 export const AGE_IDS: AgeId[] = ['stone', 'ancient', 'crusader', 'gunpowder', 'industrial', 'future'];
@@ -14,7 +14,6 @@ export interface TroopDef {
   interval: number;
   range: number;
   speed: number;
-  unlockGold: number;
 }
 
 export interface AgeDef {
@@ -26,32 +25,51 @@ export interface AgeDef {
   baseGold: number;
   /** Enemy troop strength at this stage on Timeline 1 (x troop stats). Grows per stage so progress needs upgrades. */
   enemyPower?: number;
-  /** Gold to evolve into this Age before its enemy fortress is beaten (then free). */
-  evolveGold: number;
   troops: TroopDef[];
 }
 
-export type UpgradeId = 'food' | 'fortress' | 'power';
-export interface UpgradeDef {
+/** Age Camp tracks. Levels reset on Evolution. */
+export type CampId = 'food' | 'fortress' | 'melee' | 'ranged' | 'tank';
+export interface CampTrack {
   name: string;
   icon: string;
-  maxLevel: number;
   baseCost: number;
-  costGrowth: number;
-  /** Food: +food/s per level. Fortress and Power: +fraction per level. */
+  /** Fraction added per level (Food: x Food rate; others: x HP, and damage for troops). */
   perLevel: number;
   unit: string;
+}
+
+export interface CampRules {
+  maxLevel: number;
+  /** Extra max levels per Timeline after the first. */
+  maxLevelPerTimeline: number;
+  costGrowth: number;
+  ageCostGrowth: number;
+  tracks: Record<CampId, CampTrack>;
+}
+
+export interface BossInfo extends Omit<BossDef, 'move'> {
+  name: string;
+  move: BossDef['move'];
+  hpMul: number;
+  dmgMul: number;
+  interval: number;
+  range: number;
+  speed: number;
 }
 
 export interface Balance {
   version: number;
   sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number };
-  economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number };
+  economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
   status: StatusRules;
   ages: AgeDef[];
   waves: Record<AgeId, WaveScript>;
-  upgrades: Record<UpgradeId, UpgradeDef>;
-  timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number };
+  camp: CampRules;
+  campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[] };
+  bosses: Record<AgeId, BossInfo>;
+  skills: { stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
+  timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number; goldGrowthPerTimeline: number };
 }
 
 export const BALANCE = raw as unknown as Balance;

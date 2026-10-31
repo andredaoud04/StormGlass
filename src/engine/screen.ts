@@ -15,6 +15,15 @@ export interface ScreenSize {
   /** Device pixels per art pixel. */
   scale: number;
   dpr: number;
+  /** The battle world is drawn on its own layer at a larger whole-number scale (units read bigger, HUD stays compact). */
+  worldScale: number;
+  ww: number;
+  wh: number;
+}
+
+/** About a third larger than the UI, always a whole number of device pixels per art pixel. */
+export function worldScaleFor(scale: number): number {
+  return Math.max(scale + 1, Math.round(scale * 1.34));
 }
 
 /** Pure sizing rule, shared with tests. */
@@ -24,15 +33,20 @@ export function computeSize(cssW: number, cssH: number, dpr: number): ScreenSize
   const scale = Math.max(1, Math.min(Math.floor(devW / MIN_W), Math.floor(devH / MIN_H)));
   const w = Math.min(MAX_W, Math.floor(devW / scale));
   const h = Math.min(MAX_H, Math.floor(devH / scale));
-  return { w, h, scale, dpr };
+  const worldScale = worldScaleFor(scale);
+  return { w, h, scale, dpr, worldScale, ww: Math.ceil((w * scale) / worldScale), wh: Math.ceil((h * scale) / worldScale) };
 }
 
 export class Screen {
   readonly low: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
+  /** World layer (battle), presented under the UI layer when used this frame. */
+  readonly worldLow: HTMLCanvasElement;
+  readonly worldCtx: CanvasRenderingContext2D;
+  useWorld = false;
   private readonly view: HTMLCanvasElement;
   private readonly viewCtx: CanvasRenderingContext2D;
-  size: ScreenSize = { w: 195, h: 422, scale: 2, dpr: 1 };
+  size: ScreenSize = { w: 195, h: 422, scale: 2, dpr: 1, worldScale: 3, ww: 130, wh: 282 };
   /** CSS-pixel offset and scale of the visible canvas, for input mapping. */
   cssLeft = 0;
   cssTop = 0;
@@ -48,6 +62,8 @@ export class Screen {
     this.viewCtx = this.view.getContext('2d', { alpha: false })!;
     this.low = document.createElement('canvas');
     this.ctx = this.low.getContext('2d')!;
+    this.worldLow = document.createElement('canvas');
+    this.worldCtx = this.worldLow.getContext('2d')!;
     this.resize();
     window.addEventListener('resize', () => this.resize());
     window.visualViewport?.addEventListener('resize', () => this.resize());
@@ -68,6 +84,9 @@ export class Screen {
     this.low.width = s.w;
     this.low.height = s.h;
     this.ctx.imageSmoothingEnabled = false;
+    this.worldLow.width = s.ww;
+    this.worldLow.height = s.wh;
+    this.worldCtx.imageSmoothingEnabled = false;
     this.view.width = s.w * s.scale;
     this.view.height = s.h * s.scale;
     const cssViewW = (s.w * s.scale) / dpr;
@@ -86,6 +105,13 @@ export class Screen {
   /** Copy the low-res frame to the visible canvas. */
   present(): void {
     this.viewCtx.imageSmoothingEnabled = false;
+    if (this.useWorld) {
+      const k = this.size.worldScale;
+      this.viewCtx.drawImage(this.worldLow, 0, 0, this.size.ww * k, this.size.wh * k);
+    } else {
+      this.viewCtx.fillStyle = '#1e1526';
+      this.viewCtx.fillRect(0, 0, this.view.width, this.view.height);
+    }
     this.viewCtx.drawImage(this.low, 0, 0, this.view.width, this.view.height);
   }
 

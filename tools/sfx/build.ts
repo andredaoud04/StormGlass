@@ -124,6 +124,20 @@ const SOUNDS: Record<string, () => Float32Array> = {
     for (const n of [60, 64, 67, 72]) tone(b, 0.65, 0.7, NOTE(n), NOTE(n), 'tri', 0.22, 0.01);
     return b;
   },
+  // Era weapons (added after the originals so their noise stays identical).
+  bow: () => { const b = buf(0.16); tone(b, 0, 0.14, 330, 290, 'tri', 0.45); tone(b, 0, 0.05, 900, 500, 'square', 0.12); hiss(b, 0, 0.05, 0.25, 3500, 2000); return b; },
+  crossbow: () => { const b = buf(0.14); tone(b, 0, 0.03, 1600, 1200, 'square', 0.25); tone(b, 0.01, 0.1, 220, 120, 'square', 0.3); hiss(b, 0, 0.06, 0.4, 2600, 900); return b; },
+  musket: () => { const b = buf(0.45); hiss(b, 0, 0.42, 1, 5000, 300, 2.2); tone(b, 0, 0.12, 160, 50, 'sine', 0.9); tone(b, 0, 0.02, 2200, 1500, 'square', 0.2); return b; },
+  cannon: () => { const b = buf(1.0); hiss(b, 0, 0.95, 1, 2200, 60, 1.6); tone(b, 0, 0.5, 90, 26, 'sine', 1); tone(b, 0.02, 0.2, 60, 40, 'square', 0.25); return b; },
+  rifle: () => { const b = buf(0.3); hiss(b, 0, 0.28, 0.9, 7000, 900, 2.6); tone(b, 0, 0.06, 420, 90, 'square', 0.35); tone(b, 0, 0.08, 120, 60, 'sine', 0.6); return b; },
+  steam: () => { const b = buf(0.5); hiss(b, 0, 0.48, 0.7, 6000, 3000, 0.8); tone(b, 0, 0.25, 70, 40, 'square', 0.35); return b; },
+  zap: () => { const b = buf(0.22); tone(b, 0, 0.2, 2400, 300, 'saw', 0.3); tone(b, 0, 0.18, 1200, 160, 'square', 0.15); hiss(b, 0, 0.06, 0.25, 8000, 4000); return b; },
+  zap_heavy: () => { const b = buf(0.5); tone(b, 0, 0.45, 1400, 80, 'saw', 0.35); tone(b, 0, 0.3, 300, 40, 'square', 0.3); hiss(b, 0, 0.3, 0.5, 6000, 500); return b; },
+  // Bosses and the ward.
+  roar: () => { const b = buf(1.1); tone(b, 0, 1.0, 90, 55, 'saw', 0.5, 0.15); tone(b, 0, 1.0, 93, 57, 'square', 0.2, 0.15); hiss(b, 0, 0.9, 0.35, 900, 300, 0.9); return b; },
+  ward_hit: () => { const b = buf(0.2); tone(b, 0, 0.18, 1760, 1700, 'sine', 0.35); tone(b, 0, 0.12, 2640, 2600, 'tri', 0.15); return b; },
+  ward_break: () => { const b = buf(0.9); for (let i = 0; i < 7; i++) tone(b, i * 0.05, 0.3, 2600 - i * 220, 1800 - i * 150, 'tri', 0.22); hiss(b, 0, 0.6, 0.5, 9000, 2500, 1.2); tone(b, 0, 0.4, 110, 40, 'sine', 0.6); return b; },
+  thunder: () => { const b = buf(1.4); tone(b, 0, 0.04, 3000, 1500, 'square', 0.3); hiss(b, 0, 0.25, 1, 9000, 2500, 1.4); hiss(b, 0.08, 1.25, 0.9, 900, 70, 1.1); tone(b, 0.05, 0.9, 60, 30, 'sine', 0.8); return b; },
 };
 
 mkdirSync(OUT, { recursive: true });

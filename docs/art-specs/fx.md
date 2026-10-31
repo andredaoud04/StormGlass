@@ -189,3 +189,13 @@ Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.
 - Anchor: (0, 3)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (4): #2a9cf0 #5ce6ff #c4fbff #fff8ec
+
+## fx.lightning
+
+Stormcall lightning strike, 6 frames; anchor at the ground under the bolt.
+
+- File: `public/assets/fx/lightning.png`
+- Frames: 6 x (40 x 128) in one row @ 14 fps
+- Anchor: (20, 125)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #3a8cf0 #9fe8ff #fff8ec #81cdfb

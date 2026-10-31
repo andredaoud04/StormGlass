@@ -1,8 +1,11 @@
-/** Main menu with the five tabs: Dungeons, Upgrades, Battle (centre, default), Cards, Shop. */
+/**
+ * Main menu. Five tab positions: Dungeons, Upgrades, Battle (centre, default), Cards, Shop.
+ * Tabs appear one at a time as the player progresses; until then their position stays empty.
+ */
 import type { App, Scene } from '../app';
-import { BALANCE, ageDef } from '../game/balance';
-import { canEvolve, canUnlock, evolve, evolveCost, isOwned, loadout, unlockTroop } from '../game/progress';
-import { UPGRADE_IDS, buyUpgrade, level, upgradeCost, upgradeValue } from '../game/upgrades';
+import { BALANCE, ageDef, type CampId } from '../game/balance';
+import { bossBeaten, canEvolve, canPrestige, evolve, loadout, prestige, STAGES, stageNumber } from '../game/progress';
+import { CAMP_IDS, affordableCount, buyUpgrade, canBuy, canUnlockSlot, hasSlot, level, maxLevel, slotCost, trackOpen, unlockSlot, upgradeCost, upgradeValue, type SlotId } from '../game/upgrades';
 import { newSave } from '../game/save';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
 import { EnvView } from '../view/environment';
@@ -12,6 +15,15 @@ export type Tab = 'dungeons' | 'upgrades' | 'battle' | 'cards' | 'shop';
 const TABS: Tab[] = ['dungeons', 'upgrades', 'battle', 'cards', 'shop'];
 const TAB_LABEL: Record<Tab, string> = { dungeons: 'DUNGEONS', upgrades: 'UPGRADES', battle: 'BATTLE', cards: 'CARDS', shop: 'SHOP' };
 const TAB_H = 34;
+
+/** When each tab appears. Cards and Shop stay hidden until those features ship. */
+function tabRevealed(app: App, t: Tab): boolean {
+  const s = app.save;
+  if (t === 'battle') return true;
+  if (t === 'upgrades') return s.stats.battles >= 1;
+  if (t === 'dungeons') return s.prestige >= 1;
+  return false;
+}
 
 export class MenuScene implements Scene {
   private tab: Tab;
@@ -41,7 +53,7 @@ export class MenuScene implements Scene {
   }
 
   update(dt: number): void {
-    this.env.update(dt, this.groundY);
+    this.env.update(dt, Math.floor(this.groundY / this.app.worldToUi));
     this.fx.update(dt, (k) => this.app.assets.strip(k).fps);
     this.toastT = Math.max(0, this.toastT - dt);
     this.flash = Math.max(0, this.flash - dt);
@@ -74,23 +86,29 @@ export class MenuScene implements Scene {
     const d = app.draw;
     const { w } = app;
     const G = this.groundY;
-    this.env.draw(G);
-    const armyAge = ageDef(app.save.armyAge).id;
-    const enemyAge = ageDef(app.save.enemyAge).id;
-    const baseKey = (age: string, team: string) => (app.assets.has(`base.${age}.${team}.0`) ? `base.${age}.${team}.0` : `base.stone.${team}.0`);
-    d.image(baseKey(armyAge, 'blue'), 38, G);
-    d.image(baseKey(enemyAge, 'red'), w - 39, G, { flip: true });
-    // Your army idles in front of your fortress.
-    const army = loadout(app.save);
-    army.forEach((id, i) => {
-      const key = `troop.${id}.blue`;
-      if (!app.assets.has(key)) return;
-      const a = app.assets.sheet(key).anims.idle;
-      const f = Math.floor(app.time * a.fps + i * 1.7) % a.frames;
-      d.rect(52 + i * 17 - 6, G + (i % 2) * 2, 12, 1, '#1e1526', 0.28);
-      d.frame(key, 'idle', f, 52 + i * 17, G + (i % 2) * 2);
+    // The meadow is drawn on the world layer, at the same scale as battles.
+    app.inWorld(() => {
+      const k = app.worldToUi;
+      const gw = Math.floor(G / k);
+      const ww = app.w;
+      this.env.draw(gw);
+      const armyAge = ageDef(app.save.armyAge).id;
+      const enemyAge = ageDef(app.save.enemyAge).id;
+      const baseKey = (age: string, team: string) => (app.assets.has(`base.${age}.${team}.0`) ? `base.${age}.${team}.0` : `base.stone.${team}.0`);
+      d.image(baseKey(armyAge, 'blue'), 30, gw);
+      d.image(baseKey(enemyAge, 'red'), ww - 31, gw, { flip: true });
+      // Your army idles in front of your fortress.
+      const army = loadout(app.save);
+      army.forEach((id, i) => {
+        const key = `troop.${id}.blue`;
+        if (!app.assets.has(key)) return;
+        const a = app.assets.sheet(key).anims.idle;
+        const f = Math.floor(app.time * a.fps + i * 1.7) % a.frames;
+        d.rect(44 + i * 18 - 6, gw + (i % 2) * 2, 12, 1, '#1e1526', 0.28);
+        d.frame(key, 'idle', f, 44 + i * 18, gw + (i % 2) * 2);
+      });
+      this.fx.drawFront(d);
     });
-    this.fx.drawFront(d);
 
     // Top bar.
     counter(app, 10, 5, 52, 'gold', fmt(app.save.gold), '#ffe68a');
@@ -101,19 +119,71 @@ export class MenuScene implements Scene {
     const skyRoom = G - 110;
     const ly = Math.max(26, Math.round(skyRoom * 0.28));
     d.image('ui.logo', Math.round(w / 2 - logo.w / 2), ly + Math.round(Math.sin(app.time * 1.5) * 1));
-    const enemyName = ageDef(app.save.enemyAge).name.toUpperCase() + ' AGE';
-    const pw = Math.max(110, d.measure(enemyName, 'big') + 36);
+    const save = app.save;
+    const enemyName = ageDef(save.enemyAge).name.toUpperCase() + ' AGE';
+    const pw = Math.max(120, d.measure(enemyName, 'big') + 36);
     const py = Math.max(ly + logo.h + 8, Math.min(G - 150, Math.round(ly + logo.h + skyRoom * 0.3)));
-    d.nine('ui.plaque', Math.round(w / 2 - pw / 2), py, pw, 34);
-    d.text('NEXT ENEMY', w / 2, py + 7, { align: 'center', color: '#3a2a30', outline: null });
+    d.nine('ui.plaque', Math.round(w / 2 - pw / 2), py, pw, 42);
+    const boss = save.stage === STAGES - 1;
+    const sub = bossBeaten(save) ? 'BOSS DEFEATED' : boss ? 'BOSS: ' + BALANCE.bosses[ageDef(save.enemyAge).id].name.toUpperCase() : `STAGE ${save.stage + 1} OF ${STAGES}`;
+    d.text(sub, w / 2, py + 7, { align: 'center', color: boss && !bossBeaten(save) ? '#7a1a20' : '#3a2a30', outline: null });
     d.text(enemyName, w / 2, py + 16, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    const armyLine = `ARMY: ${ageDef(app.save.armyAge).name.toUpperCase()}${app.save.timeline > 1 ? `  TIMELINE ${app.save.timeline}` : ''}`;
-    d.text(armyLine, w / 2, py + 39, { align: 'center' });
+    this.drawPips(w / 2, py + 31);
+    const line = `CAMPAIGN ${stageNumber(save)}${save.timeline > 1 ? `  TIMELINE ${save.timeline}` : ''}`;
+    d.text(line, w / 2, py + 46, { align: 'center' });
 
-    // Big Battle button on the meadow.
+    // Big button on the meadow: Battle, or Evolve / New Timeline once the boss is down.
     const bw = 128;
     const bh = 34;
-    button(app, 'battle-go', Math.round(w / 2 - bw / 2), app.h - TAB_H - bh - 10, bw, bh, 'BATTLE', () => app.go('battle'), { style: 'green', icon: 'sword' });
+    const bx = Math.round(w / 2 - bw / 2);
+    const by = app.h - TAB_H - bh - 10;
+    if (canPrestige(save)) {
+      button(app, 'prestige', bx, by, bw, bh, 'NEW TIMELINE', () => {
+        if (prestige(save)) {
+          app.persist();
+          app.sfx('evolve', { jitter: 0 });
+          this.flash = 0.6;
+          this.env = new EnvView(app, ageDef(save.enemyAge).id);
+          this.say(`TIMELINE ${save.timeline} BEGINS!`);
+        }
+      }, { style: 'gold', sub: 'BACK TO STONE, STRONGER FOES' });
+    } else if (canEvolve(save)) {
+      const next = ageDef(save.armyAge + 1).name.toUpperCase();
+      const pulse = Math.sin(app.time * 5) > 0 ? -1 : 0;
+      button(app, 'evolve-go', bx, by + pulse, bw, bh, 'EVOLVE', () => this.doEvolve(), { style: 'gold', sub: `TO THE ${next} AGE` });
+    } else {
+      button(app, 'battle-go', bx, by, bw, bh, boss ? 'BOSS' : 'BATTLE', () => app.go('battle'), { style: boss ? 'red' : 'green', icon: boss ? 'skull' : 'sword' });
+    }
+  }
+
+  private doEvolve(): void {
+    const app = this.app;
+    const s = app.save;
+    if (!evolve(s)) return;
+    app.persist();
+    app.sfx('evolve', { jitter: 0 });
+    this.flash = 0.6;
+    this.env = new EnvView(app, ageDef(s.enemyAge).id);
+    this.say(`WELCOME TO THE ${ageDef(s.armyAge).name.toUpperCase()} AGE!`);
+  }
+
+  /** Stage pips: one per stage, the last a skull for the boss. */
+  private drawPips(cx: number, y: number): void {
+    const d = this.app.draw;
+    const s = this.app.save;
+    const gap = 10;
+    const x0 = Math.round(cx - ((STAGES - 1) * gap) / 2);
+    for (let i = 0; i < STAGES; i++) {
+      const x = x0 + i * gap;
+      const done = i < s.stage || bossBeaten(s);
+      const cur = i === s.stage && !bossBeaten(s);
+      if (i === STAGES - 1) {
+        d.image('icon.skull', x - 4, y - 2, { alpha: cur || done ? 1 : 0.55 });
+        continue;
+      }
+      d.rect(x - 2, y, 5, 5, '#1e1526');
+      d.rect(x - 1, y + 1, 3, 3, done ? '#a8e070' : cur ? '#ffd03c' : '#4a3a48');
+    }
   }
 
   // ---------- Other tabs ----------
@@ -156,96 +226,89 @@ export class MenuScene implements Scene {
     const d = app.draw;
     const s = app.save;
     const { w } = app;
+    const age = ageDef(s.armyAge);
+
+    // Troop slots: bought once, kept forever. Each Age fills them with its own troops.
+    let y = this.section(y0, 'ARMY SLOTS');
     const cw = 54;
     const gap = Math.max(4, Math.min(10, Math.floor((w - 16 - 3 * cw) / 2)));
     const x0 = Math.round((w - (3 * cw + 2 * gap)) / 2);
-
-    // Troops of your current Age: buy once, kept forever.
-    let y = this.section(y0, 'TROOPS');
-    const age = ageDef(s.armyAge);
     age.troops.forEach((t, i) => {
       const x = x0 + i * (cw + gap);
-      d.nine('ui.panel_wood', x, y, cw, 74);
-      const owned = isOwned(s, t.id);
+      d.nine('ui.panel_wood', x, y, cw, 66);
+      const slot: SlotId | null = t.kind === 'melee' ? null : (t.kind as SlotId);
+      const owned = !slot || hasSlot(s, slot);
       const key = `troop.${t.id}.blue`;
       if (app.assets.has(key)) {
         const a = app.assets.sheet(key).anims.idle;
-        d.frame(key, 'idle', owned ? Math.floor(app.time * a.fps + i) % a.frames : 0, x + cw / 2, y + 36);
+        d.frame(key, 'idle', owned ? Math.floor(app.time * a.fps + i) % a.frames : 0, x + cw / 2, y + 34, { alpha: owned ? 1 : 0.55 });
       }
-      d.text(t.name.toUpperCase(), x + cw / 2, y + 40, { align: 'center' });
-      const role = t.kind === 'tank' ? 'TANK' : t.kind === 'ranged' ? 'RANGE' : 'MELEE';
-      const rowW = 11 + d.measure(String(t.cost)) + 4 + d.measure(role);
-      const rx = Math.round(x + cw / 2 - rowW / 2);
-      d.image('icon.food', rx - 1, y + 47);
-      d.text(String(t.cost), rx + 11, y + 48);
-      d.text(role, rx + rowW, y + 48, { align: 'right', color: '#cfe0a0' });
-      if (owned) d.image('icon.check', x + cw / 2 - 4, y + 59);
-      else {
-        const ok = canUnlock(s, t.id);
-        button(app, 'unlock' + i, x + 4, y + 56, cw - 8, 16, String(t.unlockGold), () => {
-          if (unlockTroop(s, t.id)) {
-            app.persist();
-            app.sfx('unlock', { jitter: 0 });
-            this.say(`${t.name.toUpperCase()} JOINS YOUR ARMY!`);
-          }
-        }, { style: ok ? 'gold' : 'grey', disabled: !ok, icon: 'gold', font: 'small' });
+      d.text(t.name.toUpperCase(), x + cw / 2, y + 38, { align: 'center' });
+      if (owned) {
+        const rowW = 11 + d.measure(String(t.cost));
+        const rx = Math.round(x + cw / 2 - rowW / 2);
+        d.image('icon.food', rx - 1, y + 47);
+        d.text(String(t.cost), rx + 11, y + 48);
+      } else {
+        const ok = canUnlockSlot(s, slot!);
+        const needsRanged = slot === 'tank' && !hasSlot(s, 'ranged');
+        if (needsRanged) d.text('RANGED FIRST', x + cw / 2, y + 52, { align: 'center', color: '#e8dcc8' });
+        else
+          button(app, 'slot-' + slot, x + 4, y + 46, cw - 8, 16, String(slotCost(slot!)), () => {
+            if (unlockSlot(s, slot!)) {
+              app.persist();
+              app.sfx('unlock', { jitter: 0 });
+              this.say(`${t.name.toUpperCase()} JOINS YOUR ARMY!`);
+            }
+          }, { style: ok ? 'gold' : 'grey', disabled: !ok, icon: 'gold', font: 'small' });
       }
     });
-    y += 78;
+    y += 70;
 
-    // Army upgrades.
-    y = this.section(y, 'ARMY');
-    UPGRADE_IDS.forEach((id, i) => {
-      const u = BALANCE.upgrades[id];
-      const x = x0 + i * (cw + gap);
+    // Age Camp: five tracks, reset when you Evolve.
+    y = this.section(y, `${age.name.toUpperCase()} CAMP`);
+    const rowH = 21;
+    const rw = Math.min(w - 16, 3 * cw + 2 * gap);
+    const rx = Math.round((w - rw) / 2);
+    const max = maxLevel(s);
+    CAMP_IDS.forEach((id: CampId, i) => {
+      const tr = BALANCE.camp.tracks[id];
+      const ry = y + i * (rowH + 2);
+      const open = trackOpen(s, id);
       const lv = level(s, id);
-      d.nine('ui.panel', x, y, cw, 58);
-      const ie = app.assets.image('icon.' + u.icon);
-      d.image('icon.' + u.icon, x + 6, y + 6);
-      d.text(u.name.toUpperCase(), x + 8 + ie.w, y + 7);
-      d.text(`LV ${lv}`, x + cw / 2, y + 19, { align: 'center', color: '#3a2a30', outline: null });
-      d.text(upgradeValue(id, lv), x + cw / 2, y + 28, { align: 'center', color: '#fff8ec' });
+      d.nine('ui.panel', rx, ry, rw, rowH, open ? 1 : 0.6);
+      const troop = id === 'melee' || id === 'ranged' || id === 'tank' ? age.troops.find((t) => t.kind === id) : null;
+      const icon = 'icon.' + tr.icon;
+      const ie = app.assets.image(icon);
+      d.image(icon, Math.round(rx + 10 - ie.w / 2), Math.round(ry + rowH / 2 - ie.h / 2 - 1), { alpha: open ? 1 : 0.45 });
+      const name = troop ? troop.name.toUpperCase() : tr.name.toUpperCase();
+      d.text(name, rx + 20, ry + 4, { color: open ? '#fff8ec' : '#b8a8b0' });
+      // Level pips.
+      const pipW = Math.max(2, Math.min(4, Math.floor(56 / max) - 1));
+      for (let k = 0; k < max; k++) d.rect(rx + 20 + k * (pipW + 1), ry + 13, pipW, 3, k < lv ? '#ffd03c' : '#3a2a30', open ? 1 : 0.5);
+      d.text(upgradeValue(id, lv), rx + rw - 48, ry + 4, { align: 'right', color: '#a8e070' });
       const c = upgradeCost(s, id);
-      if (c === null) d.text('MAX', x + cw / 2, y + 44, { align: 'center', color: '#ffe68a' });
+      const bx = rx + rw - 44;
+      if (!open) d.text('LOCKED', bx + 21, ry + 8, { align: 'center', color: '#b8a8b0' });
+      else if (c === null) d.text('MAX', bx + 21, ry + 8, { align: 'center', color: '#ffe68a' });
       else {
-        const ok = s.gold >= c;
-        button(app, 'up-' + id, x + 4, y + 38, cw - 8, 17, fmt(c), () => {
+        const ok = canBuy(s, id);
+        button(app, 'camp-' + id, bx, ry + 2, 42, rowH - 4, fmt(c), () => {
           if (buyUpgrade(s, id)) {
             app.persist();
             app.sfx('upgrade', { jitter: 0.02 });
-            this.say(`${u.name.toUpperCase()} ${upgradeValue(id, level(s, id))}`);
+            this.say(`${name} ${upgradeValue(id, level(s, id))}`);
           }
         }, { style: ok ? 'green' : 'grey', disabled: !ok, icon: 'gold', font: 'small' });
       }
     });
-    y += 62;
+    y += CAMP_IDS.length * (rowH + 2) + 2;
+    if (y + 8 < app.h - TAB_H - 4) d.text('CAMP RESETS ON EVOLVE. SLOTS STAY.', w / 2, y, { align: 'center', color: '#e8dcc8' });
+    y += 12;
 
-    // Evolution.
-    y = this.section(y, 'EVOLVE');
-    const cost = evolveCost(s);
-    const next = s.armyAge < BALANCE.ages.length - 1 ? ageDef(s.armyAge + 1) : null;
-    const pw = 3 * cw + 2 * gap;
-    d.nine('ui.panel', x0, y, pw, 44);
-    if (!next) {
-      d.text('FUTURE ARMY', w / 2, y + 9, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-      d.text('BEAT THE FUTURE FORTRESS', w / 2, y + 26, { align: 'center', color: '#3a2a30', outline: null });
-    } else {
-      d.text(`${age.name.toUpperCase()} > ${next.name.toUpperCase()}`, w / 2, y + 7, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-      const ok = canEvolve(s);
-      const label = cost === 0 ? 'EVOLVE FREE' : `EVOLVE ${fmt(cost ?? 0)}`;
-      button(app, 'evolve', Math.round(w / 2 - 52), y + 18, 104, 22, label, () => {
-        if (evolve(s)) {
-          app.persist();
-          app.sfx('evolve', { jitter: 0 });
-          this.flash = 0.5;
-          this.env = new EnvView(app, ageDef(s.enemyAge).id);
-          this.say(`WELCOME TO THE ${next.name.toUpperCase()} AGE!`);
-        }
-      }, { style: ok ? 'green' : 'grey', disabled: !ok, icon: cost === 0 ? undefined : 'gold', font: 'small' });
-    }
-    y += 48;
-    if (next && y + 8 < app.h - TAB_H - 4) {
-      d.text(cost === 0 ? 'FREE: YOU BEAT THAT FORTRESS' : 'FREE AFTER YOU BEAT ITS FORTRESS', w / 2, y, { align: 'center', color: '#e8dcc8' });
+    // Evolution, once the boss is down.
+    if (canEvolve(s) && y + 26 < app.h - TAB_H - 4) {
+      button(app, 'evolve', Math.round(w / 2 - 60), y, 120, 24, `EVOLVE: ${ageDef(s.armyAge + 1).name.toUpperCase()}`, () => this.doEvolve(), { style: 'gold', font: 'small' });
     }
   }
 
@@ -307,6 +370,8 @@ export class MenuScene implements Scene {
       const x = Math.round(i * tw);
       const bw = Math.round((i + 1) * tw) - x;
       const id = 'tab-' + t;
+      if (!tabRevealed(app, t)) return;
+      const fresh = !app.save.seen.includes('tab_' + t) && t !== 'battle';
       if (sel) {
         d.nine('ui.tab_on', x, y - 6, bw, TAB_H + 6);
       }
@@ -319,8 +384,17 @@ export class MenuScene implements Scene {
         const lx = Math.max(lw / 2 + 2, Math.min(w - lw / 2 - 2, x + bw / 2));
         d.text(TAB_LABEL[t], lx, y + 16, { align: 'center', color: '#fff1c0' });
       }
-      const locked = t === 'dungeons' && app.save.prestige < 1;
-      if (locked && !sel) d.image('icon.lock', x + bw - 12, y + 4, { alpha: 0.8 });
+      // Badges: NEW on a freshly revealed tab, else what you can afford.
+      const count = t === 'upgrades' ? affordableCount(app.save) + (canEvolve(app.save) ? 1 : 0) : 0;
+      if (!sel && (fresh || count > 0)) {
+        const label = fresh ? 'NEW' : String(count);
+        const bwid = d.measure(label) + 6;
+        const bx = x + bw - bwid - 2;
+        const by = y + 2 + (fresh && Math.sin(app.time * 6) > 0 ? -1 : 0);
+        d.rect(bx, by, bwid, 9, '#1e1526');
+        d.rect(bx + 1, by + 1, bwid - 2, 7, '#e0383a');
+        d.text(label, bx + bwid / 2, by + 2, { align: 'center', color: '#fff8ec' });
+      }
       app.input.region({
         id,
         x,
@@ -330,6 +404,10 @@ export class MenuScene implements Scene {
         onTap: () => {
           if (this.tab !== t) app.sfx('tab', { vol: 0.5 });
           this.tab = t;
+          if (!app.save.seen.includes('tab_' + t)) {
+            app.save.seen.push('tab_' + t);
+            app.persist();
+          }
         },
       });
     });

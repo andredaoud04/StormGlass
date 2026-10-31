@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "notes": "All numbers are MODEL unless docs/WAW_PARITY.md says otherwise. Change numbers here, never in code. Bump version when a change breaks old tuning.",
   "sim": {
     "tickRate": 20,
@@ -13,7 +13,11 @@
     "goldPerKill": 1,
     "goldPerTankKill": 5,
     "baseGoldSteps": 10,
-    "playerBaseHpMul": 0.75
+    "playerBaseHpMul": 0.75,
+    "slotUnlock": {
+      "ranged": 30,
+      "tank": 70
+    }
   },
   "status": {
     "poison": {
@@ -48,8 +52,7 @@
           "dmg": 12,
           "interval": 1.0,
           "range": 100,
-          "speed": 75,
-          "unlockGold": 0
+          "speed": 75
         },
         {
           "id": "stone_slinger",
@@ -60,8 +63,7 @@
           "dmg": 10,
           "interval": 1.0,
           "range": 320,
-          "speed": 65,
-          "unlockGold": 20
+          "speed": 65
         },
         {
           "id": "stone_brute",
@@ -72,11 +74,9 @@
           "dmg": 28,
           "interval": 1.4,
           "range": 110,
-          "speed": 50,
-          "unlockGold": 45
+          "speed": 50
         }
       ],
-      "evolveGold": 0,
       "foodRate": 1.0,
       "enemyPower": 0.85
     },
@@ -95,8 +95,7 @@
           "dmg": 20,
           "interval": 1.0,
           "range": 110,
-          "speed": 75,
-          "unlockGold": 0
+          "speed": 75
         },
         {
           "id": "ancient_archer",
@@ -107,8 +106,7 @@
           "dmg": 16,
           "interval": 1.0,
           "range": 400,
-          "speed": 65,
-          "unlockGold": 30
+          "speed": 65
         },
         {
           "id": "ancient_guard",
@@ -119,13 +117,11 @@
           "dmg": 44,
           "interval": 1.4,
           "range": 110,
-          "speed": 50,
-          "unlockGold": 60
+          "speed": 50
         }
       ],
-      "evolveGold": 35,
       "foodRate": 1.2,
-      "enemyPower": 0.72
+      "enemyPower": 0.85
     },
     {
       "id": "crusader",
@@ -142,8 +138,7 @@
           "dmg": 32,
           "interval": 1.0,
           "range": 105,
-          "speed": 75,
-          "unlockGold": 0
+          "speed": 75
         },
         {
           "id": "crusader_crossbow",
@@ -154,8 +149,7 @@
           "dmg": 25,
           "interval": 1.0,
           "range": 420,
-          "speed": 65,
-          "unlockGold": 45
+          "speed": 65
         },
         {
           "id": "crusader_knight",
@@ -166,13 +160,11 @@
           "dmg": 70,
           "interval": 1.4,
           "range": 115,
-          "speed": 55,
-          "unlockGold": 90
+          "speed": 55
         }
       ],
-      "evolveGold": 80,
       "foodRate": 1.4,
-      "enemyPower": 0.78
+      "enemyPower": 0.9
     },
     {
       "id": "gunpowder",
@@ -189,8 +181,7 @@
           "dmg": 51,
           "interval": 1.0,
           "range": 115,
-          "speed": 75,
-          "unlockGold": 0
+          "speed": 75
         },
         {
           "id": "gunpowder_musketeer",
@@ -201,8 +192,7 @@
           "dmg": 41,
           "interval": 1.0,
           "range": 440,
-          "speed": 65,
-          "unlockGold": 70
+          "speed": 65
         },
         {
           "id": "gunpowder_cannon",
@@ -213,13 +203,11 @@
           "dmg": 112,
           "interval": 1.4,
           "range": 120,
-          "speed": 45,
-          "unlockGold": 140
+          "speed": 45
         }
       ],
-      "evolveGold": 140,
       "foodRate": 1.6,
-      "enemyPower": 0.8
+      "enemyPower": 0.92
     },
     {
       "id": "industrial",
@@ -236,8 +224,7 @@
           "dmg": 82,
           "interval": 1.0,
           "range": 110,
-          "speed": 75,
-          "unlockGold": 0
+          "speed": 75
         },
         {
           "id": "industrial_rifleman",
@@ -248,8 +235,7 @@
           "dmg": 65,
           "interval": 1.0,
           "range": 460,
-          "speed": 65,
-          "unlockGold": 130
+          "speed": 65
         },
         {
           "id": "industrial_walker",
@@ -260,13 +246,11 @@
           "dmg": 180,
           "interval": 1.4,
           "range": 120,
-          "speed": 45,
-          "unlockGold": 260
+          "speed": 45
         }
       ],
-      "evolveGold": 220,
       "foodRate": 1.8,
-      "enemyPower": 0.92
+      "enemyPower": 0.98
     },
     {
       "id": "future",
@@ -283,8 +267,7 @@
           "dmg": 131,
           "interval": 1.0,
           "range": 110,
-          "speed": 80,
-          "unlockGold": 0
+          "speed": 80
         },
         {
           "id": "future_gunner",
@@ -295,8 +278,7 @@
           "dmg": 105,
           "interval": 1.0,
           "range": 480,
-          "speed": 70,
-          "unlockGold": 200
+          "speed": 70
         },
         {
           "id": "future_mech",
@@ -307,13 +289,11 @@
           "dmg": 289,
           "interval": 1.4,
           "range": 125,
-          "speed": 45,
-          "unlockGold": 400
+          "speed": 45
         }
       ],
-      "evolveGold": 330,
       "foodRate": 2.0,
-      "enemyPower": 0.98
+      "enemyPower": 1.0
     }
   ],
   "waves": {
@@ -527,38 +507,211 @@
     }
   },
   "timeline": {
-    "enemyStatPerTimeline": 0.6,
-    "enemyFortressPerTimeline": 0.6,
-    "spawnSpeedPerTimeline": 0.08,
-    "enemyPower": 0.85
+    "enemyStatPerTimeline": 0.45,
+    "enemyFortressPerTimeline": 0.45,
+    "spawnSpeedPerTimeline": 0.05,
+    "enemyPower": 0.85,
+    "goldGrowthPerTimeline": 2.8
   },
-  "upgrades": {
-    "food": {
-      "name": "Food",
-      "icon": "food",
-      "maxLevel": 30,
-      "baseCost": 6,
-      "costGrowth": 1.25,
-      "perLevel": 0.1,
-      "unit": "food/s"
-    },
-    "fortress": {
-      "name": "Base",
-      "icon": "hp",
-      "maxLevel": 40,
-      "baseCost": 5,
-      "costGrowth": 1.25,
-      "perLevel": 0.06,
-      "unit": "x base HP"
-    },
-    "power": {
-      "name": "Power",
-      "icon": "sword",
-      "maxLevel": 40,
-      "baseCost": 8,
-      "costGrowth": 1.25,
-      "perLevel": 0.08,
-      "unit": "x troop HP and damage"
+  "camp": {
+    "notes": "Age Camp: five tracks bought with Gold. Levels reset on Evolution; slot unlocks do not. Cost = baseCost x ageCostGrowth^age x costGrowth^level.",
+    "maxLevel": 10,
+    "maxLevelPerTimeline": 4,
+    "costGrowth": 1.35,
+    "ageCostGrowth": 1.5,
+    "tracks": {
+      "food": {
+        "name": "Food",
+        "icon": "food",
+        "baseCost": 8,
+        "perLevel": 0.1,
+        "unit": "x Food rate"
+      },
+      "fortress": {
+        "name": "Base",
+        "icon": "hp",
+        "baseCost": 6,
+        "perLevel": 0.12,
+        "unit": "x base HP"
+      },
+      "melee": {
+        "name": "Melee",
+        "icon": "sword",
+        "baseCost": 6,
+        "perLevel": 0.12,
+        "unit": "x melee HP and damage"
+      },
+      "ranged": {
+        "name": "Ranged",
+        "icon": "bow",
+        "baseCost": 8,
+        "perLevel": 0.12,
+        "unit": "x ranged HP and damage"
+      },
+      "tank": {
+        "name": "Tank",
+        "icon": "shield",
+        "baseCost": 10,
+        "perLevel": 0.12,
+        "unit": "x tank HP and damage"
+      }
     }
+  },
+  "campaign": {
+    "notes": "Every Age has stagesPerAge stages; the last is the boss stage. Stage multipliers apply on top of the Age's enemyPower and fortressHp.",
+    "stagesPerAge": 5,
+    "stagePower": [
+      1.0,
+      1.14,
+      1.28,
+      1.42,
+      1.15
+    ],
+    "stageFortress": [
+      1.0,
+      1.12,
+      1.24,
+      1.36,
+      1.5
+    ],
+    "stagePace": [
+      1.0,
+      1.03,
+      1.06,
+      1.1,
+      0.9
+    ]
+  },
+  "bosses": {
+    "stone": {
+      "name": "Ograk the Mountain",
+      "move": "slam",
+      "hpMul": 3.4,
+      "dmgMul": 1.3,
+      "interval": 2.6,
+      "windup": 0.9,
+      "range": 80,
+      "radius": 70,
+      "speed": 34,
+      "reach": 0.62,
+      "spawnSec": 14,
+      "raidSec": 13,
+      "restSec": 6,
+      "healPerSec": 0.025,
+      "retreatAt": 0.35,
+      "gold": 30
+    },
+    "ancient": {
+      "name": "The Bronze Bull",
+      "move": "charge",
+      "hpMul": 5.0,
+      "dmgMul": 1.2,
+      "interval": 2.2,
+      "windup": 0.6,
+      "range": 70,
+      "radius": 45,
+      "speed": 38,
+      "reach": 0.65,
+      "spawnSec": 14,
+      "raidSec": 12,
+      "restSec": 6,
+      "healPerSec": 0.025,
+      "retreatAt": 0.35,
+      "gold": 45,
+      "chargeRange": 260,
+      "chargeSpeed": 4.0,
+      "chargeMul": 1.8,
+      "knockback": 70
+    },
+    "crusader": {
+      "name": "Baron Ironveil",
+      "move": "lance",
+      "hpMul": 5.2,
+      "dmgMul": 1.2,
+      "interval": 2.2,
+      "windup": 0.6,
+      "range": 75,
+      "radius": 40,
+      "speed": 40,
+      "reach": 0.66,
+      "spawnSec": 14,
+      "raidSec": 12,
+      "restSec": 6,
+      "healPerSec": 0.025,
+      "retreatAt": 0.35,
+      "gold": 70,
+      "chargeRange": 320,
+      "chargeSpeed": 4.5,
+      "chargeMul": 1.4,
+      "knockback": 40
+    },
+    "gunpowder": {
+      "name": "Admiral Blackpowder",
+      "move": "barrage",
+      "hpMul": 3.6,
+      "dmgMul": 0.85,
+      "interval": 2.8,
+      "windup": 1.0,
+      "range": 360,
+      "radius": 50,
+      "speed": 30,
+      "reach": 0.42,
+      "spawnSec": 14,
+      "raidSec": 14,
+      "restSec": 6,
+      "healPerSec": 0.02,
+      "retreatAt": 0.35,
+      "gold": 110
+    },
+    "industrial": {
+      "name": "The Iron Juggernaut",
+      "move": "quake",
+      "hpMul": 5.6,
+      "dmgMul": 0.9,
+      "interval": 2.8,
+      "windup": 1.0,
+      "range": 90,
+      "radius": 130,
+      "speed": 28,
+      "reach": 0.6,
+      "spawnSec": 14,
+      "raidSec": 14,
+      "restSec": 7,
+      "healPerSec": 0.025,
+      "retreatAt": 0.35,
+      "gold": 170
+    },
+    "future": {
+      "name": "OMEGA Core",
+      "move": "blink",
+      "hpMul": 5.0,
+      "dmgMul": 1.15,
+      "interval": 2.6,
+      "windup": 0.7,
+      "range": 80,
+      "radius": 65,
+      "speed": 40,
+      "reach": 0.7,
+      "spawnSec": 12,
+      "raidSec": 10,
+      "restSec": 7,
+      "healPerSec": 0.025,
+      "retreatAt": 0.35,
+      "gold": 260,
+      "strikes": 2
+    }
+  },
+  "skills": {
+    "notes": "Stormcall: a lightning strike on the enemy closest to your fortress. Damage = your Age's tank damage x dmgMul x your best Camp troop multiplier.",
+    "stormcall": {
+      "name": "Stormcall",
+      "dmgMul": 2.5,
+      "radius": 70,
+      "cooldownSec": 20,
+      "firstReadySec": 6,
+      "bossMul": 0.5,
+      "unlockStage": 4
+    },
+    "speedUnlockStage": 3
   }
 }

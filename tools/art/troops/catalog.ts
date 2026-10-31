@@ -23,6 +23,8 @@ export interface TroopArt {
   projectile?: string;
   /** Strip keys played at the muzzle when firing (comma separated), e.g. flash and smoke. */
   muzzleFx?: string;
+  /** Attack sound (manifest meta `sfx`); default is sling for ranged and swing for melee. */
+  sfx?: string;
   /** Top-left of the 32x28 card portrait crop in the first idle frame (default: centred on the head). */
   portraitAt?: [number, number];
 }
@@ -35,7 +37,7 @@ export const STONE_TROOPS: TroopArt[] = [
 
 export const ANCIENT_TROOPS: TroopArt[] = [
   { id: 'ancient_spearman', rig: spearmanRig, anims: (r) => humanoidAnims(r, 'thrust', { weapon: 4, frontArm: -25, offhand: 0, weaponBehind: true }) },
-  { id: 'ancient_archer', rig: archerRig, anims: (r) => humanoidAnims(r, 'bow', { weapon: 25, frontArm: -5 }), muzzle: [8, -17], projectile: 'proj.arrow' },
+  { id: 'ancient_archer', rig: archerRig, anims: (r) => humanoidAnims(r, 'bow', { weapon: 25, frontArm: -5 }), muzzle: [8, -17], projectile: 'proj.arrow' , sfx: 'bow' },
   { id: 'ancient_guard', rig: shieldwallRig, anims: (r) => humanoidAnims(r, 'thrust', { weapon: 60, frontArm: -40, offhand: 0 }) },
 ];
 
@@ -47,26 +49,26 @@ const aimed = (rig: (t: typeof TEAM_BLUE) => RigParts): [number, number] => weap
 
 export const CRUSADER_TROOPS: TroopArt[] = [
   { id: 'crusader_footman', rig: footmanRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 50, frontArm: -20, offhand: 0 }, ROOMY) },
-  { id: 'crusader_crossbow', rig: crossbowRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 75, frontArm: -45 }, ROOMY), muzzle: aimed(crossbowRig), projectile: 'proj.bolt' },
+  { id: 'crusader_crossbow', rig: crossbowRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 75, frontArm: -45 }, ROOMY), muzzle: aimed(crossbowRig), projectile: 'proj.bolt' , sfx: 'crossbow' },
   { id: 'crusader_knight', rig: knightRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 60, frontArm: -35, offhand: 0 }, ROOMY) },
 ];
 
 export const GUNPOWDER_TROOPS: TroopArt[] = [
   { id: 'gunpowder_pikeman', rig: pikemanRig, anims: (r) => humanoidAnims(r, 'thrust', { weapon: 4, frontArm: -25, weaponBehind: true }, ROOMY) },
-  { id: 'gunpowder_musketeer', rig: musketeerRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(musketeerRig), projectile: 'proj.musket', muzzleFx: 'fx.muzzle,fx.gunsmoke' },
-  { id: 'gunpowder_cannon', rig: cannonRig, anims: cannonAnims, portraitAt: [10, 14] },
+  { id: 'gunpowder_musketeer', rig: musketeerRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(musketeerRig), projectile: 'proj.musket', muzzleFx: 'fx.muzzle,fx.gunsmoke' , sfx: 'musket' },
+  { id: 'gunpowder_cannon', rig: cannonRig, anims: cannonAnims, portraitAt: [10, 14] , sfx: 'cannon' },
 ];
 
 export const INDUSTRIAL_TROOPS: TroopArt[] = [
   { id: 'industrial_trencher', rig: trencherRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 110, frontArm: -15 }, ROOMY) },
-  { id: 'industrial_rifleman', rig: riflemanRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(riflemanRig), projectile: 'proj.bullet', muzzleFx: 'fx.muzzle' },
-  { id: 'industrial_walker', rig: walkerRig, anims: walkerAnims, portraitAt: [16, 8] },
+  { id: 'industrial_rifleman', rig: riflemanRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(riflemanRig), projectile: 'proj.bullet', muzzleFx: 'fx.muzzle' , sfx: 'rifle' },
+  { id: 'industrial_walker', rig: walkerRig, anims: walkerAnims, portraitAt: [16, 8] , sfx: 'steam' },
 ];
 
 export const FUTURE_TROOPS: TroopArt[] = [
   { id: 'future_blade', rig: ionBladeRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 50, frontArm: -20 }, ROOMY) },
-  { id: 'future_gunner', rig: lancerRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(lancerRig), projectile: 'proj.energy', muzzleFx: 'fx.zap' },
-  { id: 'future_mech', rig: mechRig, anims: mechAnims, portraitAt: [16, 6] },
+  { id: 'future_gunner', rig: lancerRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, ROOMY), muzzle: aimed(lancerRig), projectile: 'proj.energy', muzzleFx: 'fx.zap' , sfx: 'zap' },
+  { id: 'future_mech', rig: mechRig, anims: mechAnims, portraitAt: [16, 6] , sfx: 'zap_heavy' },
 ];
 
 export const ALL_TROOPS: TroopArt[] = [...STONE_TROOPS, ...ANCIENT_TROOPS, ...CRUSADER_TROOPS, ...GUNPOWDER_TROOPS, ...INDUSTRIAL_TROOPS, ...FUTURE_TROOPS];

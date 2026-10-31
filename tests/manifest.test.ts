@@ -49,3 +49,26 @@ describe('asset manifest covers every Age', () => {
     });
   }
 });
+
+describe('bosses', () => {
+  for (const age of BALANCE.ages) {
+    it(`${age.id} boss has an enemy sheet with the full animation set`, () => {
+      const k = `troop.boss_${age.id}.red`;
+      expect(has(k), k).toBe(true);
+      const e = manifest.assets[k] as SheetEntry;
+      for (const a of ['idle', 'walk', 'attack', 'hit', 'death']) expect(e.anims[a]?.frames, `${k} ${a}`).toBeGreaterThan(0);
+      expect(BALANCE.bosses[age.id].name.length).toBeGreaterThan(0);
+    });
+  }
+});
+
+describe('sounds', () => {
+  it('every troop and boss attack sound exists', () => {
+    const sounds = (manifest as unknown as { sounds: Record<string, string> }).sounds;
+    for (const [k, m] of Object.entries(manifest.meta)) {
+      if (!k.startsWith('troop.') || m.sfx === undefined) continue;
+      expect(sounds[String(m.sfx)], `${k} sfx ${m.sfx}`).toBeTruthy();
+    }
+    for (const s of ['bow', 'crossbow', 'musket', 'cannon', 'rifle', 'zap', 'roar', 'ward_hit', 'ward_break']) expect(sounds[s], s).toBeTruthy();
+  });
+});

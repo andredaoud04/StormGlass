@@ -207,6 +207,33 @@ Icon "fist".
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (4): #1e1526 #f0a07a #d0603e #a8402e
 
+## icon.storm
+
+Icon "storm".
+
+- File: `public/assets/icons/storm.png`
+- Size: 9 x 10
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #1e1526 #d6f6ff #5fd8f0
+
+## icon.bow
+
+Icon "bow".
+
+- File: `public/assets/icons/bow.png`
+- Size: 9 x 9
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #1e1526 #ad6a3c #e2d6b6 #dcd6c8
+
+## icon.shield
+
+Icon "shield".
+
+- File: `public/assets/icons/shield.png`
+- Size: 8 x 8
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (6): #1e1526 #aaa396 #dcd6c8 #e64d4d #7e7770 #ae2a40
+
 ## icon.tab_battle
 
 Icon "tab_battle".

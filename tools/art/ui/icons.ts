@@ -94,6 +94,11 @@ const ICONS: Record<string, string[]> = {
   hp: ['.MM.MM.', 'MMmmMmr', 'mmmmmmr', '.mmmmr.', '..mrr..', '...r...'],
   sword: ['......S', '.....Sp', '....Sp.', 'd..Sp..', '.dSp...', '.ld....', 'l.l....'],
   fist: ['.MMM.', 'MmmmM', 'mmmmr', 'mmmmr', '.rrr.'],
+  // Stormcall: a lightning bolt.
+  storm: ['....CCC', '...CCc.', '..CCc..', '.CCCCCc', '...CCc.', '..CCc..', '.Cc....', 'c......'],
+  // Role icons for the Age Camp: bow (ranged) and shield (tank).
+  bow: ['..dd...', '.d..w..', 'd...w..', 'd..Sw..', 'd...w..', '.d..w..', '..dd...'],
+  shield: ['sSSSSs', 'sSTTps', 'sSTTps', 'sSttps', '.sppp.', '..pp..'],
 };
 
 const TAB_ICONS: Record<string, string[]> = {

@@ -1705,6 +1705,264 @@
     }
    }
   },
+  "troop.boss_stone.red": {
+   "kind": "sheet",
+   "file": "troops/boss_stone_red.png",
+   "frameW": 112,
+   "frameH": 92,
+   "anchor": [
+    52,
+    74
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.boss_ancient.red": {
+   "kind": "sheet",
+   "file": "troops/boss_ancient_red.png",
+   "frameW": 112,
+   "frameH": 92,
+   "anchor": [
+    52,
+    74
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.boss_crusader.red": {
+   "kind": "sheet",
+   "file": "troops/boss_crusader_red.png",
+   "frameW": 112,
+   "frameH": 92,
+   "anchor": [
+    52,
+    74
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.boss_gunpowder.red": {
+   "kind": "sheet",
+   "file": "troops/boss_gunpowder_red.png",
+   "frameW": 88,
+   "frameH": 72,
+   "anchor": [
+    40,
+    56
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.boss_industrial.red": {
+   "kind": "sheet",
+   "file": "troops/boss_industrial_red.png",
+   "frameW": 112,
+   "frameH": 100,
+   "anchor": [
+    52,
+    92
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "troop.boss_future.red": {
+   "kind": "sheet",
+   "file": "troops/boss_future_red.png",
+   "frameW": 112,
+   "frameH": 100,
+   "anchor": [
+    52,
+    92
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -2890,6 +3148,24 @@
    "w": 7,
    "h": 7
   },
+  "icon.storm": {
+   "kind": "image",
+   "file": "icons/storm.png",
+   "w": 9,
+   "h": 10
+  },
+  "icon.bow": {
+   "kind": "image",
+   "file": "icons/bow.png",
+   "w": 9,
+   "h": 9
+  },
+  "icon.shield": {
+   "kind": "image",
+   "file": "icons/shield.png",
+   "w": 8,
+   "h": 8
+  },
   "icon.tab_battle": {
    "kind": "image",
    "file": "icons/tab_battle.png",
@@ -3541,6 +3817,18 @@
     0,
     3
    ]
+  },
+  "fx.lightning": {
+   "kind": "strip",
+   "file": "fx/lightning.png",
+   "frameW": 40,
+   "frameH": 128,
+   "frames": 6,
+   "fps": 14,
+   "anchor": [
+    20,
+    125
+   ]
   }
  },
  "sounds": {
@@ -3565,7 +3853,19 @@
   "defeat": "sfx/defeat.wav",
   "unlock": "sfx/unlock.wav",
   "upgrade": "sfx/upgrade.wav",
-  "evolve": "sfx/evolve.wav"
+  "evolve": "sfx/evolve.wav",
+  "bow": "sfx/bow.wav",
+  "crossbow": "sfx/crossbow.wav",
+  "musket": "sfx/musket.wav",
+  "cannon": "sfx/cannon.wav",
+  "rifle": "sfx/rifle.wav",
+  "steam": "sfx/steam.wav",
+  "zap": "sfx/zap.wav",
+  "zap_heavy": "sfx/zap_heavy.wav",
+  "roar": "sfx/roar.wav",
+  "ward_hit": "sfx/ward_hit.wav",
+  "ward_break": "sfx/ward_break.wav",
+  "thunder": "sfx/thunder.wav"
  },
  "meta": {
   "troop.stone_clubber": {
@@ -3583,7 +3883,8 @@
   },
   "troop.ancient_archer": {
    "top": -24,
-   "projectile": "proj.arrow"
+   "projectile": "proj.arrow",
+   "sfx": "bow"
   },
   "troop.ancient_guard": {
    "top": -28
@@ -3593,7 +3894,8 @@
   },
   "troop.crusader_crossbow": {
    "top": -24,
-   "projectile": "proj.bolt"
+   "projectile": "proj.bolt",
+   "sfx": "crossbow"
   },
   "troop.crusader_knight": {
    "top": -28
@@ -3604,10 +3906,12 @@
   "troop.gunpowder_musketeer": {
    "top": -24,
    "projectile": "proj.musket",
-   "muzzleFx": "fx.muzzle,fx.gunsmoke"
+   "muzzleFx": "fx.muzzle,fx.gunsmoke",
+   "sfx": "musket"
   },
   "troop.gunpowder_cannon": {
-   "top": -24
+   "top": -24,
+   "sfx": "cannon"
   },
   "troop.industrial_trencher": {
    "top": -23
@@ -3615,10 +3919,12 @@
   "troop.industrial_rifleman": {
    "top": -23,
    "projectile": "proj.bullet",
-   "muzzleFx": "fx.muzzle"
+   "muzzleFx": "fx.muzzle",
+   "sfx": "rifle"
   },
   "troop.industrial_walker": {
-   "top": -30
+   "top": -30,
+   "sfx": "steam"
   },
   "troop.future_blade": {
    "top": -23
@@ -3626,10 +3932,33 @@
   "troop.future_gunner": {
    "top": -22,
    "projectile": "proj.energy",
-   "muzzleFx": "fx.zap"
+   "muzzleFx": "fx.zap",
+   "sfx": "zap"
   },
   "troop.future_mech": {
-   "top": -30
+   "top": -30,
+   "sfx": "zap_heavy"
+  },
+  "troop.boss_stone": {
+   "top": -55
+  },
+  "troop.boss_ancient": {
+   "top": -55
+  },
+  "troop.boss_crusader": {
+   "top": -54
+  },
+  "troop.boss_gunpowder": {
+   "top": -49,
+   "sfx": "cannon"
+  },
+  "troop.boss_industrial": {
+   "top": -59,
+   "sfx": "steam"
+  },
+  "troop.boss_future": {
+   "top": -59,
+   "sfx": "zap_heavy"
   },
   "env.stone": {
    "skyTop": "#2f6cc4",

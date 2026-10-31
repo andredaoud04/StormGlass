@@ -587,3 +587,99 @@ future_mech (red team). Chibi troop, bold outline, lit from the top-left.
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (23): #1e1526 #8e9aae #f2f6fb #c6d0dc #e64d4d #ffffff #5a6680 #c4fbff #ffb08c #2c304e #5e6688 #ae2a40 #404668 #1e2038 #b2b3bb #9498a5 #6c7285 #484e65 #2a9cf0 #5ce6ff #fff8ec #f07a7a #ffe68a
+
+## troop.boss_stone.red
+
+boss_stone: boss at twice the troop scale, enemy team. Faces right; mirrored in game.
+
+- File: `public/assets/troops/boss_stone_red.png`
+- Frame: 112 x 92, facing right, one animation per row
+- Anchor (feet on ground): (52, 74)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (27): #1e1526 #fbf4e0 #b3a486 #7d705c #e2d6b6 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #e64d4d #7c2e30 #734424 #a86e3e #d6a160 #f4d494 #ae2a40 #ffb08c #52291b #7f4428 #94503f #ad6a3c #d99a5c #7e7770 ...
+
+## troop.boss_ancient.red
+
+boss_ancient: boss at twice the troop scale, enemy team. Faces right; mirrored in game.
+
+- File: `public/assets/troops/boss_ancient_red.png`
+- Frame: 112 x 92, facing right, one animation per row
+- Anchor (feet on ground): (52, 74)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (24): #1e1526 #fbf4e0 #e2d6b6 #b3a486 #ae2a40 #e64d4d #ffb08c #fff2a6 #e6b84a #b07a2c #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #6a1a33 #94503f #c98a52
+
+## troop.boss_crusader.red
+
+boss_crusader: boss at twice the troop scale, enemy team. Faces right; mirrored in game.
+
+- File: `public/assets/troops/boss_crusader_red.png`
+- Frame: 112 x 92, facing right, one animation per row
+- Anchor (feet on ground): (52, 74)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (22): #1e1526 #fff3a8 #ffd03c #e64d4d #a35f16 #ae2a40 #ffb08c #9aa2ae #4a505e #6a7280 #30343f #e6b84a #fff2a6 #fffaf0 #b07a2c #9a5c34 #6e3a22 #6a5a6e #312838 #45384c #221c28 #c98a52
+
+## troop.boss_gunpowder.red
+
+boss_gunpowder: boss at twice the troop scale, enemy team. Faces right; mirrored in game.
+
+- File: `public/assets/troops/boss_gunpowder_red.png`
+- Frame: 88 x 72, facing right, one animation per row
+- Anchor (feet on ground): (40, 56)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (39): #1e1526 #f2f6fa #b8c2cc #6a5a6e #45384c #a35f16 #ffd03c #fff3a8 #221c28 #312838 #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #d6dce2 #6e7884 #f07a7a #7c2e30 #ad6a3c ...
+
+## troop.boss_industrial.red
+
+boss_industrial: boss at twice the troop scale, enemy team. Faces right; mirrored in game.
+
+- File: `public/assets/troops/boss_industrial_red.png`
+- Frame: 112 x 100, facing right, one animation per row
+- Anchor (feet on ground): (52, 92)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (26): #1e1526 #30343f #9aa2ae #6a7280 #4a505e #a8b294 #7c866a #5a624e #fff3a8 #fff8ec #f2a97a #cc7a58 #e64d4d #ae2a40 #e09a1e #ffb08c #a35f16 #52291b #757885 #535665 #3d3e4d #2b2b38 #ffffff #e8eef4 ...
+
+## troop.boss_future.red
+
+boss_future: boss at twice the troop scale, enemy team. Faces right; mirrored in game.
+
+- File: `public/assets/troops/boss_future_red.png`
+- Frame: 112 x 100, facing right, one animation per row
+- Anchor (feet on ground): (52, 92)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (23): #1e1526 #404668 #2c304e #e64d4d #5e6688 #ffffff #1e2038 #c4fbff #ffb08c #a35f16 #e09a1e #ffd03c #ae2a40 #52291b #4b4e6b #363754 #282842 #1e1d33 #2a9cf0 #5ce6ff #fff8ec #f07a7a #ffe68a

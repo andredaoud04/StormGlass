@@ -81,6 +81,13 @@ export class BattleView {
     { side: 1, state: 0, shakeT: 0, flashT: 0, smokeT: 0, destroyed: false },
   ];
   private t = 0;
+  /** Boss telegraphs: where a strike will land and when. */
+  private marks: { x: number; r: number; t: number; dur: number; move: string }[] = [];
+  private wardFlash = 0;
+  /** Screen flash (Stormcall). */
+  private flash = 0;
+  private wardBroken = 0;
+  private bossDash = 0;
 
   constructor(
     private app: App,
@@ -109,6 +116,11 @@ export class BattleView {
     const team = u.side === 0 ? 'blue' : 'red';
     const key = `troop.${u.def.id}.${team}`;
     if (this.app.assets.has(key)) return key;
+    if (u.def.bossDef) {
+      // A boss without art borrows its Age's tank.
+      const tank = this.sim.config.enemyTroops.tank;
+      if (tank && this.app.assets.has(`troop.${tank.id}.${team}`)) return `troop.${tank.id}.${team}`;
+    }
     const fallback = { melee: 'stone_clubber', ranged: 'stone_slinger', tank: 'stone_brute' }[u.def.kind];
     return `troop.${fallback}.${team}`;
   }
@@ -153,9 +165,15 @@ export class BattleView {
           const v = this.vunit(u);
           v.anim = 'attack';
           v.animT = 0;
-          const ticks = Math.min(MAX_WINDUP_TICKS, Math.max(1, Math.round(u.def.interval * s.config.tickRate * WINDUP_FRACTION)));
+          const ticks = u.def.bossDef
+            ? Math.max(1, Math.round(u.def.bossDef.windup * s.config.tickRate))
+            : Math.min(MAX_WINDUP_TICKS, Math.max(1, Math.round(u.def.interval * s.config.tickRate * WINDUP_FRACTION)));
           v.windup = ticks / s.config.tickRate;
-          if (u.def.kind !== 'ranged') this.app.sfx(u.def.kind === 'tank' ? 'swing_heavy' : 'swing', { vol: 0.35, minGapMs: 60 });
+          if (u.def.kind !== 'ranged') {
+            const own = this.app.assets.meta(`troop.${u.def.id}`).sfx;
+            if (own && !u.def.bossDef) this.app.sfx(String(own), { vol: 0.55, minGapMs: 80 });
+            else this.app.sfx(u.def.kind === 'tank' ? 'swing_heavy' : 'swing', { vol: 0.35, minGapMs: 60 });
+          }
           break;
         }
         case 'shoot': {
@@ -176,7 +194,7 @@ export class BattleView {
               if (this.app.assets.has(k)) this.fx.add(k, v.px + m[0] * dir, G + v.depth + m[1], { fps: this.app.assets.strip(k).fps, flip: dir < 0, vx: k.includes('smoke') ? dir * 6 : 0, vy: k.includes('smoke') ? -3 : 0 });
             }
           }
-          this.app.sfx('sling', { vol: 0.4, minGapMs: 50 });
+          this.app.sfx(String(tmeta.sfx ?? 'sling'), { vol: tmeta.sfx ? 0.5 : 0.4, minGapMs: 50 });
           break;
         }
         case 'hit': {
@@ -254,6 +272,71 @@ export class BattleView {
           const p = this.projs.get(e.projectile);
           if (p) this.fx.add('fx.dust', this.laneToPx(e.x), G);
           this.projs.delete(e.projectile);
+          break;
+        }
+        case 'skill': {
+          const cx = this.laneToPx(e.x);
+          this.fx.add('fx.lightning', cx, G + 2);
+          this.fx.add('fx.ring', cx, G - 2);
+          for (let k = 0; k < 6; k++) this.fx.add('fx.debris', cx, G - 2, { vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, gravity: 300, life: 0.7, fps: 14 });
+          this.flash = 0.18;
+          this.shake.add(5, 0.35);
+          this.hooks.onImpact?.(true, true);
+          this.app.sfx('thunder', { vol: 1 });
+          break;
+        }
+        case 'bossSpawn': {
+          this.shake.add(4, 0.5);
+          this.app.sfx('roar', { vol: 0.9 });
+          this.fx.add('fx.dust', this.layout.laneR - 10, G, { behind: true });
+          break;
+        }
+        case 'bossWindup': {
+          const r = s.config.boss?.bossDef?.radius ?? 40;
+          this.marks.push({ x: e.x, r, t: 0, dur: e.ticks / s.config.tickRate, move: e.move });
+          if (e.move === 'barrage') this.app.sfx('cannon', { vol: 0.6 });
+          else if (e.move === 'quake') this.app.sfx('steam', { vol: 0.6 });
+          else if (e.move === 'blink') this.app.sfx('zap', { vol: 0.5 });
+          break;
+        }
+        case 'bossStrike': {
+          this.marks = this.marks.filter((m) => Math.abs(m.x - e.x) > 1);
+          const cx = this.laneToPx(e.x);
+          const half = Math.max(6, this.laneToPx(e.x + e.radius) - cx);
+          this.fx.add(e.move === 'barrage' ? 'fx.boom' : 'fx.ring', cx, G - (e.move === 'barrage' ? 6 : 2));
+          for (let k = -2; k <= 2; k++) this.fx.add('fx.dust', cx + (k * half) / 2, G + 2, { behind: true, vx: k * 10 });
+          if (e.move === 'quake') for (let k = 0; k < 6; k++) this.fx.add('fx.debris', cx + (Math.random() - 0.5) * half * 2, G, { vx: (Math.random() - 0.5) * 60, vy: -50 - Math.random() * 60, gravity: 300, life: 0.8, fps: 14 });
+          this.shake.add(e.move === 'quake' ? 6 : 4, 0.3);
+          this.hooks.onImpact?.(true, false);
+          this.app.sfx(e.move === 'barrage' ? 'boom' : 'hit_heavy', { vol: 0.9, minGapMs: 60 });
+          break;
+        }
+        case 'bossDash': {
+          this.bossDash = 0.6;
+          this.app.sfx('swing_heavy', { vol: 0.8 });
+          break;
+        }
+        case 'bossBlink': {
+          this.fx.add('fx.poof', this.laneToPx(e.from), G - 10);
+          this.fx.add('fx.poof', this.laneToPx(e.to), G - 10);
+          this.app.sfx('zap', { vol: 0.6 });
+          const v = this.units.get(e.id);
+          if (v) v.px = this.laneToPx(e.to);
+          break;
+        }
+        case 'wardHit': {
+          this.wardFlash = 0.15;
+          this.app.sfx('ward_hit', { vol: 0.3, minGapMs: 120 });
+          break;
+        }
+        case 'wardBreak': {
+          this.wardBroken = 1.2;
+          const x = this.layout.laneR + 14;
+          for (let k = 0; k < 10; k++) this.fx.add('fx.debris', x, G - 20 - Math.random() * 50, { vx: (Math.random() - 0.3) * 120, vy: -40 - Math.random() * 80, gravity: 260, life: 1, fps: 16 });
+          this.fx.add('fx.boom', x, G - 40);
+          this.fx.text('WARD BROKEN!', Math.round((this.layout.laneL + this.layout.laneR) / 2), G - 60, { color: '#9fdcff', font: 'big', life: 1.6, vy: -10 });
+          this.shake.add(5, 0.4);
+          this.app.sfx('ward_break', { vol: 1 });
           break;
         }
         default:
@@ -337,6 +420,16 @@ export class BattleView {
       if (v.dying && v.deathT > 0.95) this.units.delete(v.id);
     }
     for (const p of this.projs.values()) p.t += adt;
+    for (const m of this.marks) m.t += adt;
+    this.marks = this.marks.filter((m) => m.t < m.dur + 0.2);
+    this.wardFlash = Math.max(0, this.wardFlash - dt);
+    this.flash = Math.max(0, this.flash - dt);
+    this.wardBroken = Math.max(0, this.wardBroken - dt);
+    if (this.bossDash > 0) {
+      this.bossDash -= adt;
+      const boss = this.units.get(this.sim.bossId);
+      if (boss && Math.floor(this.bossDash * 30) % 2 === 0) this.fx.add('fx.dust', boss.px + 8, G + boss.depth, { behind: true, vx: 20 });
+    }
     void G;
   }
 
@@ -396,12 +489,14 @@ export class BattleView {
     this.env.draw(G, sx, sy);
     this.drawBase(0, sx, sy);
     this.drawBase(1, sx, sy);
+    if (this.sim.wardUp || this.wardBroken > 0) this.drawWard(sx, sy);
     this.fx.drawBack(d, sx, sy);
+    this.drawMarks(sx, sy);
 
     // Shadows first, then units sorted by depth.
     const list = [...this.units.values()].sort((a, b) => a.depth - b.depth || a.id - b.id);
     for (const v of list) {
-      const w = v.kind === 'tank' ? 9 : 6;
+      const w = v.id === this.sim.bossId ? 14 : v.kind === 'tank' ? 9 : 6;
       d.rect(v.px - w + sx, G + v.depth + sy, w * 2, 1, '#1e1526', v.dying ? 0.15 : 0.28);
       d.rect(v.px - w + 1 + sx, G + v.depth + 1 + sy, w * 2 - 2, 1, '#1e1526', v.dying ? 0.08 : 0.16);
     }
@@ -417,8 +512,8 @@ export class BattleView {
       d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, alpha });
       if (v.flash > 0) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.85 });
       if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0 });
-      // HP bar when hurt.
-      if (v.hpShow > 0 && !v.dying && v.hp < v.maxHp) {
+      // HP bar when hurt (the boss has its own bar in the HUD).
+      if (v.hpShow > 0 && !v.dying && v.hp < v.maxHp && v.id !== this.sim.bossId) {
         const bw = v.kind === 'tank' ? 16 : 12;
         const bx = Math.round(v.px - bw / 2 + sx);
         const by = y + v.top - 4;
@@ -484,6 +579,64 @@ export class BattleView {
     const ty = Number(m.torchY) - ay;
     const torch = String(m.torchFx ?? 'fx.flame');
     d.strip(torch, Math.floor(this.t * this.app.assets.strip(torch).fps + side), flip ? x - tx : x + tx, y + ty, { flip });
+  }
+
+  /** Red ground marker under a telegraphed boss strike, filling as it charges. */
+  private drawMarks(sx: number, sy: number): void {
+    const d = this.app.draw;
+    const G = this.layout.groundY;
+    for (const m of this.marks) {
+      const cx = this.laneToPx(m.x);
+      const half = Math.max(6, Math.round(this.laneToPx(m.x + m.r) - cx));
+      const p = Math.min(1, m.t / Math.max(0.05, m.dur));
+      const blink = Math.floor(m.t * 12) % 2 ? 0.55 : 0.85;
+      d.rect(Math.round(cx - half + sx), G + 3 + sy, half * 2, 1, '#ff5a4f', blink);
+      d.rect(Math.round(cx - half * p + sx), G + 4 + sy, Math.round(half * 2 * p), 2, '#ff5a4f', 0.35 + 0.4 * p);
+      d.rect(Math.round(cx - half + sx), G + 1 + sy, 1, 4, '#ff9a7a', blink);
+      d.rect(Math.round(cx + half - 1 + sx), G + 1 + sy, 1, 4, '#ff9a7a', blink);
+      if (m.move === 'barrage') {
+        // A falling shell over the mark.
+        const y = G - 70 + 70 * p * p;
+        d.rect(Math.round(cx - 1 + sx), Math.round(y + sy), 3, 3, '#2a1f2e');
+        d.rect(Math.round(cx + sx), Math.round(y + sy), 1, 1, '#ffd03c');
+      }
+    }
+  }
+
+  /** A shimmering dome over the enemy fortress while its boss lives. */
+  private drawWard(sx: number, sy: number): void {
+    const d = this.app.draw;
+    const G = this.layout.groundY;
+    const e = this.app.assets.image(`base.${this.baseAge(1)}.blue.0`);
+    const rh = (e.anchor?.[1] ?? 70) + 10;
+    const rw = Math.round(rh * 0.62);
+    const cx = this.layout.laneR + Math.round(rw * 0.55);
+    const broke = this.wardBroken > 0 && !this.sim.wardUp;
+    const pulse = 0.5 + 0.5 * Math.sin(this.t * 3);
+    const alpha = broke ? this.wardBroken / 1.2 : 0.75 + 0.2 * pulse;
+    const col = this.wardFlash > 0 ? '#ffffff' : '#7fd0ff';
+    // Hex-cell fill: rows of short dashes inside the dome, drifting slowly upward.
+    const drift = Math.floor(this.t * 6) % 6;
+    for (let y = G - rh + 3; y < G; y++) {
+      const k = Math.sqrt(Math.max(0, 1 - Math.pow((G - y) / rh, 2)));
+      const half = Math.round(rw * k);
+      if (half < 2) continue;
+      if ((y + drift) % 6 === 0) {
+        for (let x = -half + ((y >> 1) % 2) * 3; x < half - 1; x += 6) d.rect(cx + x + sx, y + sy, 3, 1, '#bfe8ff', 0.22 * alpha);
+      }
+      // Faint inner glow near the rim.
+      d.rect(cx - half + sx, y + sy, 2, 1, '#9fdcff', 0.35 * alpha);
+      d.rect(cx + half - 2 + sx, y + sy, 2, 1, '#9fdcff', 0.35 * alpha);
+    }
+    // Two-pixel rim.
+    for (let a = 0; a <= 96; a++) {
+      if (broke && a % 4 < 2) continue;
+      const th = Math.PI * (a / 96);
+      const x = Math.round(cx - Math.cos(th) * rw + sx);
+      const y = Math.round(G - Math.sin(th) * rh + sy);
+      d.rect(x, y, 2, 2, col, Math.min(1, alpha + this.wardFlash * 3));
+      if ((a + Math.floor(this.t * 14)) % 16 === 0) d.rect(x, y, 2, 2, '#ffffff', Math.min(1, alpha));
+    }
   }
 
   /** Screen y of the top of a fortress (for HP bars). */

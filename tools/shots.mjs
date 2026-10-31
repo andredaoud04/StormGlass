@@ -60,17 +60,17 @@ const SCENARIOS = [
   ['home-new', async () => {}],
   ['battle-start', async (p) => { await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 2.2, false); }],
   ['battle-mid', async (p) => {
-    await setSave(p, { ownedTroops: ['stone_clubber', 'stone_slinger', 'stone_brute'] });
+    await setSave(p, { slots: ['ranged', 'tank'] });
     await p.evaluate(() => window.__sg.app.go('battle'));
     await fastForward(p, 24);
   }],
   ['battle-late', async (p) => {
-    await setSave(p, { ownedTroops: ['stone_clubber', 'stone_slinger', 'stone_brute'] });
+    await setSave(p, { slots: ['ranged', 'tank'] });
     await p.evaluate(() => window.__sg.app.go('battle'));
     await fastForward(p, 46);
   }],
   ['battle-result', async (p) => {
-    await setSave(p, { ownedTroops: ['stone_clubber', 'stone_slinger', 'stone_brute'] });
+    await setSave(p, { slots: ['ranged', 'tank'] });
     await p.evaluate(() => window.__sg.app.go('battle'));
     for (let i = 0; i < 20; i++) {
       await fastForward(p, 10);
@@ -81,20 +81,42 @@ const SCENARIOS = [
   }],
   ['battle-pause', async (p) => { await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 8); await p.evaluate(() => window.__sg.app.scene.key('p')); await fastForward(p, 0.1, false); }],
   ['battle-ancient', async (p) => {
-    await setSave(p, { armyAge: 1, enemyAge: 1, beaten: [0], ownedTroops: ['stone_clubber', 'ancient_archer', 'ancient_guard'] });
+    await setSave(p, { armyAge: 1, enemyAge: 1, beaten: [0], slots: ['ranged', 'tank'] });
     await p.evaluate(() => window.__sg.app.go('battle'));
     await fastForward(p, 26);
   }],
   ['home-ancient', async (p) => {
-    await setSave(p, { armyAge: 1, enemyAge: 2, beaten: [0, 1], gold: 340, ownedTroops: ['ancient_archer'] });
+    await setSave(p, { armyAge: 1, enemyAge: 1, stage: 2, beaten: [0], gold: 340, slots: ['ranged'], stats: { battles: 8, wins: 7, losses: 1, retreats: 0, goldEarned: 0, kills: 0 } });
     await p.evaluate(() => window.__sg.app.go('menu'));
   }],
-  ['battle-stone-vs-ancient', async (p) => {
-    await setSave(p, { enemyAge: 1, beaten: [0], ownedTroops: ['stone_clubber', 'stone_slinger', 'stone_brute'] });
+  ['battle-storm', async (p) => {
+    await setSave(p, { stage: 3, slots: ['ranged', 'tank'] });
     await p.evaluate(() => window.__sg.app.go('battle'));
-    await fastForward(p, 20);
+    await fastForward(p, 14);
+    await p.evaluate(() => window.__sg.app.scene.key('q'));
+    await fastForward(p, 0.12, false);
   }],
-  ['upgrades', async (p) => { await setSave(p, { gold: 30 }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
+  ['battle-storm-cooldown', async (p) => {
+    await setSave(p, { stage: 3, slots: ['ranged', 'tank'], settings: { sound: true, reducedMotion: false, fast: true } });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await fastForward(p, 14);
+    await p.evaluate(() => window.__sg.app.scene.key('q'));
+    await fastForward(p, 3, false);
+  }],
+  ['home-after-battle1', async (p) => {
+    await setSave(p, { stage: 1, gold: 54, stats: { battles: 1, wins: 1, losses: 0, retreats: 0, goldEarned: 36, kills: 9 } });
+    await p.evaluate(() => window.__sg.app.go('menu'));
+  }],
+  ['home-boss', async (p) => {
+    await setSave(p, { stage: 4, slots: ['ranged', 'tank'], stats: { battles: 4, wins: 4, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } });
+    await p.evaluate(() => window.__sg.app.go('menu'));
+  }],
+  ['home-evolve', async (p) => {
+    await setSave(p, { stage: 4, beaten: [0], slots: ['ranged', 'tank'], stats: { battles: 5, wins: 5, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } });
+    await p.evaluate(() => window.__sg.app.go('menu'));
+  }],
+  ['upgrades', async (p) => { await setSave(p, { gold: 60, stats: { battles: 2, wins: 2, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
+  ['upgrades-camp', async (p) => { await setSave(p, { armyAge: 2, enemyAge: 2, gold: 400, slots: ['ranged', 'tank'], camp: { food: 3, melee: 2, fortress: 1 }, stats: { battles: 12, wins: 11, losses: 1, retreats: 0, goldEarned: 0, kills: 0 } }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
   ['dungeons', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'dungeons')); }],
   ['cards', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'cards')); }],
   ['shop', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'shop')); }],
@@ -102,6 +124,16 @@ const SCENARIOS = [
 ];
 
 // Later Ages: a home screen, an early crowd and a late fight (fortress damage) per Age.
+// Boss stage of every Age: the boss mid-raid with the ward up.
+const ALL = [['stone', 0], ['ancient', 1], ['crusader', 2], ['gunpowder', 3], ['industrial', 4], ['future', 5]];
+for (const [age, n] of ALL) {
+  SCENARIOS.push([`boss-${age}`, async (p) => {
+    await setSave(p, { armyAge: n, enemyAge: n, stage: 4, slots: ['ranged', 'tank'], camp: { melee: 3, ranged: 3, tank: 3, fortress: 3, food: 3 } });
+    await p.evaluate(() => window.__sg.app.go('battle'));
+    await crowd(p, 17);
+  }]);
+}
+
 const LATER = [
   ['crusader', 2, ['crusader_footman', 'crusader_crossbow', 'crusader_knight']],
   ['gunpowder', 3, ['gunpowder_pikeman', 'gunpowder_musketeer', 'gunpowder_cannon']],
@@ -110,7 +142,8 @@ const LATER = [
 ];
 for (const [age, n, troops] of LATER) {
   const beaten = Array.from({ length: n }, (_, i) => i);
-  const save = { armyAge: n, enemyAge: n, beaten, gold: 500, ownedTroops: troops };
+  const save = { armyAge: n, enemyAge: n, beaten, gold: 500, slots: ['ranged', 'tank'], stats: { battles: n * 5, wins: n * 5, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } };
+  void troops;
   SCENARIOS.push([`home-${age}`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('menu')); await fastForward(p, 0.5, false); }]);
   SCENARIOS.push([`battle-${age}-start`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 2.2, false); }]);
   SCENARIOS.push([`battle-${age}`, async (p) => { await setSave(p, save); await p.evaluate(() => window.__sg.app.go('battle')); await crowd(p, 12); }]);
