@@ -49,7 +49,7 @@ This file is the single source of truth. If code and Bible disagree, fix one of 
 3. Every battle starts at 0 Food. Stone income is 1 Food per second. Stone costs: Clubber 5, Slinger 8, Brute 12. Later-Age costs are MODEL: Ancient 6/9/14, Crusader 7/11/16, Gunpowder 8/12/18, Industrial 9/14/20, Future 10/16/23.
 4. In battle: at most 3 troop cards, 3 Skill buttons, 1 Hero button. A new player owns only the Clubber. The first Hero unlocks after the first Prestige.
 5. Gold comes only from main campaign battles: 1 per normal kill, 5 per tank kill, plus Gold for damaging the enemy fortress. Gold is kept after a loss or retreat. Dungeons, events, daily rewards and chests never give Gold. Starting Gold is 18 (MODEL).
-6. Campaign (D25): every Age has 5 stages, 4 battles then a boss. Winning moves you one stage on; you never evolve after a normal battle. Beating the boss unlocks Evolution, which is free and moves your army and the enemy to the next Age together.
+6. Campaign (D25, D32): a numbered sequence of battles, 4 then a boss per Age. Winning the newest battle opens the next; beating a boss opens the next Age's battles (fighting them before you Evolve is the hard way). Any earlier battle can be replayed for Gold. Evolution is bought with Gold once your own Age's boss is beaten, and it resets Gold and upgrades (We Are Warriors format).
 7. The main campaign never ends (D26). Prestige needs a Future army and a beaten Future boss. It costs nothing. It restarts you at Stone on the next, harder Timeline, forever. You keep slots and permanent collections (Cards, Skills, Runes, Heroes). The main campaign is paced to be enjoyed; real difficulty belongs to events and dungeons.
 8. Five tab positions: Dungeons, Upgrades, Battle (centre, default), Cards, Shop. Tabs appear one at a time as the player progresses (D28); an unrevealed tab's position stays empty. Battle, Upgrades and Dungeons never scroll.
 9. Dungeons: Rush, Legends, Bosses, Survival on one screen. Rush unlocks after Prestige 1, Legends after 2, Bosses after 3. Keys appear only in Dungeons.
@@ -101,14 +101,13 @@ All battle logic is in `src/sim`. It is pure and deterministic: the same seed an
 
 ## 5. Progression and Economy
 
-Data: `src/data/balance.json` (version 2). Logic: `src/game/progress.ts`, `src/game/upgrades.ts` (Age Camp and slots), `src/game/battleSetup.ts` (stages and bosses). Save: `src/game/save.ts`.
+Data: `src/data/balance.json` (version 3). Logic: `src/game/progress.ts`, `src/game/upgrades.ts`, `src/game/battleSetup.ts` (stages, waves, bosses). Save: `src/game/save.ts`.
 
-### Loop
-1. Fight the current stage. Earn Gold from kills, fortress damage and boss damage, win or lose. A loss or retreat replays the same stage and keeps the Gold.
-2. Spend Gold: buy the Ranged and Tank slots (once, forever), or train the Age Camp.
-3. Win stages 1 to 4, then beat the boss on stage 5.
-4. Evolve (free). Army and enemy move to the next Age, stage 1. The Camp resets; slots stay.
-5. Beat the Future boss: start the next Timeline (Prestige). Timelines never end.
+### Loop (We Are Warriors format, D32)
+1. Fight the newest battle, or pick an earlier one with the arrows to replay it for Gold. Gold comes from kills, fortress damage and boss damage, win or lose.
+2. Spend Gold on Food rate and Base HP, and once on the Ranged and Tank slots.
+3. Beat your Age's boss: Evolution unlocks. It costs Gold (Ancient 2,000, Crusader 2,600, Gunpowder 6,500, Industrial 14,700, Future 25,200; x1.8 per Timeline) and resets Gold, Food and Base. Slots stay. The next Age's battles are already open; fighting them before you evolve is the hard way.
+4. Beat the Future boss with a Future army: start the next Timeline. Timelines never end.
 
 ### Bosses (D27)
 - One per Age, stage 5: Ograk the Mountain (slam), The Bronze Bull (charge with knockback), Baron Ironveil (lance: pierces a line), Admiral Blackpowder (barrage from range), The Iron Juggernaut (quake: wide area that chills), OMEGA Core (blink: teleports to your front, strikes twice, blinks home).
@@ -119,32 +118,31 @@ Data: `src/data/balance.json` (version 2). Logic: `src/game/progress.ts`, `src/g
 
 ### Numbers (all MODEL unless marked)
 - Base Food income by army Age: 1.0 (LOCKED for Stone), 1.2, 1.4, 1.6, 1.8, 2.0 Food/s.
-- Troop stats: each Age is 1.6x the Age before (HP and damage).
-- Enemy power by Age: 0.85, 0.85, 0.9, 0.92, 0.98, 1.0 x troop stats; by stage 1.0, 1.14, 1.28, 1.42, 1.15 (boss stage).
-- Enemy fortress HP: 400 x 1.6^Age, by stage x1.0, 1.12, 1.24, 1.36, 1.5. Your fortress has 0.75x the Age value, times the Camp Base track.
-- Fortress Gold (paid in 10 steps): 30, 55, 95, 165, 285, 490. Boss Gold: 30, 45, 70, 110, 170, 260.
-- Slots: Ranged 30 Gold, Tank 70 Gold (Ranged first). Kept forever.
-- Age Camp: Food +10% rate, Base +12% HP, Melee/Ranged/Tank +12% HP and damage per level. Max level 10, plus 4 per Timeline after the first. Cost = base (8, 6, 6, 8, 10) x 1.5^Age x 1.35^level. Resets on Evolution.
-- Timeline scaling: +45% enemy stats and fortress HP per Timeline (linear), waves 5% faster, fortress and boss Gold x2.8 per Timeline.
+- Troop stats: each Age is 1.6x the Age before. Ranged range 200 to 290 lane units (D35).
+- Waves: hand-made per stage (D34), groups of units 1.2 s apart with lulls; the tail repeats.
+- Enemy strength: Age enemyPower x per-Age stagePower (tuned, D35).
+- Upgrades: Food +8% rate, Base +10% HP per level. Cost = (6 or 5) x 1.6^Age x 1.17^level. Max level 30, +10 per Timeline. Reset on Evolution.
+- Slots: Ranged 30, Tank 70 Gold (Ranged first). Kept forever.
+- Fortress Gold (paid in 10 steps): 30, 55, 95, 165, 285, 490. Boss Gold: 30, 45, 70, 110, 170, 260 (paid in tenths as the boss is worn down).
 
 ### Predicted pacing (`npm run sim`, 2026-10-31)
 | Moment | Smart player | Simple player |
 |--------|-------------|---------------|
-| First win | 0.9 min | 1.0 min |
-| Stone boss | 6.5 min | 8.4 min |
-| Ancient boss | 13.5 min | 15.2 min |
-| Crusader boss | 19.4 min | 21.2 min |
-| Gunpowder boss | 26.5 min | 27.0 min |
-| Industrial boss | 32.8 min | 33.1 min |
-| Future boss (first Prestige) | 39.2 min | 47.4 min |
-| Timeline 2 done | 114 min | 111 min |
+| First win | 1 min | 1 min |
+| Evolve to Ancient | 47 min | 106 min |
+| Evolve to Crusader | 123 min | 196 min |
+| Evolve to Gunpowder | 215 min | 336 min |
+| Evolve to Industrial | 314 min | 479 min |
+| Evolve to Future | 426 min | 629 min |
+| First Prestige | 446 min | 657 min |
+| Timeline 2 done | 1126 min | |
 
-Tests: first Prestige 30 to 100 minutes; every boss beaten; battles average 40 to 100 s; Timeline 3 is finishable (the campaign stays endless).
+About 80% of battles are replays (farming), as in We Are Warriors. Battles average 96 s. Dungeons, events and the double-Gold ad will shorten this (D33). Check the curve with `npx tsx tools/sim/calibrate.ts` and retune with `tools/sim/tune-stages.ts`.
 
 ### Save
 - Saved to `localStorage` key `stormglass.save` after every battle and purchase.
 - Schema version 3. `MIGRATIONS` upgrades older saves one step at a time; `repair` clamps every field so a damaged save never crashes (tested). v2 to v3: owned troops become slots, old upgrade levels are refunded as Gold, the enemy rejoins your army's Age at stage 1.
-- Prestige keeps Gold and slots; it resets Ages, stage, Camp and beaten bosses.
+- Schema 4 (v3 to v4: the Age Camp is refunded as Gold; a beaten boss opens the next Age's battles; `pick` added for replays). Prestige keeps slots; it resets Gold, Ages, battles, upgrades and beaten bosses.
 
 ---
 
@@ -263,4 +261,8 @@ Folders:
 | D29 | 2026-10-31 | "Do it like We Are Warriors scaling" for HUD, UI and unit size. First pass: the battle world (and the home meadow) is drawn on its own layer at about 1.33x the UI pixel size (always whole device pixels), fortresses partly off the screen edges, the HUD unchanged. To be checked against a We Are Warriors screenshot from Andre. | PROVISIONAL | Andre |
 | D30 | 2026-10-31 | Era attack sounds: bow, crossbow, musket, cannon, rifle, steam, energy zap; boss roar on arrival; ward ting and shatter. Listed per troop as manifest meta `sfx`. | PROVISIONAL | Claude |
 | D31 | 2026-10-31 | Release skill and speed (scope "Campaign + Prestige"): Stormcall, a lightning strike on the enemy nearest your fortress (your Age's tank damage x2.5 x your best Camp troop track, radius 70, first charge 6 s, cooldown 20 s, bosses take half), in the leftmost Skill socket from Stone stage 4. Double speed (X1/X2 in the battle header, remembered) from Stone stage 3. Both stay unlocked for good. | PROVISIONAL | Claude |
+| D32 | 2026-10-31 | "Let's use We Are Warriors format of progression." Gold buys Food rate and Base HP; Evolution costs Gold (rising each Age), needs your Age's boss, and resets Gold and those upgrades; slots stay. Battles are numbered and any earlier one can be replayed for Gold. Replaces the Age Camp (D28) and free Evolution. | LOCKED | Andre |
+| D33 | 2026-10-31 | "90 minutes per age, but also additional upgrades from dungeons and extra events make it quicker, and watching ads for double gold make it quicker." Main campaign tuned to about 45 min for Stone and 75 to 115 min for each later Age without those boosts. | LOCKED | Andre |
+| D34 | 2026-10-31 | "Hand-made waves." Every stage has its own authored groups (slow start, groups with lulls, mixed units), not a single trickle. | LOCKED | Andre |
+| D35 | 2026-10-31 | Ranged troops overpowered: ranges cut to 200 to 290 lane units (from 320 to 480) and ranged HP -15%. Difficulty curve tuned per stage (`ages[].stagePower`, `tools/sim/tune-stages.ts`) so each Age's stages need about 0, 3, 6, 9, 12 upgrade levels: no walls. Timeline scaling lowered (+12% enemy stats, +25% fortress, Gold x1.8 per Timeline) until cards and dungeons add troop power. | PROVISIONAL | Claude |
 | D24 | 2026-10-30 | HUD walls: Crusader stone with heraldic pennants, Gunpowder timber and iron, Industrial red brick and steel girder, Future alloy panels (owner brief for this pass; replaces the Open Decision 3 proposal). | PROVISIONAL | Andre (brief) |

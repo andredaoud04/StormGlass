@@ -83,7 +83,7 @@ describe('determinism', () => {
 
 describe('gold', () => {
   it('pays 1 per normal kill and 5 per tank kill, once', () => {
-    const c = config({ enemyTroops: { ...config().enemyTroops, ranged: { ...config().enemyTroops.tank } } });
+    const c = config({ enemyTroops: { ...config().enemyTroops, melee: { ...config().enemyTroops.tank } } });
     const s = createBattle(c);
     const policy = cyclePolicy([2, 0]);
     let goldEvents = 0;
@@ -117,7 +117,8 @@ describe('gold', () => {
   it('keeps Gold earned before a retreat and stops the battle', () => {
     const s = createBattle(config());
     const policy = cyclePolicy([0]);
-    while (s.tick < 20 * 40) stepBattle(s, policy(s));
+    while (s.tick < 20 * 20 && !s.result) stepBattle(s, policy(s));
+    expect(s.result).toBeNull();
     const earned = totalGold(s);
     stepBattle(s, [{ type: 'retreat' }]);
     expect(s.result).toBe('retreat');

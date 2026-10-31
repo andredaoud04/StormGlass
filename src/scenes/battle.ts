@@ -2,8 +2,8 @@
 import type { App, Scene } from '../app';
 import { BALANCE, ageDef } from '../game/balance';
 import { buildBattleConfig, isBossStage } from '../game/battleSetup';
-import { applyOutcome, bossBeaten, loadout, speedUnlocked, STAGES, stormcallUnlocked, type BattleOutcome } from '../game/progress';
-import { foodRateMilli, fortressMul, kindMul } from '../game/upgrades';
+import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
+import { foodRateMilli, fortressMul } from '../game/upgrades';
 import { createBattle, food, stepBattle, totalGold } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
@@ -52,6 +52,8 @@ export class BattleScene implements Scene {
   private readonly enemyAge: number;
   private readonly stage: number;
   private readonly bossName: string;
+  /** Replaying an earlier battle (no frontier progress, same Gold). */
+  private readonly replay: boolean;
   private bossIntroT = -1;
   private bossBarShown = 0;
   private hudTop = 0;
@@ -61,19 +63,20 @@ export class BattleScene implements Scene {
   constructor(private app: App) {
     const s = app.save;
     this.troops = loadout(s);
-    this.enemyAge = s.enemyAge;
-    this.stage = s.stage;
-    this.bossName = BALANCE.bosses[ageDef(s.enemyAge).id].name.toUpperCase();
+    const sel = selected(s);
+    this.enemyAge = sel.age;
+    this.stage = sel.stage;
+    this.replay = toIndex(sel) < frontier(s);
+    this.bossName = BALANCE.bosses[ageDef(sel.age).id].name.toUpperCase();
     const config = buildBattleConfig({
       seed: (s.createdAt + s.battleNo * 7919) | 0,
       loadout: this.troops,
-      enemyAge: s.enemyAge,
-      stage: s.stage,
+      enemyAge: sel.age,
+      stage: sel.stage,
       armyAge: s.armyAge,
       timeline: s.timeline,
       foodRateMilli: foodRateMilli(s),
       fortressMul: fortressMul(s),
-      kindMul: kindMul(s),
       campaign: true,
       stormcall: stormcallUnlocked(s),
     });
@@ -349,7 +352,8 @@ export class BattleScene implements Scene {
     const pw = Math.min(app.w - 110, Math.max(72, tw + 28));
     d.nine('ui.plaque', Math.round(app.w / 2 - pw / 2), 3, pw, 24);
     d.text(title, app.w / 2, 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    this.drawPips(app.w / 2, 30);
+    this.drawPips(app.w / 2 + 14, 30);
+    d.text(`BATTLE ${battleNumber({ age: this.enemyAge, stage: this.stage })}`, app.w / 2 - 10, 30, { align: 'right', color: this.replay ? '#cfe0a0' : '#fff8ec' });
     if (this.phase === 'play') {
       iconButton(app, 'pause', app.w - 24, 4, 20, 'pause', () => (this.paused = true));
       if (speedUnlocked(app.save)) {
@@ -609,9 +613,12 @@ export class BattleScene implements Scene {
       d.image('icon.gold', x + pw - 23, ry + 5, { alpha: ta });
     }
     let note = '';
-    if (win && isBossStage(this.stage) && bossBeaten(app.save)) note = app.save.armyAge < BALANCE.ages.length - 1 ? 'EVOLUTION UNLOCKED!' : 'NEW TIMELINE UNLOCKED!';
-    else if (win) note = `NEXT: STAGE ${app.save.stage + 1} OF ${STAGES}`;
-    else note = 'UPGRADE AND TRY AGAIN';
+    const sv = app.save;
+    if (win && isBossStage(this.stage) && this.enemyAge === sv.armyAge && evolveUnlocked(sv)) note = `EVOLVE FOR ${fmt(evolveCost(sv) ?? 0)} GOLD`;
+    else if (win && isBossStage(this.stage) && this.enemyAge === BALANCE.ages.length - 1 && sv.armyAge === this.enemyAge) note = 'NEW TIMELINE UNLOCKED!';
+    else if (win && this.replay) note = 'REPLAY: GOLD EARNED';
+    else if (win) note = `NEXT: BATTLE ${battleNumber(selected(sv))}`;
+    else note = 'UPGRADE, OR REPLAY FOR GOLD';
     if (note && this.resultT > 1.1) d.text(note, app.w / 2, ry + 22, { align: 'center', color: '#3a2a30', outline: null });
     if (this.resultT > 0.9) button(app, 'continue', x + 20, y + ph - 32, pw - 40, 26, 'CONTINUE', () => app.go('menu'), { style: 'green' });
   }

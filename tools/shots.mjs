@@ -107,16 +107,21 @@ const SCENARIOS = [
     await setSave(p, { stage: 1, gold: 54, stats: { battles: 1, wins: 1, losses: 0, retreats: 0, goldEarned: 36, kills: 9 } });
     await p.evaluate(() => window.__sg.app.go('menu'));
   }],
+  ['home-replay', async (p) => {
+    await setSave(p, { stage: 3, pick: 1, slots: ['ranged'], stats: { battles: 6, wins: 4, losses: 2, retreats: 0, goldEarned: 0, kills: 0 } });
+    await p.evaluate(() => window.__sg.app.go('menu'));
+  }],
+  ['upgrades-evolve', async (p) => { await setSave(p, { enemyAge: 1, stage: 0, beaten: [0], gold: 900, slots: ['ranged', 'tank'], upgrades: { food: 6, fortress: 4 }, stats: { battles: 12, wins: 11, losses: 1, retreats: 0, goldEarned: 0, kills: 0 } }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
   ['home-boss', async (p) => {
     await setSave(p, { stage: 4, slots: ['ranged', 'tank'], stats: { battles: 4, wins: 4, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } });
     await p.evaluate(() => window.__sg.app.go('menu'));
   }],
   ['home-evolve', async (p) => {
-    await setSave(p, { stage: 4, beaten: [0], slots: ['ranged', 'tank'], stats: { battles: 5, wins: 5, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } });
+    await setSave(p, { enemyAge: 1, stage: 0, beaten: [0], gold: 520, slots: ['ranged', 'tank'], stats: { battles: 5, wins: 5, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } });
     await p.evaluate(() => window.__sg.app.go('menu'));
   }],
   ['upgrades', async (p) => { await setSave(p, { gold: 60, stats: { battles: 2, wins: 2, losses: 0, retreats: 0, goldEarned: 0, kills: 0 } }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
-  ['upgrades-camp', async (p) => { await setSave(p, { armyAge: 2, enemyAge: 2, gold: 400, slots: ['ranged', 'tank'], camp: { food: 3, melee: 2, fortress: 1 }, stats: { battles: 12, wins: 11, losses: 1, retreats: 0, goldEarned: 0, kills: 0 } }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
+  ['upgrades-camp', async (p) => { await setSave(p, { armyAge: 2, enemyAge: 2, gold: 400, slots: ['ranged', 'tank'], upgrades: { food: 3, fortress: 1 }, stats: { battles: 12, wins: 11, losses: 1, retreats: 0, goldEarned: 0, kills: 0 } }); await p.evaluate(() => window.__sg.app.go('menu', 'upgrades')); }],
   ['dungeons', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'dungeons')); }],
   ['cards', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'cards')); }],
   ['shop', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'shop')); }],
@@ -128,7 +133,7 @@ const SCENARIOS = [
 const ALL = [['stone', 0], ['ancient', 1], ['crusader', 2], ['gunpowder', 3], ['industrial', 4], ['future', 5]];
 for (const [age, n] of ALL) {
   SCENARIOS.push([`boss-${age}`, async (p) => {
-    await setSave(p, { armyAge: n, enemyAge: n, stage: 4, slots: ['ranged', 'tank'], camp: { melee: 3, ranged: 3, tank: 3, fortress: 3, food: 3 } });
+    await setSave(p, { armyAge: n, enemyAge: n, stage: 4, slots: ['ranged', 'tank'], upgrades: { fortress: 8, food: 8 } });
     await p.evaluate(() => window.__sg.app.go('battle'));
     await crowd(p, 17);
   }]);

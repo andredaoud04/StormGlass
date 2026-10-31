@@ -28,7 +28,7 @@ describe('save', () => {
     const s = newSave(5);
     s.gold = 77;
     s.slots.push('ranged');
-    s.camp.food = 2;
+    s.upgrades.food = 2;
     writeSave(store, s);
     expect(loadSave(store)).toEqual(s);
   });
@@ -48,7 +48,8 @@ describe('save', () => {
     const m = migrate({ schema: 1, gold: 300, armyAge: 2, enemyAge: 3, timeline: 2, ownedTroops: ['stone_brute'], beaten: [0, 1, 2], stats: { battles: 12 } });
     expect(m.gold).toBe(300);
     expect(m.armyAge).toBe(2);
-    expect(m.enemyAge).toBe(2);
+    // Its Crusader fortress was beaten, so the Gunpowder battles are open.
+    expect(m.enemyAge).toBe(3);
     expect(m.stage).toBe(0);
     expect(m.beaten).toEqual([0, 1, 2]);
     expect(m.battleNo).toBe(12);
@@ -59,22 +60,34 @@ describe('save', () => {
     const m = migrate({ schema: 2, gold: 100, armyAge: 1, enemyAge: 2, ownedTroops: ['stone_clubber', 'stone_slinger'], upgrades: { food: 2 }, beaten: [0, 1] });
     expect(m.schema).toBe(SAVE_SCHEMA);
     expect(m.gold).toBe(100 + 6 + Math.round(6 * 1.25));
-    expect(m.enemyAge).toBe(1);
+    expect(m.enemyAge).toBe(2);
     expect(m.stage).toBe(0);
     expect(m.slots).toEqual(['ranged']);
-    expect(m.camp).toEqual({});
+    expect(m.upgrades).toEqual({});
     expect(m.beaten).toEqual([0, 1]);
   });
 
+  it('migrates a v3 save to the We Are Warriors format and refunds the Age Camp as Gold', () => {
+    const m = migrate({ schema: 3, gold: 50, armyAge: 0, enemyAge: 0, stage: 4, beaten: [0], slots: ['ranged'], camp: { food: 2, melee: 1 } });
+    expect(m.schema).toBe(SAVE_SCHEMA);
+    expect(m.gold).toBe(50 + 8 + Math.round(8 * 1.35) + 6);
+    expect(m.upgrades).toEqual({});
+    expect(m.enemyAge).toBe(1);
+    expect(m.stage).toBe(0);
+    expect(m.pick).toBe(-1);
+    expect(m.slots).toEqual(['ranged']);
+  });
+
   it('repairs corrupt fields instead of crashing', () => {
-    const m = migrate({ schema: SAVE_SCHEMA, gold: -5, armyAge: 99, enemyAge: 'x', stage: 77, beaten: [1, 1, 'a', 42], slots: 'nope', camp: { food: -3, bogus: 4 }, settings: { sound: false } });
+    const m = migrate({ schema: SAVE_SCHEMA, gold: -5, armyAge: 99, enemyAge: 'x', stage: 77, beaten: [1, 1, 'a', 42], slots: 'nope', upgrades: { food: -3, bogus: 4 }, settings: { sound: false } });
     expect(m.gold).toBe(0);
     expect(m.armyAge).toBe(BALANCE.ages.length - 1);
     expect(m.enemyAge).toBe(m.armyAge);
+    expect(m.pick).toBe(-1);
     expect(m.stage).toBe(BALANCE.campaign.stagesPerAge - 1);
     expect(m.beaten).toEqual([1]);
     expect(m.slots).toEqual([]);
-    expect(m.camp).toEqual({ food: 0 });
+    expect(m.upgrades).toEqual({ food: 0 });
     expect(m.settings.sound).toBe(false);
   });
 

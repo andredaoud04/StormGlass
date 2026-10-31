@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "notes": "All numbers are MODEL unless docs/WAW_PARITY.md says otherwise. Change numbers here, never in code. Bump version when a change breaks old tuning.",
   "sim": {
     "tickRate": 20,
@@ -59,10 +59,10 @@
           "name": "Slinger",
           "kind": "ranged",
           "cost": 8,
-          "hp": 34,
+          "hp": 29,
           "dmg": 10,
           "interval": 1.0,
-          "range": 320,
+          "range": 200,
           "speed": 65
         },
         {
@@ -78,7 +78,14 @@
         }
       ],
       "foodRate": 1.0,
-      "enemyPower": 0.85
+      "enemyPower": 0.85,
+      "stagePower": [
+        1.0,
+        1.758,
+        1.83,
+        1.833,
+        2.21
+      ]
     },
     {
       "id": "ancient",
@@ -102,10 +109,10 @@
           "name": "Archer",
           "kind": "ranged",
           "cost": 9,
-          "hp": 54,
+          "hp": 46,
           "dmg": 16,
           "interval": 1.0,
-          "range": 400,
+          "range": 230,
           "speed": 65
         },
         {
@@ -121,7 +128,14 @@
         }
       ],
       "foodRate": 1.2,
-      "enemyPower": 0.85
+      "enemyPower": 0.85,
+      "stagePower": [
+        1.272,
+        1.34,
+        1.334,
+        1.576,
+        1.184
+      ]
     },
     {
       "id": "crusader",
@@ -145,10 +159,10 @@
           "name": "Crossbow",
           "kind": "ranged",
           "cost": 11,
-          "hp": 87,
+          "hp": 74,
           "dmg": 25,
           "interval": 1.0,
-          "range": 420,
+          "range": 250,
           "speed": 65
         },
         {
@@ -164,7 +178,14 @@
         }
       ],
       "foodRate": 1.4,
-      "enemyPower": 0.9
+      "enemyPower": 0.9,
+      "stagePower": [
+        1.088,
+        1.278,
+        1.304,
+        1.521,
+        1.493
+      ]
     },
     {
       "id": "gunpowder",
@@ -188,10 +209,10 @@
           "name": "Musketeer",
           "kind": "ranged",
           "cost": 12,
-          "hp": 139,
+          "hp": 118,
           "dmg": 41,
           "interval": 1.0,
-          "range": 440,
+          "range": 270,
           "speed": 65
         },
         {
@@ -207,7 +228,14 @@
         }
       ],
       "foodRate": 1.6,
-      "enemyPower": 0.92
+      "enemyPower": 0.92,
+      "stagePower": [
+        1.549,
+        1.232,
+        1.408,
+        1.797,
+        1.737
+      ]
     },
     {
       "id": "industrial",
@@ -231,10 +259,10 @@
           "name": "Rifleman",
           "kind": "ranged",
           "cost": 14,
-          "hp": 223,
+          "hp": 190,
           "dmg": 65,
           "interval": 1.0,
-          "range": 460,
+          "range": 280,
           "speed": 65
         },
         {
@@ -250,7 +278,14 @@
         }
       ],
       "foodRate": 1.8,
-      "enemyPower": 0.98
+      "enemyPower": 0.98,
+      "stagePower": [
+        1.029,
+        1.032,
+        1.061,
+        1.404,
+        1.254
+      ]
     },
     {
       "id": "future",
@@ -274,10 +309,10 @@
           "name": "Lancer",
           "kind": "ranged",
           "cost": 16,
-          "hp": 357,
+          "hp": 303,
           "dmg": 105,
           "interval": 1.0,
-          "range": 480,
+          "range": 290,
           "speed": 70
         },
         {
@@ -293,269 +328,188 @@
         }
       ],
       "foodRate": 2.0,
-      "enemyPower": 1.0
+      "enemyPower": 1.0,
+      "stagePower": [
+        0.845,
+        1.046,
+        0.976,
+        0.945,
+        0.877
+      ]
     }
   ],
   "waves": {
-    "stone": {
-      "spawns": [
-        [
-          7,
-          "melee"
-        ],
-        [
-          15,
-          "melee"
-        ],
-        [
-          22,
-          "melee"
-        ],
-        [
-          27,
-          "ranged"
-        ],
-        [
-          33,
-          "melee"
-        ],
-        [
-          39,
-          "melee"
-        ],
-        [
-          44,
-          "ranged"
-        ],
-        [
-          49,
-          "melee"
-        ]
-      ],
-      "loopFrom": 4,
-      "loopPeriod": 20
-    },
-    "ancient": {
-      "spawns": [
-        [
-          7,
-          "melee"
-        ],
-        [
-          15,
-          "melee"
-        ],
-        [
-          22,
-          "melee"
-        ],
-        [
-          27,
-          "ranged"
-        ],
-        [
-          33,
-          "tank"
-        ],
-        [
-          44,
-          "ranged"
-        ],
-        [
-          49,
-          "melee"
-        ]
-      ],
-      "loopFrom": 3,
-      "loopPeriod": 27
-    },
-    "crusader": {
-      "spawns": [
-        [
-          7,
-          "melee"
-        ],
-        [
-          15,
-          "melee"
-        ],
-        [
-          22,
-          "melee"
-        ],
-        [
-          27,
-          "ranged"
-        ],
-        [
-          33,
-          "tank"
-        ],
-        [
-          44,
-          "ranged"
-        ],
-        [
-          49,
-          "melee"
-        ]
-      ],
-      "loopFrom": 3,
-      "loopPeriod": 27
-    },
-    "gunpowder": {
-      "spawns": [
-        [
-          7,
-          "melee"
-        ],
-        [
-          15,
-          "melee"
-        ],
-        [
-          22,
-          "melee"
-        ],
-        [
-          27,
-          "ranged"
-        ],
-        [
-          33,
-          "tank"
-        ],
-        [
-          44,
-          "ranged"
-        ],
-        [
-          49,
-          "melee"
-        ]
-      ],
-      "loopFrom": 3,
-      "loopPeriod": 27
-    },
-    "industrial": {
-      "spawns": [
-        [
-          7,
-          "melee"
-        ],
-        [
-          15,
-          "melee"
-        ],
-        [
-          22,
-          "melee"
-        ],
-        [
-          27,
-          "ranged"
-        ],
-        [
-          33,
-          "tank"
-        ],
-        [
-          44,
-          "ranged"
-        ],
-        [
-          49,
-          "melee"
-        ]
-      ],
-      "loopFrom": 3,
-      "loopPeriod": 27
-    },
-    "future": {
-      "spawns": [
-        [
-          7,
-          "melee"
-        ],
-        [
-          15,
-          "melee"
-        ],
-        [
-          22,
-          "melee"
-        ],
-        [
-          27,
-          "ranged"
-        ],
-        [
-          33,
-          "tank"
-        ],
-        [
-          44,
-          "ranged"
-        ],
-        [
-          49,
-          "melee"
-        ]
-      ],
-      "loopFrom": 3,
-      "loopPeriod": 27
-    }
+    "notes": "Hand-made waves per Age and stage. Each group is 'second:units' (m melee, r ranged, t tank); a group's units walk out groupGap seconds apart. After the last group, the groups from loopFrom repeat: loopPeriod is the time from the first repeated group to its next repeat (always longer than the repeated span, so spawns never go backwards).",
+    "groupGap": 1.2,
+    "stone": [
+      {
+        "groups": "8:m 20:m 32:mm 46:mm",
+        "loopFrom": 2,
+        "loopPeriod": 26
+      },
+      {
+        "groups": "8:m 18:mm 32:mr 46:mm 58:mmr",
+        "loopFrom": 3,
+        "loopPeriod": 24
+      },
+      {
+        "groups": "8:mm 22:mr 36:mmm 50:mr 62:mmr",
+        "loopFrom": 2,
+        "loopPeriod": 38
+      },
+      {
+        "groups": "8:mr 20:mm 32:mmr 46:mt 58:mmmr",
+        "loopFrom": 2,
+        "loopPeriod": 39
+      },
+      {
+        "groups": "8:m 20:mm 34:mr 48:mm",
+        "loopFrom": 1,
+        "loopPeriod": 40
+      }
+    ],
+    "ancient": [
+      {
+        "groups": "8:m 20:mr 34:mm 48:mt",
+        "loopFrom": 2,
+        "loopPeriod": 26
+      },
+      {
+        "groups": "8:mm 22:rr 36:mmt 52:mr",
+        "loopFrom": 1,
+        "loopPeriod": 42
+      },
+      {
+        "groups": "8:mr 20:mmr 36:t 44:mmrr 60:mm",
+        "loopFrom": 2,
+        "loopPeriod": 36
+      },
+      {
+        "groups": "8:mm 18:rr 30:mmt 46:mrr 60:tmm",
+        "loopFrom": 2,
+        "loopPeriod": 42
+      },
+      {
+        "groups": "8:mr 22:mm 38:mrr 54:t",
+        "loopFrom": 1,
+        "loopPeriod": 44
+      }
+    ],
+    "crusader": [
+      {
+        "groups": "8:mm 22:mr 38:t 48:mmr",
+        "loopFrom": 1,
+        "loopPeriod": 38
+      },
+      {
+        "groups": "8:m 16:mr 30:mmt 46:rr 58:mm",
+        "loopFrom": 2,
+        "loopPeriod": 40
+      },
+      {
+        "groups": "8:mmm 24:rt 40:mmr 56:tm",
+        "loopFrom": 1,
+        "loopPeriod": 44
+      },
+      {
+        "groups": "8:mr 18:mmt 34:rrm 50:mmtr",
+        "loopFrom": 1,
+        "loopPeriod": 45
+      },
+      {
+        "groups": "8:mm 24:mr 40:t 50:mmr",
+        "loopFrom": 1,
+        "loopPeriod": 38
+      }
+    ],
+    "gunpowder": [
+      {
+        "groups": "8:m 18:rr 32:mm 46:mrr",
+        "loopFrom": 1,
+        "loopPeriod": 40
+      },
+      {
+        "groups": "8:mr 22:mrr 38:t 48:mmr",
+        "loopFrom": 1,
+        "loopPeriod": 38
+      },
+      {
+        "groups": "8:rr 18:mm 30:mrt 48:rrm",
+        "loopFrom": 1,
+        "loopPeriod": 42
+      },
+      {
+        "groups": "8:mm 20:rrr 36:mmt 54:mrr",
+        "loopFrom": 1,
+        "loopPeriod": 46
+      },
+      {
+        "groups": "8:mr 22:rr 38:mm 52:t",
+        "loopFrom": 1,
+        "loopPeriod": 42
+      }
+    ],
+    "industrial": [
+      {
+        "groups": "8:mm 24:t 36:mr 50:mmr",
+        "loopFrom": 1,
+        "loopPeriod": 38
+      },
+      {
+        "groups": "8:mr 20:mmt 38:rr 52:mmt",
+        "loopFrom": 1,
+        "loopPeriod": 44
+      },
+      {
+        "groups": "8:mmr 26:tt 44:mrr",
+        "loopFrom": 0,
+        "loopPeriod": 48
+      },
+      {
+        "groups": "8:mr 18:mmt 36:rrt 54:mmm",
+        "loopFrom": 1,
+        "loopPeriod": 48
+      },
+      {
+        "groups": "8:mm 24:mr 40:t 54:mrr",
+        "loopFrom": 1,
+        "loopPeriod": 42
+      }
+    ],
+    "future": [
+      {
+        "groups": "8:mr 20:mm 32:rt 46:mmr",
+        "loopFrom": 1,
+        "loopPeriod": 38
+      },
+      {
+        "groups": "8:mm 18:rr 30:mmt 46:rrm",
+        "loopFrom": 1,
+        "loopPeriod": 40
+      },
+      {
+        "groups": "8:mrm 24:tr 38:mmrr 56:t",
+        "loopFrom": 1,
+        "loopPeriod": 44
+      },
+      {
+        "groups": "8:mm 18:rrt 34:mmrr 52:tt",
+        "loopFrom": 1,
+        "loopPeriod": 46
+      },
+      {
+        "groups": "8:mr 22:mmr 38:rt 54:mm",
+        "loopFrom": 1,
+        "loopPeriod": 44
+      }
+    ]
   },
   "timeline": {
-    "enemyStatPerTimeline": 0.45,
-    "enemyFortressPerTimeline": 0.45,
+    "enemyStatPerTimeline": 0.12,
+    "enemyFortressPerTimeline": 0.25,
     "spawnSpeedPerTimeline": 0.05,
     "enemyPower": 0.85,
-    "goldGrowthPerTimeline": 2.8
-  },
-  "camp": {
-    "notes": "Age Camp: five tracks bought with Gold. Levels reset on Evolution; slot unlocks do not. Cost = baseCost x ageCostGrowth^age x costGrowth^level.",
-    "maxLevel": 10,
-    "maxLevelPerTimeline": 4,
-    "costGrowth": 1.35,
-    "ageCostGrowth": 1.5,
-    "tracks": {
-      "food": {
-        "name": "Food",
-        "icon": "food",
-        "baseCost": 8,
-        "perLevel": 0.1,
-        "unit": "x Food rate"
-      },
-      "fortress": {
-        "name": "Base",
-        "icon": "hp",
-        "baseCost": 6,
-        "perLevel": 0.12,
-        "unit": "x base HP"
-      },
-      "melee": {
-        "name": "Melee",
-        "icon": "sword",
-        "baseCost": 6,
-        "perLevel": 0.12,
-        "unit": "x melee HP and damage"
-      },
-      "ranged": {
-        "name": "Ranged",
-        "icon": "bow",
-        "baseCost": 8,
-        "perLevel": 0.12,
-        "unit": "x ranged HP and damage"
-      },
-      "tank": {
-        "name": "Tank",
-        "icon": "shield",
-        "baseCost": 10,
-        "perLevel": 0.12,
-        "unit": "x tank HP and damage"
-      }
-    }
+    "goldGrowthPerTimeline": 1.8
   },
   "campaign": {
     "notes": "Every Age has stagesPerAge stages; the last is the boss stage. Stage multipliers apply on top of the Age's enemyPower and fortressHp.",
@@ -713,5 +667,39 @@
       "unlockStage": 4
     },
     "speedUnlockStage": 3
+  },
+  "upgrades": {
+    "notes": "We Are Warriors format: Gold buys Food rate and Base HP. Both reset when you Evolve (the new Age starts stronger). Cost = baseCost x ageCostGrowth^armyAge x costGrowth^level.",
+    "maxLevel": 30,
+    "maxLevelPerTimeline": 10,
+    "costGrowth": 1.17,
+    "ageCostGrowth": 1.6,
+    "tracks": {
+      "food": {
+        "name": "Food",
+        "icon": "food",
+        "baseCost": 6,
+        "perLevel": 0.08,
+        "unit": "x Food rate"
+      },
+      "fortress": {
+        "name": "Base",
+        "icon": "hp",
+        "baseCost": 5,
+        "perLevel": 0.1,
+        "unit": "x base HP"
+      }
+    }
+  },
+  "evolution": {
+    "notes": "Gold to evolve INTO each Age (index = target Age). Needs your current Age's boss beaten. Evolving resets Gold and upgrades; slots stay.",
+    "cost": [
+      0,
+      800,
+      2600,
+      6500,
+      14700,
+      19000
+    ]
   }
 }

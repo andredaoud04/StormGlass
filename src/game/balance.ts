@@ -1,5 +1,5 @@
 import raw from '../data/balance.json';
-import type { BossDef, StatusRules, TroopKind, WaveScript } from '../sim/types';
+import type { BossDef, StatusRules, TroopKind } from '../sim/types';
 
 export type AgeId = 'stone' | 'ancient' | 'crusader' | 'gunpowder' | 'industrial' | 'future';
 export const AGE_IDS: AgeId[] = ['stone', 'ancient', 'crusader', 'gunpowder', 'industrial', 'future'];
@@ -25,27 +25,37 @@ export interface AgeDef {
   baseGold: number;
   /** Enemy troop strength at this stage on Timeline 1 (x troop stats). Grows per stage so progress needs upgrades. */
   enemyPower?: number;
+  /** Enemy strength by stage in this Age (overrides campaign.stagePower). Tuned so each stage needs a few more upgrade levels. */
+  stagePower?: number[];
   troops: TroopDef[];
 }
 
-/** Age Camp tracks. Levels reset on Evolution. */
-export type CampId = 'food' | 'fortress' | 'melee' | 'ranged' | 'tank';
-export interface CampTrack {
+/** Gold upgrades (We Are Warriors format). Levels reset on Evolution. */
+export type UpgradeId = 'food' | 'fortress';
+export interface UpgradeTrack {
   name: string;
   icon: string;
   baseCost: number;
-  /** Fraction added per level (Food: x Food rate; others: x HP, and damage for troops). */
+  /** Fraction added per level (Food: x Food rate; Base: x fortress HP). */
   perLevel: number;
   unit: string;
 }
 
-export interface CampRules {
+export interface UpgradeRules {
   maxLevel: number;
   /** Extra max levels per Timeline after the first. */
   maxLevelPerTimeline: number;
   costGrowth: number;
   ageCostGrowth: number;
-  tracks: Record<CampId, CampTrack>;
+  tracks: Record<UpgradeId, UpgradeTrack>;
+}
+
+/** One stage's hand-made wave: groups as "second:units" (m, r, t), e.g. "8:mm 20:mr". */
+export interface StageWave {
+  groups: string;
+  /** Index of the first group in the repeating tail. */
+  loopFrom: number;
+  loopPeriod: number;
 }
 
 export interface BossInfo extends Omit<BossDef, 'move'> {
@@ -64,8 +74,9 @@ export interface Balance {
   economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
   status: StatusRules;
   ages: AgeDef[];
-  waves: Record<AgeId, WaveScript>;
-  camp: CampRules;
+  waves: Record<AgeId, StageWave[]> & { groupGap: number };
+  upgrades: UpgradeRules;
+  evolution: { cost: number[] };
   campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[] };
   bosses: Record<AgeId, BossInfo>;
   skills: { stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };

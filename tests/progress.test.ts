@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { newSave } from '../src/game/save';
-import { applyOutcome, bossBeaten, canEvolve, canPrestige, evolve, loadout, prestige, stageNumber, STAGES } from '../src/game/progress';
+import { applyOutcome, battleNumber, bossBeaten, canEvolve, canPrestige, evolve, evolveCost, evolveUnlocked, frontier, loadout, pickBattle, prestige, selected, speedUnlocked, STAGES, stormcallUnlocked } from '../src/game/progress';
 import { BALANCE } from '../src/game/balance';
 
-const win = (s: ReturnType<typeof newSave>) => applyOutcome(s, { result: 'victory', gold: 0, kills: 0, enemyAge: s.enemyAge, stage: s.stage, campaign: true });
+type Save = ReturnType<typeof newSave>;
+const fight = (s: Save, result: 'victory' | 'defeat' | 'retreat', gold = 0) => {
+  const r = selected(s);
+  applyOutcome(s, { result, gold, kills: 0, enemyAge: r.age, stage: r.stage, campaign: true });
+};
+const winStone = (s: Save) => {
+  for (let i = 0; i < STAGES; i++) fight(s, 'victory');
+};
 
 describe('loadout', () => {
   it('a new player owns only the Clubber', () => {
@@ -19,91 +26,118 @@ describe('loadout', () => {
   });
 });
 
-describe('campaign stages', () => {
-  it('has 5 stages per Age and the last one is the boss', () => {
+describe('battles', () => {
+  it('are numbered in order: 4 battles then a boss per Age', () => {
     expect(STAGES).toBe(5);
     const s = newSave();
-    for (let i = 0; i < STAGES - 1; i++) win(s);
-    expect(s.stage).toBe(4);
-    expect(bossBeaten(s)).toBe(false);
-    expect(stageNumber(s)).toBe(5);
-    win(s);
-    expect(bossBeaten(s)).toBe(true);
-    expect(s.stage).toBe(4);
-  });
-
-  it('winning never evolves you; only the boss unlocks Evolution', () => {
-    const s = newSave();
-    win(s);
-    win(s);
+    expect(battleNumber(selected(s))).toBe(1);
+    for (let i = 0; i < STAGES - 1; i++) fight(s, 'victory');
+    expect(battleNumber(selected(s))).toBe(5);
+    expect(bossBeaten(s, 0)).toBe(false);
+    fight(s, 'victory');
+    expect(bossBeaten(s, 0)).toBe(true);
+    // The next Age's battles open, but your army does not change.
+    expect(battleNumber(selected(s))).toBe(6);
+    expect(s.enemyAge).toBe(1);
     expect(s.armyAge).toBe(0);
-    expect(s.enemyAge).toBe(0);
-    expect(canEvolve(s)).toBe(false);
   });
 
-  it('a loss or retreat replays the same stage and keeps the Gold', () => {
+  it('a loss or retreat keeps the Gold and the battle', () => {
     const s = newSave();
-    win(s);
-    applyOutcome(s, { result: 'defeat', gold: 7, kills: 3, enemyAge: 0, stage: 1, campaign: true });
-    applyOutcome(s, { result: 'retreat', gold: 2, kills: 0, enemyAge: 0, stage: 1, campaign: true });
+    fight(s, 'victory');
+    fight(s, 'defeat', 7);
+    fight(s, 'retreat', 2);
     expect(s.gold).toBe(18 + 9);
-    expect(s.stage).toBe(1);
+    expect(frontier(s)).toBe(1);
+  });
+
+  it('earlier battles can be replayed for Gold without moving the frontier', () => {
+    const s = newSave();
+    fight(s, 'victory');
+    fight(s, 'victory');
+    pickBattle(s, -1);
+    expect(battleNumber(selected(s))).toBe(2);
+    pickBattle(s, -5);
+    expect(battleNumber(selected(s))).toBe(1);
+    fight(s, 'victory', 40);
+    expect(s.gold).toBe(18 + 40);
+    expect(frontier(s)).toBe(2);
+    pickBattle(s, 9);
+    expect(battleNumber(selected(s))).toBe(3);
+    expect(s.pick).toBe(-1);
   });
 
   it('non-campaign battles never pay Gold or move the campaign', () => {
     const s = newSave();
     applyOutcome(s, { result: 'victory', gold: 50, kills: 3, enemyAge: 0, stage: 0, campaign: false });
     expect(s.gold).toBe(18);
-    expect(s.stage).toBe(0);
+    expect(frontier(s)).toBe(0);
   });
 });
 
-describe('evolution', () => {
-  it('is free after the boss, moves army and enemy together and resets the Camp', () => {
+describe('evolution (We Are Warriors format)', () => {
+  it('opens after your Age’s boss and costs Gold', () => {
     const s = newSave();
-    s.slots = ['ranged'];
-    s.camp = { food: 3, melee: 2 };
-    for (let i = 0; i < STAGES; i++) win(s);
-    s.gold = 0;
+    s.gold = 1e9;
+    expect(evolveUnlocked(s)).toBe(false);
+    expect(canEvolve(s)).toBe(false);
+    winStone(s);
+    expect(evolveUnlocked(s)).toBe(true);
+    s.gold = (evolveCost(s) ?? 0) - 1;
+    expect(canEvolve(s)).toBe(false);
+    s.gold += 1;
     expect(canEvolve(s)).toBe(true);
-    expect(evolve(s)).toBe(true);
-    expect(s.armyAge).toBe(1);
-    expect(s.enemyAge).toBe(1);
-    expect(s.stage).toBe(0);
-    expect(s.camp).toEqual({});
-    expect(s.slots).toEqual(['ranged']);
-    expect(s.gold).toBe(0);
-    expect(stageNumber(s)).toBe(6);
   });
 
-  it('there is no seventh Age', () => {
+  it('resets Gold and upgrades, keeps slots, never changes the frontier', () => {
+    const s = newSave();
+    winStone(s);
+    s.slots = ['ranged'];
+    s.upgrades = { food: 5, fortress: 3 };
+    s.gold = (evolveCost(s) ?? 0) + 777;
+    const f = frontier(s);
+    expect(evolve(s)).toBe(true);
+    expect(s.armyAge).toBe(1);
+    expect(s.gold).toBe(0);
+    expect(s.upgrades).toEqual({});
+    expect(s.slots).toEqual(['ranged']);
+    expect(frontier(s)).toBe(f);
+    // The next Evolution needs the Ancient boss.
+    s.gold = 1e9;
+    expect(canEvolve(s)).toBe(false);
+  });
+
+  it('costs rise every Age and there is no seventh Age', () => {
+    const c = BALANCE.evolution.cost;
+    for (let i = 2; i < c.length; i++) expect(c[i]).toBeGreaterThan(c[i - 1]);
     const s = newSave();
     s.armyAge = 5;
     s.enemyAge = 5;
     s.beaten = [5];
+    s.gold = 1e12;
+    expect(evolveCost(s)).toBeNull();
     expect(evolve(s)).toBe(false);
     expect(BALANCE.ages.map((a) => a.id)).toEqual(['stone', 'ancient', 'crusader', 'gunpowder', 'industrial', 'future']);
   });
 });
 
 describe('prestige (endless Timelines)', () => {
-  it('needs the Future boss beaten, costs nothing, restarts at Stone stage 1', () => {
+  it('needs a Future army and the Future boss, costs nothing, restarts at battle 1', () => {
     const s = newSave();
     s.armyAge = 5;
     s.enemyAge = 5;
     s.stage = 4;
     expect(canPrestige(s)).toBe(false);
     s.beaten = [0, 1, 2, 3, 4, 5];
-    s.gold = 123;
     s.slots = ['ranged', 'tank'];
+    s.upgrades = { food: 9 };
     expect(prestige(s)).toBe(true);
     expect(s.timeline).toBe(2);
     expect(s.prestige).toBe(1);
     expect(s.armyAge).toBe(0);
-    expect(s.enemyAge).toBe(0);
-    expect(s.stage).toBe(0);
+    expect(frontier(s)).toBe(0);
     expect(s.beaten).toEqual([]);
-    expect(s.gold).toBe(123);
+    expect(s.upgrades).toEqual({});
     expect(s.slots).toEqual(['ranged', 'tank']);
   });
 
@@ -120,8 +154,7 @@ describe('prestige (endless Timelines)', () => {
 });
 
 describe('unlocks by campaign progress', () => {
-  it('double speed from Stone stage 3, Stormcall from Stone stage 4, and they stay', async () => {
-    const { speedUnlocked, stormcallUnlocked } = await import('../src/game/progress');
+  it('double speed from Stone stage 3, Stormcall from Stone stage 4, and they stay', () => {
     const s = newSave();
     expect(speedUnlocked(s)).toBe(false);
     expect(stormcallUnlocked(s)).toBe(false);
