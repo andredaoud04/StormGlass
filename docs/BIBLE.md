@@ -69,13 +69,12 @@ Date: 2026-10-30. Branch `rebuild` merged to `main` when M1 passed its checks. L
 |-----------|--------|-------|
 | M1 Core battle, Stone Age | DONE | Lane battle, Food, three Stone troops, authored waves, base-damage Gold, victory, defeat, retreat, Battle home screen, juice (hit flash, sparks, damage numbers, hitstop, shake, slow-motion fortress destruction, coins flying to the counter), sound effects |
 | M2 Progression and economy | DONE (first pass) | Upgrades tab (troop unlocks, Food, Base, Power, Evolution), versioned balance table, headless simulator (`npm run sim`), pacing tests. Prestige rules and tests done; Prestige button arrives with M4 |
-| M3 All six Ages | DONE (first pass) | Art for all six Ages: troops (both teams, full animation set), fortress (four damage states), layered battlefield, HUD wall, projectiles and muzzle effects. Campaign of 5 stages per Age with a boss per Age (own art at twice troop scale, own move set, raid and retreat, ward). Age Camp upgrades, slots, gradual tab reveal, endless Timelines. Still to do: WAW-like scaling of battlefield, HUD and units (waiting on a reference screenshot from Andre); era sounds |
+| M3 All six Ages | DONE (first pass) | Art for all six Ages: troops (both teams, full animation set), fortress (four damage states), layered battlefield, HUD wall, projectiles and muzzle effects. Campaign of 5 stages per Age with a boss per Age (own art at twice troop scale, own move set, raid and retreat, ward). Age Camp upgrades, slots, gradual tab reveal, endless Timelines. World layer at 1.33x scale (D29, first pass) and era sounds (D30) done. Still to do: confirm scaling against a WAW screenshot |
 | M4 Meta | NOT STARTED | Status effects already in the sim with tests. Skill and Hero sockets shown locked. Dungeons tab shows the four modes with their unlock rules |
 | M5 Live features | NOT STARTED | |
 | M6 Release | NOT STARTED | |
 
 Known gaps:
-- Ranged troops of every Age share the one `sling` shot sound and tanks the swing sound (no musket bang, cannon boom or energy zap yet); sound was left unchanged on purpose.
 - The Stone-art fallback in `battleView.ts` stays as a safety net only; no Age uses it now.
 - Stone and Ancient death falls can clip at the frame edge (later Ages use the padded `roomyDeath` fall); left as is so Stone and Ancient look unchanged.
 - Cards and Shop tabs show "arrives in a later update". Shop says "No ads. No purchases."
@@ -261,5 +260,6 @@ Folders:
 | D26 | 2026-10-31 | "I want the main timeline to be unlimited, and a way to enjoy the pacing of the game. The We Are Warriors progression tips to making the progression difficult in events and dungeons." Replaces Locked Rule 7's single Prestige with endless Timelines. | LOCKED | Andre |
 | D27 | 2026-10-31 | Boss "raid, retreat, ward, but it will also be boss dependent, different move sets affect how the boss behaves. But a consistent attack on the base doesn't make sense." Bosses never attack your fortress. | LOCKED | Andre |
 | D28 | 2026-10-31 | "The UI and progression in the GPT version is far better. I also love the gradually showing new tabs." Release scope "Campaign + Prestige": Age Camp upgrades that reset each Age, permanent Ranged/Tank slots, tabs revealed one by one. Per-troop Gold unlocks and permanent Food/Base/Power upgrades are retired. | LOCKED | Andre |
-| D29 | 2026-10-31 | "Do it like We Are Warriors scaling" for HUD, UI and unit size. Pending a reference screenshot (this session cannot reach the app stores). | OPEN | Andre |
+| D29 | 2026-10-31 | "Do it like We Are Warriors scaling" for HUD, UI and unit size. First pass: the battle world (and the home meadow) is drawn on its own layer at about 1.33x the UI pixel size (always whole device pixels), fortresses partly off the screen edges, the HUD unchanged. To be checked against a We Are Warriors screenshot from Andre. | PROVISIONAL | Andre |
+| D30 | 2026-10-31 | Era attack sounds: bow, crossbow, musket, cannon, rifle, steam, energy zap; boss roar on arrival; ward ting and shatter. Listed per troop as manifest meta `sfx`. | PROVISIONAL | Claude |
 | D24 | 2026-10-30 | HUD walls: Crusader stone with heraldic pennants, Gunpowder timber and iron, Industrial red brick and steel girder, Future alloy panels (owner brief for this pass; replaces the Open Decision 3 proposal). | PROVISIONAL | Andre (brief) |

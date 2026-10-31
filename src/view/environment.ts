@@ -40,9 +40,12 @@ export class EnvView {
     this.smoke = new FxSystem((k) => app.assets.strip(k).frames);
   }
 
+  /** Width of the layer this environment was last drawn on (the battle world is narrower than the UI). */
+  private viewW = 0;
+
   /** Left edge of the 256-wide art relative to the screen. */
   get offsetX(): number {
-    return Math.floor((this.app.w - ENV_W) / 2);
+    return Math.floor(((this.viewW || this.app.w) - ENV_W) / 2);
   }
 
   update(dt: number, groundY: number): void {
@@ -78,13 +81,14 @@ export class EnvView {
         p.t += dt;
         p.y += Math.sin(p.t * 2) * 3 * dt;
       }
-      this.pteros = this.pteros.filter((p) => p.x < this.app.w + 30);
+      this.pteros = this.pteros.filter((p) => p.x < (this.viewW || this.app.w) + 30);
     }
   }
 
   /** Draw from the top of the screen down to `bottom`, with the ground line at groundY. */
   draw(groundY: number, ox = 0, oy = 0): void {
     const d = this.app.draw;
+    this.viewW = this.app.w;
     const meta = this.app.assets.meta(`env.${this.age}`);
     const x0 = this.offsetX + ox;
     const sky = this.app.assets.image(`env.${this.age}.sky`);

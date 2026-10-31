@@ -238,9 +238,9 @@ export const BOSS_TROOPS: TroopArt[] = [
   { id: 'boss_stone', rig: ograkRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 130, frontArm: -15 }, { roomyDeath: true }) },
   { id: 'boss_ancient', rig: bullRig, anims: (r) => humanoidAnims(r, 'thrust', { weapon: 60, frontArm: -40, offhand: 0 }, { roomyDeath: true }) },
   { id: 'boss_crusader', rig: baronRig, anims: (r) => humanoidAnims(r, 'swing', { weapon: 60, frontArm: -35, offhand: 0 }, { roomyDeath: true }) },
-  { id: 'boss_gunpowder', rig: admiralRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, { roomyDeath: true }) },
-  { id: 'boss_industrial', rig: juggernautRig, anims: walkerAnims },
-  { id: 'boss_future', rig: omegaRig, anims: mechAnims },
+  { id: 'boss_gunpowder', rig: admiralRig, anims: (r) => humanoidAnims(r, 'shoot', { weapon: 40, frontArm: -30 }, { roomyDeath: true }), sfx: 'cannon' },
+  { id: 'boss_industrial', rig: juggernautRig, anims: walkerAnims, sfx: 'steam' },
+  { id: 'boss_future', rig: omegaRig, anims: mechAnims, sfx: 'zap_heavy' },
 ];
 
 void PLASMA;

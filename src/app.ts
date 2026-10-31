@@ -37,11 +37,33 @@ export class App {
     screen.onResize = () => this.scene?.resize?.();
   }
 
+  /** True while drawing the battle world layer: w, h and draw refer to world pixels. */
+  private worldPass = false;
+
   get w(): number {
-    return this.screen.size.w;
+    return this.worldPass ? this.screen.size.ww : this.screen.size.w;
   }
   get h(): number {
-    return this.screen.size.h;
+    return this.worldPass ? this.screen.size.wh : this.screen.size.h;
+  }
+  /** World pixels to UI pixels. */
+  get worldToUi(): number {
+    return this.screen.size.worldScale / this.screen.size.scale;
+  }
+
+  /** Draw onto the world layer (larger pixels, under the UI). */
+  inWorld(fn: () => void): void {
+    const ctx = this.draw.ctx;
+    this.worldPass = true;
+    this.screen.useWorld = true;
+    this.draw.ctx = this.screen.worldCtx;
+    this.screen.worldCtx.setTransform(1, 0, 0, 1, 0, 0);
+    try {
+      fn();
+    } finally {
+      this.draw.ctx = ctx;
+      this.worldPass = false;
+    }
   }
   get reducedMotion(): boolean {
     return this.save.settings.reducedMotion;
@@ -66,6 +88,8 @@ export class App {
     this.input.begin();
     this.scene.update(dt);
     this.screen.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.screen.ctx.clearRect(0, 0, this.screen.size.w, this.screen.size.h);
+    this.screen.useWorld = false;
     this.scene.draw();
     this.input.end();
     this.screen.present();

@@ -10,7 +10,8 @@ import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
 import { BattleView } from '../view/battleView';
 
 const MAX_STEPS_PER_FRAME = 6;
-const BASE_INSET = 38;
+/** World pixels of each fortress left on screen in front of its anchor (the rest is off the edge). */
+const BASE_INSET = 30;
 
 interface Coin {
   x: number;
@@ -78,7 +79,10 @@ export class BattleScene implements Scene {
     this.sim = createBattle(config);
     this.wallKey = app.assets.has(`ui.wall_${ageDef(this.enemyAge).id}`) ? `ui.wall_${ageDef(this.enemyAge).id}` : 'ui.wall_stone';
     this.view = new BattleView(app, this.sim, this.layout(), ageDef(this.enemyAge).id, {
-      onCoin: (x, y, amount) => this.spawnCoins(x, y, amount),
+      onCoin: (x, y, amount) => {
+        const [ux, uy] = this.ui(x, y);
+        this.spawnCoins(ux, uy, amount);
+      },
       onImpact: (heavy, kill) => {
         if (app.reducedMotion) return;
         this.freeze = Math.max(this.freeze, heavy ? 0.06 : kill ? 0.035 : 0);
@@ -88,11 +92,20 @@ export class BattleScene implements Scene {
     app.sfx('fight', { vol: 0.8, jitter: 0 });
   }
 
+  /** Layout in world pixels; the HUD (UI pixels) sits under the ground line. */
   private layout() {
-    const { w, h } = this.app;
+    const { h } = this.app;
     const hudH = Math.max(98, Math.min(112, Math.round(h * 0.24)));
     this.hudTop = h - hudH;
-    return { groundY: this.hudTop - 24, laneL: BASE_INSET, laneR: w - 1 - BASE_INSET };
+    const k = this.app.worldToUi;
+    const ww = this.app.screen.size.ww;
+    return { groundY: Math.floor((this.hudTop - 22) / k), laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
+  }
+
+  /** World x/y to UI x/y. */
+  private ui(x: number, y: number): [number, number] {
+    const k = this.app.worldToUi;
+    return [Math.round(x * k), Math.round(y * k)];
   }
 
   resize(): void {
@@ -190,8 +203,8 @@ export class BattleScene implements Scene {
             if (!this.app.reducedMotion) this.slowmo = 0.6;
           }
           if (e.type === 'gold' && e.reason === 'base') {
-            const x = this.view.layout.laneR + 4;
-            this.spawnCoins(x, this.view.layout.groundY - 20 - Math.random() * 30, e.amount);
+            const [x, y] = this.ui(this.view.layout.laneR + 4, this.view.layout.groundY - 20 - Math.random() * 30);
+            this.spawnCoins(x, y, e.amount);
           }
           if (e.type === 'end') this.startEnding(e.result);
         }
@@ -240,7 +253,7 @@ export class BattleScene implements Scene {
     const app = this.app;
     const d = app.draw;
     const { w, h } = app;
-    this.view.draw();
+    app.inWorld(() => this.view.draw());
     this.drawBaseBars();
     this.drawHeader();
     this.drawHud();
@@ -258,7 +271,7 @@ export class BattleScene implements Scene {
   private drawIntro(): void {
     const d = this.app.draw;
     const t = this.introT;
-    const y = Math.round(this.view.layout.groundY - 80 + (t < 0.15 ? (0.15 - t) * -60 : 0));
+    const y = Math.round(this.ui(0, this.view.layout.groundY)[1] - 80 + (t < 0.15 ? (0.15 - t) * -60 : 0));
     const a = t > 1 ? (1.3 - t) / 0.3 : 1;
     const boss = isBossStage(this.stage);
     d.text(boss ? 'BOSS BATTLE!' : 'FIGHT!', this.app.w / 2, y, { font: 'big', color: boss ? '#ff7a5a' : '#ffd03c', shadow: true, align: 'center', alpha: a });
@@ -271,7 +284,7 @@ export class BattleScene implements Scene {
     const d = app.draw;
     const t = this.bossIntroT;
     const a = t < 0.2 ? t / 0.2 : t > 2 ? (2.4 - t) / 0.4 : 1;
-    const y = Math.round(this.view.layout.groundY - 96);
+    const y = Math.round(this.ui(0, this.view.layout.groundY)[1] - 96);
     const slide = t < 0.2 ? (0.2 - t) * 200 : 0;
     const label = this.bossName;
     const bw = Math.min(app.w - 8, d.measure(label, 'big') + 40);
@@ -343,10 +356,10 @@ export class BattleScene implements Scene {
   private drawBaseBars(): void {
     const d = this.app.draw;
     const s = this.sim;
-    const top = this.view.baseTop() - 6;
+    const top = this.ui(0, this.view.baseTop())[1] - 6;
     const bars: [number, number, number, string, string][] = [
-      [this.view.layout.laneL - 16, s.playerBaseHp, s.config.playerBaseHp, '#6fd36a', '#b6f08a'],
-      [this.view.layout.laneR + 16, s.enemyBaseHp, s.config.enemyBaseHp, '#ff5a4f', '#ff9a7a'],
+      [Math.max(19, this.ui(this.view.layout.laneL - 12, 0)[0]), s.playerBaseHp, s.config.playerBaseHp, '#6fd36a', '#b6f08a'],
+      [Math.min(this.app.w - 19, this.ui(this.view.layout.laneR + 12, 0)[0]), s.enemyBaseHp, s.config.enemyBaseHp, '#ff5a4f', '#ff9a7a'],
     ];
     if (s.wardUp) {
       bars[1][3] = '#5ab0ff';

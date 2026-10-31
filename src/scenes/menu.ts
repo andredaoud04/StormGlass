@@ -53,7 +53,7 @@ export class MenuScene implements Scene {
   }
 
   update(dt: number): void {
-    this.env.update(dt, this.groundY);
+    this.env.update(dt, Math.floor(this.groundY / this.app.worldToUi));
     this.fx.update(dt, (k) => this.app.assets.strip(k).fps);
     this.toastT = Math.max(0, this.toastT - dt);
     this.flash = Math.max(0, this.flash - dt);
@@ -86,23 +86,29 @@ export class MenuScene implements Scene {
     const d = app.draw;
     const { w } = app;
     const G = this.groundY;
-    this.env.draw(G);
-    const armyAge = ageDef(app.save.armyAge).id;
-    const enemyAge = ageDef(app.save.enemyAge).id;
-    const baseKey = (age: string, team: string) => (app.assets.has(`base.${age}.${team}.0`) ? `base.${age}.${team}.0` : `base.stone.${team}.0`);
-    d.image(baseKey(armyAge, 'blue'), 38, G);
-    d.image(baseKey(enemyAge, 'red'), w - 39, G, { flip: true });
-    // Your army idles in front of your fortress.
-    const army = loadout(app.save);
-    army.forEach((id, i) => {
-      const key = `troop.${id}.blue`;
-      if (!app.assets.has(key)) return;
-      const a = app.assets.sheet(key).anims.idle;
-      const f = Math.floor(app.time * a.fps + i * 1.7) % a.frames;
-      d.rect(52 + i * 17 - 6, G + (i % 2) * 2, 12, 1, '#1e1526', 0.28);
-      d.frame(key, 'idle', f, 52 + i * 17, G + (i % 2) * 2);
+    // The meadow is drawn on the world layer, at the same scale as battles.
+    app.inWorld(() => {
+      const k = app.worldToUi;
+      const gw = Math.floor(G / k);
+      const ww = app.w;
+      this.env.draw(gw);
+      const armyAge = ageDef(app.save.armyAge).id;
+      const enemyAge = ageDef(app.save.enemyAge).id;
+      const baseKey = (age: string, team: string) => (app.assets.has(`base.${age}.${team}.0`) ? `base.${age}.${team}.0` : `base.stone.${team}.0`);
+      d.image(baseKey(armyAge, 'blue'), 30, gw);
+      d.image(baseKey(enemyAge, 'red'), ww - 31, gw, { flip: true });
+      // Your army idles in front of your fortress.
+      const army = loadout(app.save);
+      army.forEach((id, i) => {
+        const key = `troop.${id}.blue`;
+        if (!app.assets.has(key)) return;
+        const a = app.assets.sheet(key).anims.idle;
+        const f = Math.floor(app.time * a.fps + i * 1.7) % a.frames;
+        d.rect(44 + i * 18 - 6, gw + (i % 2) * 2, 12, 1, '#1e1526', 0.28);
+        d.frame(key, 'idle', f, 44 + i * 18, gw + (i % 2) * 2);
+      });
+      this.fx.drawFront(d);
     });
-    this.fx.drawFront(d);
 
     // Top bar.
     counter(app, 10, 5, 52, 'gold', fmt(app.save.gold), '#ffe68a');

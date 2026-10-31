@@ -167,7 +167,11 @@ export class BattleView {
             ? Math.max(1, Math.round(u.def.bossDef.windup * s.config.tickRate))
             : Math.min(MAX_WINDUP_TICKS, Math.max(1, Math.round(u.def.interval * s.config.tickRate * WINDUP_FRACTION)));
           v.windup = ticks / s.config.tickRate;
-          if (u.def.kind !== 'ranged') this.app.sfx(u.def.kind === 'tank' ? 'swing_heavy' : 'swing', { vol: 0.35, minGapMs: 60 });
+          if (u.def.kind !== 'ranged') {
+            const own = this.app.assets.meta(`troop.${u.def.id}`).sfx;
+            if (own && !u.def.bossDef) this.app.sfx(String(own), { vol: 0.55, minGapMs: 80 });
+            else this.app.sfx(u.def.kind === 'tank' ? 'swing_heavy' : 'swing', { vol: 0.35, minGapMs: 60 });
+          }
           break;
         }
         case 'shoot': {
@@ -188,7 +192,7 @@ export class BattleView {
               if (this.app.assets.has(k)) this.fx.add(k, v.px + m[0] * dir, G + v.depth + m[1], { fps: this.app.assets.strip(k).fps, flip: dir < 0, vx: k.includes('smoke') ? dir * 6 : 0, vy: k.includes('smoke') ? -3 : 0 });
             }
           }
-          this.app.sfx('sling', { vol: 0.4, minGapMs: 50 });
+          this.app.sfx(String(tmeta.sfx ?? 'sling'), { vol: tmeta.sfx ? 0.5 : 0.4, minGapMs: 50 });
           break;
         }
         case 'hit': {
@@ -270,14 +274,16 @@ export class BattleView {
         }
         case 'bossSpawn': {
           this.shake.add(4, 0.5);
-          this.app.sfx('boom', { vol: 0.7 });
+          this.app.sfx('roar', { vol: 0.9 });
           this.fx.add('fx.dust', this.layout.laneR - 10, G, { behind: true });
           break;
         }
         case 'bossWindup': {
           const r = s.config.boss?.bossDef?.radius ?? 40;
           this.marks.push({ x: e.x, r, t: 0, dur: e.ticks / s.config.tickRate, move: e.move });
-          if (e.move === 'barrage') this.app.sfx('sling', { vol: 0.6 });
+          if (e.move === 'barrage') this.app.sfx('cannon', { vol: 0.6 });
+          else if (e.move === 'quake') this.app.sfx('steam', { vol: 0.6 });
+          else if (e.move === 'blink') this.app.sfx('zap', { vol: 0.5 });
           break;
         }
         case 'bossStrike': {
@@ -300,14 +306,14 @@ export class BattleView {
         case 'bossBlink': {
           this.fx.add('fx.poof', this.laneToPx(e.from), G - 10);
           this.fx.add('fx.poof', this.laneToPx(e.to), G - 10);
-          this.app.sfx('ready', { vol: 0.6 });
+          this.app.sfx('zap', { vol: 0.6 });
           const v = this.units.get(e.id);
           if (v) v.px = this.laneToPx(e.to);
           break;
         }
         case 'wardHit': {
           this.wardFlash = 0.15;
-          this.app.sfx('hit_ranged', { vol: 0.25, minGapMs: 120 });
+          this.app.sfx('ward_hit', { vol: 0.3, minGapMs: 120 });
           break;
         }
         case 'wardBreak': {
@@ -315,9 +321,9 @@ export class BattleView {
           const x = this.layout.laneR + 14;
           for (let k = 0; k < 10; k++) this.fx.add('fx.debris', x, G - 20 - Math.random() * 50, { vx: (Math.random() - 0.3) * 120, vy: -40 - Math.random() * 80, gravity: 260, life: 1, fps: 16 });
           this.fx.add('fx.boom', x, G - 40);
-          this.fx.text('WARD BROKEN!', this.app.w / 2, G - 70, { color: '#9fdcff', font: 'big', life: 1.6, vy: -10 });
+          this.fx.text('WARD BROKEN!', Math.round((this.layout.laneL + this.layout.laneR) / 2), G - 60, { color: '#9fdcff', font: 'big', life: 1.6, vy: -10 });
           this.shake.add(5, 0.4);
-          this.app.sfx('boom', { vol: 1 });
+          this.app.sfx('ward_break', { vol: 1 });
           break;
         }
         default:
