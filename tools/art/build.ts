@@ -9,6 +9,7 @@ import { A, B, G, Img, R } from './img';
 import { INK, TEAM_BLUE, TEAM_RED, MOSS, GOLD, WOOD, STONE } from './palette';
 import { packSheet } from './rig';
 import { ALL_TROOPS } from './troops/catalog';
+import { BOSS_TROOPS } from './troops/bosses';
 import { stoneEnv, type EnvArt } from './env/stone';
 import { ancientEnv } from './env/ancient';
 import { BASE_FRONT, BASE_GROUND, flagFrames, stoneFortress } from './bases/stone';
@@ -159,6 +160,16 @@ export function buildAll(): void {
       if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.projectile ? { projectile: t.projectile } : {}), ...(t.muzzleFx ? { muzzleFx: t.muzzleFx } : {}) };
       if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, t.portraitAt ? anims[0].frames[0].crop(t.portraitAt[0], t.portraitAt[1], 32, 28) : portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
     }
+  }
+
+  // Bosses (enemy side only).
+  for (const t of BOSS_TROOPS) {
+    const r = t.rig(TEAM_RED);
+    const anims = t.anims(r);
+    const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
+    const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
+    reg.sheet(`troop.${t.id}.red`, `troops/${t.id}_red.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id}: boss at twice the troop scale, enemy team. Faces right; mirrored in game.`, t.muzzle);
+    reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1] };
   }
 
   // Environments

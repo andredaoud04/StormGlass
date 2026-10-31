@@ -18,7 +18,8 @@ describe('save', () => {
     expect(s.gold).toBe(BALANCE.economy.startingGold);
     expect(s.gold).toBe(18);
     expect(s.armyAge).toBe(0);
-    expect(s.ownedTroops).toEqual(['stone_clubber']);
+    expect(s.slots).toEqual([]);
+    expect(s.stage).toBe(0);
     expect(s.schema).toBe(SAVE_SCHEMA);
   });
 
@@ -26,7 +27,8 @@ describe('save', () => {
     const store = new MemStore();
     const s = newSave(5);
     s.gold = 77;
-    s.ownedTroops.push('stone_slinger');
+    s.slots.push('ranged');
+    s.camp.food = 2;
     writeSave(store, s);
     expect(loadSave(store)).toEqual(s);
   });
@@ -36,7 +38,8 @@ describe('save', () => {
     expect(m.schema).toBe(SAVE_SCHEMA);
     expect(m.gold).toBe(40);
     expect(m.armyAge).toBe(1);
-    expect(m.ownedTroops).toEqual(['stone_clubber', 'stone_slinger']);
+    expect(m.enemyAge).toBe(1);
+    expect(m.slots).toEqual(['ranged']);
     expect(m.gems).toBe(0);
     expect(m.prestige).toBe(0);
   });
@@ -44,19 +47,34 @@ describe('save', () => {
   it('migrates a v1 save and keeps its progress', () => {
     const m = migrate({ schema: 1, gold: 300, armyAge: 2, enemyAge: 3, timeline: 2, ownedTroops: ['stone_brute'], beaten: [0, 1, 2], stats: { battles: 12 } });
     expect(m.gold).toBe(300);
-    expect(m.enemyAge).toBe(3);
+    expect(m.armyAge).toBe(2);
+    expect(m.enemyAge).toBe(2);
+    expect(m.stage).toBe(0);
     expect(m.beaten).toEqual([0, 1, 2]);
     expect(m.battleNo).toBe(12);
-    expect(m.ownedTroops).toContain('stone_clubber');
+    expect(m.slots).toEqual(['ranged', 'tank']);
+  });
+
+  it('migrates a v2 save to campaign stages and refunds old upgrades as Gold', () => {
+    const m = migrate({ schema: 2, gold: 100, armyAge: 1, enemyAge: 2, ownedTroops: ['stone_clubber', 'stone_slinger'], upgrades: { food: 2 }, beaten: [0, 1] });
+    expect(m.schema).toBe(SAVE_SCHEMA);
+    expect(m.gold).toBe(100 + 6 + Math.round(6 * 1.25));
+    expect(m.enemyAge).toBe(1);
+    expect(m.stage).toBe(0);
+    expect(m.slots).toEqual(['ranged']);
+    expect(m.camp).toEqual({});
+    expect(m.beaten).toEqual([0, 1]);
   });
 
   it('repairs corrupt fields instead of crashing', () => {
-    const m = migrate({ schema: SAVE_SCHEMA, gold: -5, armyAge: 99, enemyAge: 'x', beaten: [1, 1, 'a', 42], ownedTroops: 'nope', settings: { sound: false } });
+    const m = migrate({ schema: SAVE_SCHEMA, gold: -5, armyAge: 99, enemyAge: 'x', stage: 77, beaten: [1, 1, 'a', 42], slots: 'nope', camp: { food: -3, bogus: 4 }, settings: { sound: false } });
     expect(m.gold).toBe(0);
     expect(m.armyAge).toBe(BALANCE.ages.length - 1);
-    expect(m.enemyAge).toBe(0);
+    expect(m.enemyAge).toBe(m.armyAge);
+    expect(m.stage).toBe(BALANCE.campaign.stagesPerAge - 1);
     expect(m.beaten).toEqual([1]);
-    expect(m.ownedTroops).toEqual(['stone_clubber']);
+    expect(m.slots).toEqual([]);
+    expect(m.camp).toEqual({ food: 0 });
     expect(m.settings.sound).toBe(false);
   });
 

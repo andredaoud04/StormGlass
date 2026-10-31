@@ -94,6 +94,9 @@ const ICONS: Record<string, string[]> = {
   hp: ['.MM.MM.', 'MMmmMmr', 'mmmmmmr', '.mmmmr.', '..mrr..', '...r...'],
   sword: ['......S', '.....Sp', '....Sp.', 'd..Sp..', '.dSp...', '.ld....', 'l.l....'],
   fist: ['.MMM.', 'MmmmM', 'mmmmr', 'mmmmr', '.rrr.'],
+  // Role icons for the Age Camp: bow (ranged) and shield (tank).
+  bow: ['..dd...', '.d..w..', 'd...w..', 'd..Sw..', 'd...w..', '.d..w..', '..dd...'],
+  shield: ['sSSSSs', 'sSTTps', 'sSTTps', 'sSttps', '.sppp.', '..pp..'],
 };
 
 const TAB_ICONS: Record<string, string[]> = {

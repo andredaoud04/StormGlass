@@ -44,6 +44,8 @@ export interface RigParts {
   /** Draw the offhand (shield) in front of the torso instead of behind it. */
   offhandInFront?: boolean;
   outline?: Color;
+  /** Multiplies pose offsets (body, head, legs) for rigs drawn at a larger pixel scale (bosses). */
+  poseScale?: number;
 }
 
 export interface Pose {
@@ -94,8 +96,11 @@ function handPos(arm: Limb, shoulder: [number, number], deg: number): [number, n
   return [shoulder[0] + dx, shoulder[1] + dy];
 }
 
-export function buildFrame(r: RigParts, pose: Pose): Img {
+export function buildFrame(r: RigParts, pose0: Pose): Img {
   const ink = r.outline ?? INK;
+  const k = r.poseScale ?? 1;
+  const sc = (v?: [number, number]): [number, number] | undefined => (v ? [v[0] * k, v[1] * k] : v);
+  const pose: Pose = k === 1 ? pose0 : { ...pose0, body: sc(pose0.body), head: sc(pose0.head), frontLeg: sc(pose0.frontLeg), backLeg: sc(pose0.backLeg) };
   const f = new Img(r.frameW, r.frameH);
   const [bx, by] = pose.body ?? [0, 0];
   const hip: [number, number] = [r.hip[0] + bx, r.hip[1] + by];

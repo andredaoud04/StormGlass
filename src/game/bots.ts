@@ -40,7 +40,7 @@ export function runBattle(config: BattleConfig, policy: Policy, maxSeconds = 300
   return {
     result: s.result,
     seconds: s.tick / config.tickRate,
-    gold: s.gold.kills + s.gold.tanks + s.gold.base,
+    gold: s.gold.kills + s.gold.tanks + s.gold.base + s.gold.boss,
     state: s,
   };
 }

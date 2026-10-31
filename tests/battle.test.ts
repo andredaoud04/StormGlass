@@ -176,3 +176,81 @@ describe('battle end', () => {
     expect(stateHash(r.state)).toBe(h);
   });
 });
+
+describe('bosses', () => {
+  const ARMY = ['stone_clubber', 'stone_slinger', 'stone_brute'];
+  const bossConfig = (age = 0, over: Partial<BattleConfig> = {}) => {
+    const loadout = BALANCE.ages[age].troops.map((t) => t.id);
+    return { ...buildBattleConfig({ seed: 3, loadout, enemyAge: age, armyAge: age, stage: 4, timeline: 1 }), ...over };
+  };
+
+  it('only the last stage of an Age has a boss', () => {
+    for (let st = 0; st < 4; st++) expect(buildBattleConfig({ seed: 1, loadout: ARMY, enemyAge: 0, armyAge: 0, stage: st, timeline: 1 }).boss).toBeUndefined();
+    expect(bossConfig().boss?.boss).toBe(true);
+  });
+
+  it('the ward keeps the enemy fortress safe until the boss falls', () => {
+    const cfg = bossConfig(0, { playerBaseHp: 1e9 });
+    const s = createBattle(cfg);
+    expect(s.wardUp).toBe(true);
+    const full = s.enemyBaseHp;
+    // A Brute at the enemy gate, before the boss arrives.
+    s.foodMilli = 100_000;
+    stepBattle(s, [{ type: 'deploy', slot: 2 }]);
+    const brute = s.units.find((u) => u.side === 0)!;
+    brute.x = cfg.laneLength - 60;
+    brute.hp = brute.maxHp = 1e9;
+    let wardHits = 0;
+    for (let i = 0; i < 5 * cfg.tickRate; i++) for (const e of stepBattle(s)) if (e.type === 'wardHit') wardHits++;
+    expect(wardHits).toBeGreaterThan(0);
+    expect(s.enemyBaseHp).toBe(full);
+  });
+
+  it('every boss raids and falls back, and never damages your fortress', () => {
+    for (let age = 0; age < BALANCE.ages.length; age++) {
+      const cfg = bossConfig(age, { playerBaseHp: 1e9 });
+      const s = createBattle(cfg);
+      const phases = new Set<string>();
+      let bossDamageToBase = 0;
+      let lastBaseHp = s.playerBaseHp;
+      for (let i = 0; i < 90 * cfg.tickRate && !s.result; i++) {
+        const ev = stepBattle(s, i % 40 === 0 ? [{ type: 'deploy', slot: 0 }] : []);
+        for (const e of ev) if (e.type === 'bossPhase') phases.add(e.phase);
+        const boss = s.units.find((u) => u.id === s.bossId);
+        if (boss) expect(boss.x).toBeGreaterThanOrEqual(cfg.laneLength * (1 - cfg.boss!.bossDef!.reach) - 1e-6);
+        if (s.playerBaseHp < lastBaseHp && ev.some((e) => e.type === 'bossStrike' && e.x < cfg.spawnOffset)) bossDamageToBase++;
+        lastBaseHp = s.playerBaseHp;
+      }
+      expect(s.bossSpawned).toBe(true);
+      expect(phases.has('retreat') || phases.has('rest')).toBe(true);
+      expect(bossDamageToBase).toBe(0);
+    }
+  });
+
+  it('killing the boss breaks the ward and pays its Gold in full, exactly once', () => {
+    const cfg = bossConfig(0, { playerBaseHp: 1e9 });
+    const s = createBattle(cfg);
+    while (!s.bossSpawned) stepBattle(s);
+    const boss = s.units.find((u) => u.id === s.bossId)!;
+    // An unkillable hero stands in front of the boss and wears it down through the normal damage path.
+    s.foodMilli = 100_000;
+    stepBattle(s, [{ type: 'deploy', slot: 0 }]);
+    const hero = s.units.find((u) => u.side === 0)!;
+    hero.def = { ...hero.def, dmg: Math.ceil(boss.maxHp / 6), speed: 400 };
+    hero.hp = hero.maxHp = 1e9;
+    let broke = 0;
+    for (let i = 0; i < 60 * cfg.tickRate && boss.alive; i++) for (const e of stepBattle(s)) if (e.type === 'wardBreak') broke++;
+    for (let i = 0; i < 5; i++) for (const e of stepBattle(s)) if (e.type === 'wardBreak') broke++;
+    expect(boss.alive).toBe(false);
+    expect(broke).toBe(1);
+    expect(s.wardUp).toBe(false);
+    expect(s.gold.boss).toBe(cfg.boss!.bossDef!.gold);
+  });
+
+  it('boss battles are deterministic', () => {
+    const cfg = bossConfig(5);
+    const a = runBattle(cfg, cyclePolicy([0, 1, 0, 2]), 200);
+    const b = runBattle(cfg, cyclePolicy([0, 1, 0, 2]), 200);
+    expect(stateHash(a.state)).toBe(stateHash(b.state));
+  });
+});

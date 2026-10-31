@@ -13,6 +13,7 @@ import {
   NO_TARGET,
   type BattleConfig,
   type BattleState,
+  type BossPhase,
   type Command,
   type Side,
   type TroopStats,
@@ -40,7 +41,11 @@ export function createBattle(config: BattleConfig): BattleState {
     nextId: 1,
     waveIndex: 0,
     result: null,
-    gold: { kills: 0, tanks: 0, base: 0 },
+    gold: { kills: 0, tanks: 0, base: 0, boss: 0 },
+    wardUp: !!config.boss,
+    bossId: 0,
+    bossSpawned: false,
+    bossMilestonesPaid: 0,
     baseMilestonesPaid: 0,
     kills: 0,
     tankKills: 0,
@@ -50,7 +55,7 @@ export function createBattle(config: BattleConfig): BattleState {
 }
 
 export function totalGold(s: BattleState): number {
-  return s.gold.kills + s.gold.tanks + s.gold.base;
+  return s.gold.kills + s.gold.tanks + s.gold.base + s.gold.boss;
 }
 
 export function food(s: BattleState): number {
@@ -166,6 +171,10 @@ function findUnit(s: BattleState, id: number): Unit | undefined {
 }
 
 function damageBase(s: BattleState, side: Side, dmg: number, heavy: boolean): void {
+  if (side === 1 && s.wardUp) {
+    s.events.push({ type: 'wardHit', dmg });
+    return;
+  }
   if (side === 1) {
     s.enemyBaseHp = Math.max(0, s.enemyBaseHp - dmg);
     payBaseGold(s);
@@ -245,6 +254,10 @@ function landAttack(s: BattleState, u: Unit): void {
 }
 
 function stepUnit(s: BattleState, u: Unit): void {
+  if (u.boss) {
+    stepBoss(s, u);
+    return;
+  }
   const dt = 1 / s.config.tickRate;
   const slow = slowFactor(s, u);
   u.prevX = u.x;
@@ -314,6 +327,15 @@ function stepProjectiles(s: BattleState): void {
 
 function stepEnemySpawns(s: BattleState): void {
   const now = s.tick / s.config.tickRate;
+  const boss = s.config.boss;
+  if (boss?.bossDef && !s.bossSpawned && now + 1e-9 >= boss.bossDef.spawnSec) {
+    // The boss always gets in, even on a full lane.
+    s.bossSpawned = true;
+    const u = spawnUnit(s, 1, boss);
+    u.boss = { phase: 'raid', timer: 0, raidHp: u.hp, charged: false, dashing: false, pierced: [], strikes: 0, strikeX: u.x };
+    s.bossId = u.id;
+    s.events.push({ type: 'bossSpawn', id: u.id });
+  }
   // At most one spawn per tick; a full lane holds the queue instead of banking spawns.
   const next = waveSpawnTime(s.config, s.waveIndex);
   if (next.time <= now + 1e-9 && aliveCount(s, 1) < s.config.maxUnitsPerSide) {
@@ -348,6 +370,10 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
   for (const u of s.units) if (u.alive) tickStatus(s, u);
   for (const u of s.units) if (u.alive) stepUnit(s, u);
   stepProjectiles(s);
+  if (s.wardUp && s.bossSpawned && !s.units.some((u) => u.id === s.bossId && u.alive)) {
+    s.wardUp = false;
+    s.events.push({ type: 'wardBreak' });
+  }
   // Bodies stay one second for the death animation, then leave the state.
   for (const u of s.units) if (!u.alive) u.deadTicks++;
   s.units = s.units.filter((u) => u.alive || u.deadTicks < s.config.tickRate);
@@ -362,9 +388,196 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
   return s.events;
 }
 
+// ---------- Bosses ----------
+//
+// A boss raids down the lane, strikes your army with its move set, then falls back to heal at
+// its fortress and raids again. It never targets your fortress and never walks past `reach`,
+// so your fortress only falls to ordinary troops.
+
+function setBossPhase(s: BattleState, u: Unit, phase: BossPhase): void {
+  const b = u.boss!;
+  b.phase = phase;
+  b.timer = 0;
+  b.dashing = false;
+  u.windup = -1;
+  if (phase === 'raid') {
+    b.raidHp = u.hp;
+    b.charged = false;
+    b.strikes = 0;
+    b.pierced = [];
+  }
+  s.events.push({ type: 'bossPhase', id: u.id, phase });
+}
+
+function bossHome(s: BattleState): number {
+  return s.config.laneLength - s.config.spawnOffset;
+}
+
+/** The lowest lane x the boss may reach. */
+function bossLimit(s: BattleState, u: Unit): number {
+  return s.config.laneLength * (1 - u.def.bossDef!.reach);
+}
+
+/** Living player unit closest to the enemy fortress (the front of your army). */
+function frontmostEnemy(s: BattleState): Unit | null {
+  let best: Unit | null = null;
+  for (const e of s.units) if (e.alive && e.side === 0 && (!best || e.x > best.x || (e.x === best.x && e.id < best.id))) best = e;
+  return best;
+}
+
+function startBossStrike(s: BattleState, u: Unit, x: number): void {
+  const d = u.def.bossDef!;
+  const ticks = Math.max(1, Math.round(d.windup * s.config.tickRate));
+  u.windup = ticks;
+  u.cooldown = u.def.interval * s.config.tickRate;
+  u.boss!.strikeX = x;
+  u.walking = false;
+  s.events.push({ type: 'swing', id: u.id });
+  s.events.push({ type: 'bossWindup', id: u.id, move: d.move, x, ticks });
+}
+
+/** Area damage centred on `x`. Quake also chills; every strike knocks a little. */
+function landBossStrike(s: BattleState, u: Unit): void {
+  const d = u.def.bossDef!;
+  const b = u.boss!;
+  s.events.push({ type: 'bossStrike', id: u.id, move: d.move, x: b.strikeX, radius: d.radius });
+  for (const e of s.units) {
+    if (!e.alive || e.side === u.side || Math.abs(e.x - b.strikeX) > d.radius) continue;
+    if (d.move === 'quake') applyStatus(s, e, 'cold', u.def.dmg);
+    hitUnit(s, u.side, u.def, e, u.def.dmg, d.move === 'barrage');
+  }
+  b.strikes++;
+}
+
+function stepBoss(s: BattleState, u: Unit): void {
+  const d = u.def.bossDef!;
+  const b = u.boss!;
+  const tr = s.config.tickRate;
+  const dt = 1 / tr;
+  const slow = slowFactor(s, u);
+  const home = bossHome(s);
+  const limit = bossLimit(s, u);
+  u.prevX = u.x;
+  b.timer++;
+  if (u.cooldown > 0) u.cooldown = Math.max(0, u.cooldown - slow);
+
+  if (u.windup >= 0) {
+    u.windup -= slow;
+    if (u.windup <= 0) {
+      u.windup = -1;
+      landBossStrike(s, u);
+      if (d.move === 'blink' && b.phase === 'raid' && b.strikes >= (d.strikes ?? 2)) {
+        // Blink home at once.
+        s.events.push({ type: 'bossBlink', id: u.id, from: u.x, to: home });
+        u.x = home;
+        u.prevX = home;
+        setBossPhase(s, u, 'rest');
+      }
+    }
+    return;
+  }
+
+  if (b.phase === 'retreat') {
+    u.walking = true;
+    u.x = Math.min(home, u.x + u.def.speed * 1.4 * dt * slow);
+    if (u.x >= home) setBossPhase(s, u, 'rest');
+    return;
+  }
+
+  const n = nearestEnemy(s, u);
+  const inRange = n.unit && n.dist <= u.def.range;
+
+  if (b.phase === 'rest') {
+    u.walking = false;
+    u.hp = Math.min(u.maxHp, u.hp + u.maxHp * d.healPerSec * dt);
+    // Defends itself at home, but does not advance.
+    if (inRange && u.cooldown <= 0) startBossStrike(s, u, n.unit!.x);
+    else if (b.timer >= d.restSec * tr) setBossPhase(s, u, 'raid');
+    return;
+  }
+
+  // Raid.
+  const lost = (b.raidHp - u.hp) / u.maxHp;
+  if (b.timer >= d.raidSec * tr || lost >= d.retreatAt) {
+    setBossPhase(s, u, 'retreat');
+    return;
+  }
+
+  if ((d.move === 'charge' || d.move === 'lance') && !b.charged) {
+    if (b.dashing || (n.unit && n.dist <= (d.chargeRange ?? 0))) {
+      if (!b.dashing) s.events.push({ type: 'bossDash', id: u.id });
+      b.dashing = true;
+      u.walking = true;
+      const step = u.def.speed * (d.chargeSpeed ?? 3) * dt * slow;
+      const from = u.x;
+      u.x = Math.max(limit, u.x - step);
+      const dashDmg = Math.round(u.def.dmg * (d.chargeMul ?? 1.5));
+      if (d.move === 'lance') {
+        // Lance: pierce every unit the dash passes, then stop at the reach limit or after the run.
+        for (const e of s.units) {
+          if (!e.alive || e.side === u.side || b.pierced.includes(e.id)) continue;
+          if (e.x <= from + 10 && e.x >= u.x - 10) {
+            b.pierced.push(e.id);
+            hitUnit(s, u.side, u.def, e, dashDmg, false);
+            if (e.alive) e.x = Math.max(s.config.spawnOffset, e.x - (d.knockback ?? 0));
+          }
+        }
+        if (u.x <= limit || from - u.x < 1e-9 || b.pierced.length >= 6) {
+          b.dashing = false;
+          b.charged = true;
+        }
+      } else {
+        const t = nearestEnemy(s, u);
+        if (u.x <= limit || (t.unit && t.dist <= u.def.range * 0.5)) {
+          b.dashing = false;
+          b.charged = true;
+          s.events.push({ type: 'bossStrike', id: u.id, move: d.move, x: u.x - u.def.range * 0.5, radius: d.radius });
+          for (const e of s.units) {
+            if (!e.alive || e.side === u.side || Math.abs(e.x - (u.x - u.def.range * 0.5)) > d.radius) continue;
+            hitUnit(s, u.side, u.def, e, dashDmg, false);
+            if (e.alive) e.x = Math.max(s.config.spawnOffset, e.x - (d.knockback ?? 0));
+          }
+        }
+      }
+      return;
+    }
+  }
+
+  if (d.move === 'blink' && u.cooldown <= 0) {
+    const f = frontmostEnemy(s);
+    if (f) {
+      const to = Math.max(limit, Math.min(home, f.x + u.def.range * 0.6));
+      if (Math.abs(f.x - to) <= u.def.range) {
+        if (Math.abs(to - u.x) > 1) {
+          s.events.push({ type: 'bossBlink', id: u.id, from: u.x, to });
+          u.x = to;
+          u.prevX = to;
+        }
+        startBossStrike(s, u, f.x);
+        return;
+      }
+    }
+  }
+
+  if (inRange) {
+    u.walking = false;
+    if (u.cooldown <= 0) {
+      // Barrage aims at the thickest point of the front: the frontmost unit.
+      const tx = d.move === 'barrage' ? (frontmostEnemy(s) ?? n.unit!).x : n.unit!.x;
+      startBossStrike(s, u, tx);
+    }
+    return;
+  }
+
+  if (u.x > limit) {
+    u.walking = true;
+    u.x = Math.max(limit, u.x - u.def.speed * dt * slow);
+  } else u.walking = false;
+}
+
 /** Stable digest of the battle state for determinism tests and replays. */
 export function stateHash(s: BattleState): string {
-  const parts: (string | number)[] = [s.tick, s.foodMilli, s.playerBaseHp, s.enemyBaseHp, s.waveIndex, s.result ?? '-'];
+  const parts: (string | number)[] = [s.tick, s.foodMilli, s.playerBaseHp, s.enemyBaseHp, s.waveIndex, s.result ?? '-', s.wardUp ? 1 : 0];
   for (const u of s.units) parts.push(u.id, u.side, u.x.toFixed(6), u.hp.toFixed(6), u.alive ? 1 : 0);
   for (const p of s.projectiles) parts.push(p.id, p.x.toFixed(6));
   let h = 2166136261;

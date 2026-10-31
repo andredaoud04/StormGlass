@@ -1,9 +1,9 @@
 /** Campaign battle: fixed-step sim, world view, HUD, ending sequence, result panel. */
 import type { App, Scene } from '../app';
-import { ageDef } from '../game/balance';
-import { buildBattleConfig } from '../game/battleSetup';
-import { applyOutcome, loadout, type BattleOutcome } from '../game/progress';
-import { foodRateMilli, fortressMul, powerMul } from '../game/upgrades';
+import { BALANCE, ageDef } from '../game/balance';
+import { buildBattleConfig, isBossStage } from '../game/battleSetup';
+import { applyOutcome, bossBeaten, loadout, STAGES, type BattleOutcome } from '../game/progress';
+import { foodRateMilli, fortressMul, kindMul } from '../game/upgrades';
 import { createBattle, food, stepBattle, totalGold } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
@@ -49,27 +49,30 @@ export class BattleScene implements Scene {
   private introT = 0;
   private readonly troops: string[];
   private readonly enemyAge: number;
-  private readonly battleNo: number;
+  private readonly stage: number;
+  private readonly bossName: string;
+  private bossIntroT = -1;
+  private bossBarShown = 0;
   private hudTop = 0;
   private deployedOnce = false;
-  private prevEnemyAge: number;
   private wallKey = 'ui.wall_stone';
 
   constructor(private app: App) {
     const s = app.save;
     this.troops = loadout(s);
     this.enemyAge = s.enemyAge;
-    this.prevEnemyAge = s.enemyAge;
-    this.battleNo = s.battleNo + 1;
+    this.stage = s.stage;
+    this.bossName = BALANCE.bosses[ageDef(s.enemyAge).id].name.toUpperCase();
     const config = buildBattleConfig({
       seed: (s.createdAt + s.battleNo * 7919) | 0,
       loadout: this.troops,
       enemyAge: s.enemyAge,
+      stage: s.stage,
       armyAge: s.armyAge,
       timeline: s.timeline,
       foodRateMilli: foodRateMilli(s),
       fortressMul: fortressMul(s),
-      powerMul: powerMul(s),
+      kindMul: kindMul(s),
       campaign: true,
     });
     this.sim = createBattle(config);
@@ -145,7 +148,7 @@ export class BattleScene implements Scene {
     this.resultT = 0;
     if (this.outcome) return;
     const s = this.sim;
-    this.outcome = { result: this.result as BattleOutcome['result'], gold: totalGold(s), kills: s.kills, enemyAge: this.enemyAge, campaign: true };
+    this.outcome = { result: this.result as BattleOutcome['result'], gold: totalGold(s), kills: s.kills, enemyAge: this.enemyAge, stage: this.stage, campaign: true };
     applyOutcome(this.app.save, this.outcome);
     this.app.persist();
     // Any coins still in the air count now.
@@ -156,6 +159,8 @@ export class BattleScene implements Scene {
   update(dt: number): void {
     dt = Math.min(dt, 0.1);
     this.introT += dt;
+    if (this.bossIntroT >= 0) this.bossIntroT += dt;
+    if (this.sim.bossSpawned) this.bossBarShown = Math.min(1, this.bossBarShown + dt * 3);
     this.goldBump = Math.max(0, this.goldBump - dt);
     this.foodBump = Math.max(0, this.foodBump - dt);
     for (let i = 0; i < 3; i++) this.cardShake[i] = Math.max(0, this.cardShake[i] - dt);
@@ -180,6 +185,10 @@ export class BattleScene implements Scene {
         const events = stepBattle(this.sim, this.pending.splice(0));
         this.view.onEvents(events);
         for (const e of events) {
+          if (e.type === 'bossSpawn') {
+            this.bossIntroT = 0;
+            if (!this.app.reducedMotion) this.slowmo = 0.6;
+          }
           if (e.type === 'gold' && e.reason === 'base') {
             const x = this.view.layout.laneR + 4;
             this.spawnCoins(x, this.view.layout.groundY - 20 - Math.random() * 30, e.amount);
@@ -236,7 +245,9 @@ export class BattleScene implements Scene {
     this.drawHeader();
     this.drawHud();
     this.drawCoins();
+    this.drawBossBar();
     if (this.phase === 'play' && this.introT < 1.3) this.drawIntro();
+    if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.4) this.drawBossIntro();
     if (this.phase === 'result') this.drawResult();
     else if (this.paused) this.drawPause();
     void d;
@@ -249,7 +260,51 @@ export class BattleScene implements Scene {
     const t = this.introT;
     const y = Math.round(this.view.layout.groundY - 80 + (t < 0.15 ? (0.15 - t) * -60 : 0));
     const a = t > 1 ? (1.3 - t) / 0.3 : 1;
-    d.text('FIGHT!', this.app.w / 2, y, { font: 'big', color: '#ffd03c', shadow: true, align: 'center', alpha: a });
+    const boss = isBossStage(this.stage);
+    d.text(boss ? 'BOSS BATTLE!' : 'FIGHT!', this.app.w / 2, y, { font: 'big', color: boss ? '#ff7a5a' : '#ffd03c', shadow: true, align: 'center', alpha: a });
+    if (boss) d.text('BREAK THE WARD: DEFEAT THE BOSS', this.app.w / 2, y + 13, { align: 'center', color: '#fff8ec', alpha: a });
+  }
+
+  /** Banner when the boss walks out. */
+  private drawBossIntro(): void {
+    const app = this.app;
+    const d = app.draw;
+    const t = this.bossIntroT;
+    const a = t < 0.2 ? t / 0.2 : t > 2 ? (2.4 - t) / 0.4 : 1;
+    const y = Math.round(this.view.layout.groundY - 96);
+    const slide = t < 0.2 ? (0.2 - t) * 200 : 0;
+    const label = this.bossName;
+    const bw = Math.min(app.w - 8, d.measure(label, 'big') + 40);
+    d.rect(0, y - 4, app.w, 30, '#1e1526', 0.55 * a);
+    d.nine('ui.ribbon_grey', Math.round(app.w / 2 - bw / 2 + slide), y, bw, 22, a);
+    d.text(label, app.w / 2 + slide, y + 7, { font: 'big', align: 'center', color: '#ff9a7a', shadow: true, alpha: a });
+    d.text('APPROACHES!', app.w / 2, y + 25, { align: 'center', color: '#fff1c0', alpha: a });
+  }
+
+  /** Boss HP bar under the header, with the ward state. */
+  private drawBossBar(): void {
+    const s = this.sim;
+    if (!s.bossSpawned || this.bossBarShown <= 0) return;
+    const app = this.app;
+    const d = app.draw;
+    const boss = s.units.find((u) => u.id === s.bossId);
+    const hp = boss?.alive ? boss.hp : 0;
+    const max = boss?.maxHp ?? 1;
+    const bw = Math.min(150, app.w - 40);
+    const x = Math.round(app.w / 2 - bw / 2);
+    const y = 40 - Math.round((1 - this.bossBarShown) * 10);
+    const a = this.bossBarShown;
+    d.image('icon.skull', x - 11, y - 2, { alpha: a });
+    d.rect(x - 1, y - 1, bw + 2, 7, '#1e1526', a);
+    d.rect(x, y, bw, 5, '#4a2a33', a);
+    const fill = Math.ceil((hp / max) * bw);
+    if (fill > 0) {
+      d.rect(x, y, fill, 5, '#c0304a', a);
+      d.rect(x, y, fill, 1, '#ff7a6a', a);
+    }
+    const phase = boss?.alive ? boss.boss?.phase : null;
+    const tag = !boss?.alive ? 'DEFEATED' : phase === 'rest' ? 'RECOVERING' : phase === 'retreat' ? 'FALLING BACK' : 'RAIDING';
+    d.text(`${this.bossName}  ${tag}`, app.w / 2, y + 8, { align: 'center', color: boss?.alive ? '#fff8ec' : '#a8e070', alpha: a });
   }
 
   private drawHeader(): void {
@@ -262,8 +317,27 @@ export class BattleScene implements Scene {
     const pw = Math.min(app.w - 110, Math.max(72, tw + 28));
     d.nine('ui.plaque', Math.round(app.w / 2 - pw / 2), 3, pw, 24);
     d.text(title, app.w / 2, 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    d.text(`BATTLE ${this.battleNo}`, app.w / 2, 29, { align: 'center', color: '#fff8ec' });
+    this.drawPips(app.w / 2, 30);
     if (this.phase === 'play') iconButton(app, 'pause', app.w - 24, 4, 20, 'pause', () => (this.paused = true));
+  }
+
+  /** Stage pips: one per stage, the last one a skull for the boss. */
+  private drawPips(cx: number, y: number): void {
+    const d = this.app.draw;
+    const gap = 9;
+    const x0 = Math.round(cx - ((STAGES - 1) * gap) / 2);
+    for (let i = 0; i < STAGES; i++) {
+      const x = x0 + i * gap;
+      const done = i < this.stage;
+      const cur = i === this.stage;
+      if (i === STAGES - 1) {
+        d.image('icon.skull', x - 4, y - 2, { alpha: cur || done ? 1 : 0.5 });
+        continue;
+      }
+      d.rect(x - 2, y, 5, 5, '#1e1526');
+      d.rect(x - 1, y + 1, 3, 3, done ? '#a8e070' : cur ? '#ffd03c' : '#4a3a48');
+      if (cur && Math.floor(this.app.time * 3) % 2 === 0) d.rect(x - 1, y + 1, 3, 1, '#fff8ec');
+    }
   }
 
   private drawBaseBars(): void {
@@ -274,6 +348,10 @@ export class BattleScene implements Scene {
       [this.view.layout.laneL - 16, s.playerBaseHp, s.config.playerBaseHp, '#6fd36a', '#b6f08a'],
       [this.view.layout.laneR + 16, s.enemyBaseHp, s.config.enemyBaseHp, '#ff5a4f', '#ff9a7a'],
     ];
+    if (s.wardUp) {
+      bars[1][3] = '#5ab0ff';
+      bars[1][4] = '#bfe8ff';
+    }
     for (const [cx, hp, max, c1, c2] of bars) {
       const bw = 34;
       const x = Math.round(cx - bw / 2);
@@ -284,7 +362,8 @@ export class BattleScene implements Scene {
         d.rect(x, top, fill, 4, c1);
         d.rect(x, top, fill, 1, c2);
       }
-      d.text(fmt(Math.ceil(hp)), cx, top - 8, { align: 'center' });
+      const warded = s.wardUp && cx > this.app.w / 2;
+      d.text(warded ? 'WARD' : fmt(Math.ceil(hp)), cx, top - 8, { align: 'center', color: warded ? '#bfe8ff' : undefined });
     }
   }
 
@@ -427,7 +506,7 @@ export class BattleScene implements Scene {
     dim(app, Math.min(0.6, this.resultT * 2));
     blocker(app, 'result-block');
     const pw = 156;
-    const ph = 150;
+    const ph = s.config.boss ? 170 : 150;
     const x = Math.round(app.w / 2 - pw / 2);
     const slide = Math.max(0, 1 - this.resultT / 0.25);
     const y = Math.round(app.h / 2 - ph / 2 + 10 + slide * 40);
@@ -443,6 +522,7 @@ export class BattleScene implements Scene {
       ['skull', `TANKS x${s.tankKills}`, s.gold.tanks],
       ['hp', 'FORTRESS DAMAGE', s.gold.base],
     ];
+    if (s.config.boss) rows.push(['skull', 'BOSS DAMAGE', s.gold.boss]);
     let ry = y + 22;
     rows.forEach(([icon, label, g], i) => {
       const a = Math.min(1, Math.max(0, (this.resultT - 0.25 - i * 0.15) / 0.15));
@@ -463,8 +543,9 @@ export class BattleScene implements Scene {
       d.image('icon.gold', x + pw - 23, ry + 5, { alpha: ta });
     }
     let note = '';
-    if (win && this.prevEnemyAge < app.save.enemyAge) note = `NEXT: ${ageDef(app.save.enemyAge).name.toUpperCase()} AGE`;
-    else if (!win) note = 'UPGRADE AND TRY AGAIN';
+    if (win && isBossStage(this.stage) && bossBeaten(app.save)) note = app.save.armyAge < BALANCE.ages.length - 1 ? 'EVOLUTION UNLOCKED!' : 'NEW TIMELINE UNLOCKED!';
+    else if (win) note = `NEXT: STAGE ${app.save.stage + 1} OF ${STAGES}`;
+    else note = 'UPGRADE AND TRY AGAIN';
     if (note && this.resultT > 1.1) d.text(note, app.w / 2, ry + 22, { align: 'center', color: '#3a2a30', outline: null });
     if (this.resultT > 0.9) button(app, 'continue', x + 20, y + ph - 32, pw - 40, 26, 'CONTINUE', () => app.go('menu'), { style: 'green' });
   }
