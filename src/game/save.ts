@@ -4,7 +4,7 @@
  */
 import { BALANCE, troopDef } from './balance';
 
-export const SAVE_SCHEMA = 3;
+export const SAVE_SCHEMA = 4;
 export const SAVE_KEY = 'stormglass.save';
 
 export interface Settings {
@@ -33,18 +33,20 @@ export interface SaveData {
   runePoints: number;
   /** Your troops' Age, 0 = Stone. Changes only through Evolution. */
   armyAge: number;
-  /** The Age of the enemy you are fighting. Moves up with your army when you Evolve. */
+  /** Frontier: the Age of the furthest battle unlocked. Can be one Age ahead of your army. */
   enemyAge: number;
-  /** Stage within the enemy Age, 0-based; the last stage is the boss. */
+  /** Frontier stage within that Age, 0-based; the last stage is the boss. */
   stage: number;
+  /** An earlier battle picked for replay (index from the start of the Timeline), or -1 for the frontier. */
+  pick: number;
   timeline: number;
   prestige: number;
   /** Ages whose boss is beaten on the current Timeline (unlocks Evolution). */
   beaten: number[];
   /** Troop slots bought with Gold ('ranged', 'tank'). Kept forever. */
   slots: string[];
-  /** Age Camp levels by track. Reset on Evolution. */
-  camp: Record<string, number>;
+  /** Upgrade levels (Food, Base). Reset on Evolution. */
+  upgrades: Record<string, number>;
   /** Campaign battle counter (for authored first-battle moments and seeds). */
   battleNo: number;
   stats: Stats;
@@ -66,9 +68,10 @@ export function newSave(now = 0): SaveData {
     timeline: 1,
     prestige: 0,
     stage: 0,
+    pick: -1,
     beaten: [],
     slots: [],
-    camp: {},
+    upgrades: {},
     battleNo: 0,
     stats: { battles: 0, wins: 0, losses: 0, retreats: 0, goldEarned: 0, kills: 0 },
     settings: { sound: true, reducedMotion: false, fast: false },
@@ -110,6 +113,27 @@ export const MIGRATIONS: Record<number, (s: AnySave) => AnySave> = {
     const army = num(s.armyAge, 0);
     return { ...s, schema: 3, gold: num(s.gold, 0) + refund, enemyAge: army, stage: 0, slots, camp: {}, beaten: Array.isArray(s.beaten) ? (s.beaten as number[]).filter((a) => a <= army) : [] };
   },
+  // v3 -> v4: We Are Warriors format. The Age Camp is gone (its Gold is refunded); the frontier
+  // stays where it was, and a beaten boss opens the next Age's battles.
+  3: (s) => {
+    let refund = 0;
+    const army = num(s.armyAge, 0);
+    if (s.camp && typeof s.camp === 'object') {
+      for (const [k, v] of Object.entries(s.camp)) {
+        const base = ({ food: 8, fortress: 6, melee: 6, ranged: 8, tank: 10 } as Record<string, number>)[k] ?? 0;
+        const lv = Math.max(0, Math.min(40, Math.floor(num(v, 0))));
+        for (let i = 0; i < lv; i++) refund += Math.round(base * Math.pow(1.5, army) * Math.pow(1.35, i));
+      }
+    }
+    const beaten = Array.isArray(s.beaten) ? (s.beaten as number[]) : [];
+    let enemyAge = num(s.enemyAge, army);
+    let stage = num(s.stage, 0);
+    if (beaten.includes(enemyAge) && enemyAge < 5) {
+      enemyAge++;
+      stage = 0;
+    }
+    return { ...s, schema: 4, gold: num(s.gold, 0) + refund, upgrades: {}, camp: undefined, enemyAge, stage, pick: -1 };
+  },
 };
 
 function num(v: unknown, d: number): number {
@@ -140,8 +164,8 @@ export function repair(s: AnySave): SaveData {
   const maxAge = BALANCE.ages.length - 1;
   const stats = (s.stats ?? {}) as AnySave;
   const settings = (s.settings ?? {}) as AnySave;
-  const camp: Record<string, number> = {};
-  if (s.camp && typeof s.camp === 'object') for (const [k, v] of Object.entries(s.camp)) if (k in BALANCE.camp.tracks) camp[k] = int(v, 0, 0, 999);
+  const upgrades: Record<string, number> = {};
+  if (s.upgrades && typeof s.upgrades === 'object') for (const [k, v] of Object.entries(s.upgrades)) if (k in BALANCE.upgrades.tracks) upgrades[k] = int(v, 0, 0, 999);
   const slotList = Array.isArray(s.slots) ? (s.slots as unknown[]).filter((x): x is string => x === 'ranged' || x === 'tank') : [];
   const slots = slotList.includes('tank') ? ['ranged', 'tank'] : slotList.includes('ranged') ? ['ranged'] : [];
   const armyAge = int(s.armyAge, 0, 0, maxAge);
@@ -152,14 +176,15 @@ export function repair(s: AnySave): SaveData {
     keys: int(s.keys, 0, 0, 1e6),
     runePoints: int(s.runePoints, 0, 0, 1e6),
     armyAge,
-    // The enemy is always your army's Age (Evolution moves both together).
-    enemyAge: armyAge,
+    // The frontier is never behind your army, and at most one Age ahead of it.
+    enemyAge: Math.max(armyAge, Math.min(armyAge + 1, maxAge, int(s.enemyAge, armyAge, 0, maxAge))),
     stage: int(s.stage, 0, 0, BALANCE.campaign.stagesPerAge - 1),
+    pick: int(s.pick, -1, -1, 1e6),
     timeline: int(s.timeline, 1, 1, 999),
     prestige: int(s.prestige, 0, 0, 999),
     beaten: Array.isArray(s.beaten) ? [...new Set((s.beaten as unknown[]).filter((a): a is number => Number.isInteger(a) && (a as number) >= 0 && (a as number) <= maxAge))] : [],
     slots,
-    camp,
+    upgrades,
     battleNo: int(s.battleNo, 0, 0, 1e9),
     stats: {
       battles: int(stats.battles, 0, 0, 1e9),

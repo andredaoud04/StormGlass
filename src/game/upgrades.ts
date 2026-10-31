@@ -1,51 +1,45 @@
 /**
- * Age Camp: five upgrade tracks bought with Gold. Levels reset on Evolution, so prices start low
- * again in every Age. Slot unlocks (Ranged, Tank) are bought once and kept forever.
+ * Gold upgrades in the We Are Warriors format: Food rate and Base HP. Both reset when you
+ * Evolve (the new Age starts stronger). Ranged and Tank slots are bought once and kept forever.
  * Curves live in balance.json; this file only applies them.
  */
-import type { TroopKind } from '../sim/types';
-import { BALANCE, type CampId } from './balance';
+import { BALANCE, type UpgradeId } from './balance';
 import type { SaveData } from './save';
 
-export const CAMP_IDS: CampId[] = ['food', 'fortress', 'melee', 'ranged', 'tank'];
+export const UPGRADE_IDS: UpgradeId[] = ['food', 'fortress'];
 export type SlotId = 'ranged' | 'tank';
 
-export function level(s: SaveData, id: CampId): number {
-  return s.camp[id] ?? 0;
+export function level(s: SaveData, id: UpgradeId): number {
+  return s.upgrades[id] ?? 0;
 }
 
 export function maxLevel(s: SaveData): number {
-  const c = BALANCE.camp;
-  return c.maxLevel + c.maxLevelPerTimeline * (Math.max(1, s.timeline) - 1);
+  const u = BALANCE.upgrades;
+  return u.maxLevel + u.maxLevelPerTimeline * (Math.max(1, s.timeline) - 1);
 }
 
 export function hasSlot(s: SaveData, slot: SlotId): boolean {
   return s.slots.includes(slot);
 }
 
-/** A troop track can only be trained once its slot is unlocked. */
-export function trackOpen(s: SaveData, id: CampId): boolean {
-  return id === 'ranged' || id === 'tank' ? hasSlot(s, id) : true;
-}
-
 /** Gold to buy the next level, or null at max level. */
-export function upgradeCost(s: SaveData, id: CampId): number | null {
-  const c = BALANCE.camp;
+export function upgradeCost(s: SaveData, id: UpgradeId): number | null {
+  const u = BALANCE.upgrades;
   const lv = level(s, id);
   if (lv >= maxLevel(s)) return null;
-  return Math.round(c.tracks[id].baseCost * Math.pow(c.ageCostGrowth, s.armyAge) * Math.pow(c.costGrowth, lv));
+  return Math.round(u.tracks[id].baseCost * Math.pow(u.ageCostGrowth, s.armyAge) * Math.pow(u.costGrowth, lv));
 }
 
-export function canBuy(s: SaveData, id: CampId): boolean {
+export function canBuy(s: SaveData, id: UpgradeId): boolean {
   const c = upgradeCost(s, id);
-  return trackOpen(s, id) && c !== null && s.gold >= c;
+  return c !== null && s.gold >= c;
 }
 
-export function buyUpgrade(s: SaveData, id: CampId): boolean {
+export function buyUpgrade(s: SaveData, id: UpgradeId): boolean {
   const c = upgradeCost(s, id);
-  if (c === null || !canBuy(s, id)) return false;
+  if (c === null || s.gold < c) return false;
   s.gold -= c;
-  s.camp[id] = level(s, id) + 1;
+  s.upgrades[id] = level(s, id) + 1;
   return true;
 }
 
@@ -67,9 +61,8 @@ export function unlockSlot(s: SaveData, slot: SlotId): boolean {
   return true;
 }
 
-/** The track's multiplier at a level, e.g. 1.36 at level 3 of a 12% track. */
-export function trackMul(id: CampId, lv: number): number {
-  return 1 + lv * BALANCE.camp.tracks[id].perLevel;
+export function trackMul(id: UpgradeId, lv: number): number {
+  return 1 + lv * BALANCE.upgrades.tracks[id].perLevel;
 }
 
 /** Player Food income in milli-Food per second. Stone base is exactly 1 Food/s. */
@@ -82,19 +75,19 @@ export function fortressMul(s: SaveData): number {
   return trackMul('fortress', level(s, 'fortress'));
 }
 
-export function kindMul(s: SaveData): Record<TroopKind, number> {
-  return { melee: trackMul('melee', level(s, 'melee')), ranged: trackMul('ranged', level(s, 'ranged')), tank: trackMul('tank', level(s, 'tank')) };
-}
-
-/** Display value of a track at a level, e.g. "x1.36". */
-export function upgradeValue(id: CampId, lv: number): string {
+/** Display value of an upgrade at a level: Food in Food/s, Base as a multiplier. */
+export function upgradeValue(s: SaveData, id: UpgradeId, lv: number): string {
+  if (id === 'food') {
+    const v = (BALANCE.ages[s.armyAge]?.foodRate ?? 1) * trackMul('food', lv);
+    return `${Math.round(v * 100) / 100}/S`;
+  }
   return `x${Math.round(trackMul(id, lv) * 100) / 100}`;
 }
 
 /** Number of things the player can buy right now (for the tab badge). */
 export function affordableCount(s: SaveData): number {
   let n = 0;
-  for (const id of CAMP_IDS) if (canBuy(s, id)) n++;
+  for (const id of UPGRADE_IDS) if (canBuy(s, id)) n++;
   for (const slot of ['ranged', 'tank'] as SlotId[]) if (canUnlockSlot(s, slot)) n++;
   return n;
 }

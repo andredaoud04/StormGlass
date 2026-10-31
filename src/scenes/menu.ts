@@ -3,9 +3,9 @@
  * Tabs appear one at a time as the player progresses; until then their position stays empty.
  */
 import type { App, Scene } from '../app';
-import { BALANCE, ageDef, type CampId } from '../game/balance';
-import { bossBeaten, canEvolve, canPrestige, evolve, loadout, prestige, STAGES, stageNumber } from '../game/progress';
-import { CAMP_IDS, affordableCount, buyUpgrade, canBuy, canUnlockSlot, hasSlot, level, maxLevel, slotCost, trackOpen, unlockSlot, upgradeCost, upgradeValue, type SlotId } from '../game/upgrades';
+import { BALANCE, ageDef, type UpgradeId } from '../game/balance';
+import { battleNumber, canEvolve, canPrestige, evolve, evolveCost, evolveUnlocked, frontier, loadout, pickBattle, prestige, selected, STAGES, toIndex } from '../game/progress';
+import { UPGRADE_IDS, affordableCount, buyUpgrade, canBuy, canUnlockSlot, hasSlot, level, maxLevel, slotCost, unlockSlot, upgradeCost, upgradeValue, type SlotId } from '../game/upgrades';
 import { newSave } from '../game/save';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
 import { EnvView } from '../view/environment';
@@ -40,7 +40,7 @@ export class MenuScene implements Scene {
     tab: Tab = 'battle',
   ) {
     this.tab = tab;
-    this.env = new EnvView(app, ageDef(app.save.enemyAge).id);
+    this.env = new EnvView(app, ageDef(selected(app.save).age).id);
     this.fx = new FxSystem((k) => app.assets.strip(k).frames);
   }
 
@@ -93,7 +93,7 @@ export class MenuScene implements Scene {
       const ww = app.w;
       this.env.draw(gw);
       const armyAge = ageDef(app.save.armyAge).id;
-      const enemyAge = ageDef(app.save.enemyAge).id;
+      const enemyAge = ageDef(selected(app.save).age).id;
       const baseKey = (age: string, team: string) => (app.assets.has(`base.${age}.${team}.0`) ? `base.${age}.${team}.0` : `base.stone.${team}.0`);
       d.image(baseKey(armyAge, 'blue'), 30, gw);
       d.image(baseKey(enemyAge, 'red'), ww - 31, gw, { flip: true });
@@ -120,40 +120,55 @@ export class MenuScene implements Scene {
     const ly = Math.max(26, Math.round(skyRoom * 0.28));
     d.image('ui.logo', Math.round(w / 2 - logo.w / 2), ly + Math.round(Math.sin(app.time * 1.5) * 1));
     const save = app.save;
-    const enemyName = ageDef(save.enemyAge).name.toUpperCase() + ' AGE';
-    const pw = Math.max(120, d.measure(enemyName, 'big') + 36);
+    const sel = selected(save);
+    const front = frontier(save);
+    const idx = toIndex(sel);
+    const enemyName = ageDef(sel.age).name.toUpperCase() + ' AGE';
+    const pw = Math.max(126, d.measure(enemyName, 'big') + 40);
     const py = Math.max(ly + logo.h + 8, Math.min(G - 150, Math.round(ly + logo.h + skyRoom * 0.3)));
-    d.nine('ui.plaque', Math.round(w / 2 - pw / 2), py, pw, 42);
-    const boss = save.stage === STAGES - 1;
-    const sub = bossBeaten(save) ? 'BOSS DEFEATED' : boss ? 'BOSS: ' + BALANCE.bosses[ageDef(save.enemyAge).id].name.toUpperCase() : `STAGE ${save.stage + 1} OF ${STAGES}`;
-    d.text(sub, w / 2, py + 7, { align: 'center', color: boss && !bossBeaten(save) ? '#7a1a20' : '#3a2a30', outline: null });
+    const px = Math.round(w / 2 - pw / 2);
+    d.nine('ui.plaque', px, py, pw, 42);
+    const boss = sel.stage === STAGES - 1;
+    const sub = boss ? 'BOSS: ' + BALANCE.bosses[ageDef(sel.age).id].name.toUpperCase() : `BATTLE ${battleNumber(sel)}`;
+    d.text(sub, w / 2, py + 7, { align: 'center', color: boss ? '#7a1a20' : '#3a2a30', outline: null });
     d.text(enemyName, w / 2, py + 16, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    this.drawPips(w / 2, py + 31);
-    const line = `CAMPAIGN ${stageNumber(save)}${save.timeline > 1 ? `  TIMELINE ${save.timeline}` : ''}`;
-    d.text(line, w / 2, py + 46, { align: 'center' });
+    this.drawPips(w / 2, py + 31, sel.stage, idx < front);
+    // Arrows: pick any battle already unlocked (replay earlier ones for Gold).
+    if (idx > 0) button(app, 'pick-prev', px - 22, py + 10, 20, 22, '<', () => this.pick(-1), { style: 'wood' });
+    if (idx < front) button(app, 'pick-next', px + pw + 2, py + 10, 20, 22, '>', () => this.pick(1), { style: 'wood' });
+    const line = idx < front ? 'REPLAY  (TAP > FOR THE NEWEST BATTLE)' : sel.age > save.armyAge ? 'STRONGER FOES: EVOLVE FIRST' : save.timeline > 1 ? `TIMELINE ${save.timeline}` : '';
+    if (line) d.text(line, w / 2, py + 46, { align: 'center', color: sel.age > save.armyAge && idx >= front ? '#ffb08c' : '#fff8ec' });
 
-    // Big button on the meadow: Battle, or Evolve / New Timeline once the boss is down.
+    // Evolution: shown once your Age's boss is down; it costs Gold and resets Gold and upgrades.
     const bw = 128;
     const bh = 34;
     const bx = Math.round(w / 2 - bw / 2);
     const by = app.h - TAB_H - bh - 10;
     if (canPrestige(save)) {
-      button(app, 'prestige', bx, by, bw, bh, 'NEW TIMELINE', () => {
+      button(app, 'prestige', bx, by - bh - 6, bw, bh, 'NEW TIMELINE', () => {
         if (prestige(save)) {
           app.persist();
           app.sfx('evolve', { jitter: 0 });
           this.flash = 0.6;
-          this.env = new EnvView(app, ageDef(save.enemyAge).id);
+          this.env = new EnvView(app, ageDef(selected(save).age).id);
           this.say(`TIMELINE ${save.timeline} BEGINS!`);
         }
       }, { style: 'gold', sub: 'BACK TO STONE, STRONGER FOES' });
-    } else if (canEvolve(save)) {
-      const next = ageDef(save.armyAge + 1).name.toUpperCase();
-      const pulse = Math.sin(app.time * 5) > 0 ? -1 : 0;
-      button(app, 'evolve-go', bx, by + pulse, bw, bh, 'EVOLVE', () => this.doEvolve(), { style: 'gold', sub: `TO THE ${next} AGE` });
-    } else {
-      button(app, 'battle-go', bx, by, bw, bh, boss ? 'BOSS' : 'BATTLE', () => app.go('battle'), { style: boss ? 'red' : 'green', icon: boss ? 'skull' : 'sword' });
+    } else if (evolveUnlocked(save)) {
+      const cost = evolveCost(save) ?? 0;
+      const ok = canEvolve(save);
+      const pulse = ok && Math.sin(app.time * 5) > 0 ? -1 : 0;
+      button(app, 'evolve-go', bx, by - bh - 6 + pulse, bw, bh, 'EVOLVE', () => this.doEvolve(), { style: ok ? 'gold' : 'grey', disabled: !ok, sub: `${fmt(cost)} GOLD`, subIcon: 'gold' });
     }
+    button(app, 'battle-go', bx, by, bw, bh, boss ? 'BOSS' : 'BATTLE', () => app.go('battle'), { style: boss ? 'red' : 'green', icon: boss ? 'skull' : 'sword' });
+  }
+
+  private pick(step: number): void {
+    const app = this.app;
+    pickBattle(app.save, step);
+    app.persist();
+    app.sfx('tab', { vol: 0.5 });
+    this.env = new EnvView(app, ageDef(selected(app.save).age).id);
   }
 
   private doEvolve(): void {
@@ -163,28 +178,27 @@ export class MenuScene implements Scene {
     app.persist();
     app.sfx('evolve', { jitter: 0 });
     this.flash = 0.6;
-    this.env = new EnvView(app, ageDef(s.enemyAge).id);
+    this.env = new EnvView(app, ageDef(selected(s).age).id);
     this.say(`WELCOME TO THE ${ageDef(s.armyAge).name.toUpperCase()} AGE!`);
   }
 
-  /** Stage pips: one per stage, the last a skull for the boss. */
-  private drawPips(cx: number, y: number): void {
+  /** Stage pips for the picked battle's Age: one per stage, the last a skull for the boss. */
+  private drawPips(cx: number, y: number, stage: number, replay: boolean): void {
     const d = this.app.draw;
-    const s = this.app.save;
     const gap = 10;
     const x0 = Math.round(cx - ((STAGES - 1) * gap) / 2);
     for (let i = 0; i < STAGES; i++) {
       const x = x0 + i * gap;
-      const done = i < s.stage || bossBeaten(s);
-      const cur = i === s.stage && !bossBeaten(s);
+      const cur = i === stage;
       if (i === STAGES - 1) {
-        d.image('icon.skull', x - 4, y - 2, { alpha: cur || done ? 1 : 0.55 });
+        d.image('icon.skull', x - 4, y - 2, { alpha: cur || i < stage ? 1 : 0.55 });
         continue;
       }
       d.rect(x - 2, y, 5, 5, '#1e1526');
-      d.rect(x - 1, y + 1, 3, 3, done ? '#a8e070' : cur ? '#ffd03c' : '#4a3a48');
+      d.rect(x - 1, y + 1, 3, 3, i < stage ? '#a8e070' : cur ? (replay ? '#cfe0a0' : '#ffd03c') : '#4a3a48');
     }
   }
+
 
   // ---------- Other tabs ----------
 
@@ -265,50 +279,56 @@ export class MenuScene implements Scene {
     });
     y += 70;
 
-    // Age Camp: five tracks, reset when you Evolve.
-    y = this.section(y, `${age.name.toUpperCase()} CAMP`);
-    const rowH = 21;
+    // Gold upgrades: Food and Base. They reset when you Evolve (the new Age starts stronger).
+    y = this.section(y, 'UPGRADES');
+    const rowH = 24;
     const rw = Math.min(w - 16, 3 * cw + 2 * gap);
     const rx = Math.round((w - rw) / 2);
     const max = maxLevel(s);
-    CAMP_IDS.forEach((id: CampId, i) => {
-      const tr = BALANCE.camp.tracks[id];
-      const ry = y + i * (rowH + 2);
-      const open = trackOpen(s, id);
+    UPGRADE_IDS.forEach((id: UpgradeId, i) => {
+      const tr = BALANCE.upgrades.tracks[id];
+      const ry = y + i * (rowH + 3);
       const lv = level(s, id);
-      d.nine('ui.panel', rx, ry, rw, rowH, open ? 1 : 0.6);
-      const troop = id === 'melee' || id === 'ranged' || id === 'tank' ? age.troops.find((t) => t.kind === id) : null;
+      d.nine('ui.panel', rx, ry, rw, rowH);
       const icon = 'icon.' + tr.icon;
       const ie = app.assets.image(icon);
-      d.image(icon, Math.round(rx + 10 - ie.w / 2), Math.round(ry + rowH / 2 - ie.h / 2 - 1), { alpha: open ? 1 : 0.45 });
-      const name = troop ? troop.name.toUpperCase() : tr.name.toUpperCase();
-      d.text(name, rx + 20, ry + 4, { color: open ? '#fff8ec' : '#b8a8b0' });
-      // Level pips.
-      const pipW = Math.max(2, Math.min(4, Math.floor(56 / max) - 1));
-      for (let k = 0; k < max; k++) d.rect(rx + 20 + k * (pipW + 1), ry + 13, pipW, 3, k < lv ? '#ffd03c' : '#3a2a30', open ? 1 : 0.5);
-      d.text(upgradeValue(id, lv), rx + rw - 48, ry + 4, { align: 'right', color: '#a8e070' });
+      d.image(icon, Math.round(rx + 10 - ie.w / 2), Math.round(ry + rowH / 2 - ie.h / 2 - 1));
+      const name = id === 'food' ? 'FOOD RATE' : 'BASE HP';
+      d.text(`${name}  LV ${lv}`, rx + 20, ry + 5);
+      d.text(upgradeValue(s, id, lv), rx + 20, ry + 14, { color: '#a8e070' });
       const c = upgradeCost(s, id);
-      const bx = rx + rw - 44;
-      if (!open) d.text('LOCKED', bx + 21, ry + 8, { align: 'center', color: '#b8a8b0' });
-      else if (c === null) d.text('MAX', bx + 21, ry + 8, { align: 'center', color: '#ffe68a' });
+      const bx = rx + rw - 48;
+      if (c === null) d.text('MAX', bx + 23, ry + 9, { align: 'center', color: '#ffe68a' });
       else {
         const ok = canBuy(s, id);
-        button(app, 'camp-' + id, bx, ry + 2, 42, rowH - 4, fmt(c), () => {
+        button(app, 'up-' + id, bx, ry + 3, 46, rowH - 6, fmt(c), () => {
           if (buyUpgrade(s, id)) {
             app.persist();
             app.sfx('upgrade', { jitter: 0.02 });
-            this.say(`${name} ${upgradeValue(id, level(s, id))}`);
+            this.say(`${name} ${upgradeValue(s, id, level(s, id))}`);
           }
         }, { style: ok ? 'green' : 'grey', disabled: !ok, icon: 'gold', font: 'small' });
       }
+      void max;
     });
-    y += CAMP_IDS.length * (rowH + 2) + 2;
-    if (y + 8 < app.h - TAB_H - 4) d.text('CAMP RESETS ON EVOLVE. SLOTS STAY.', w / 2, y, { align: 'center', color: '#e8dcc8' });
-    y += 12;
+    y += UPGRADE_IDS.length * (rowH + 3) + 4;
 
-    // Evolution, once the boss is down.
-    if (canEvolve(s) && y + 26 < app.h - TAB_H - 4) {
-      button(app, 'evolve', Math.round(w / 2 - 60), y, 120, 24, `EVOLVE: ${ageDef(s.armyAge + 1).name.toUpperCase()}`, () => this.doEvolve(), { style: 'gold', font: 'small' });
+    // Evolution.
+    y = this.section(y, 'EVOLVE');
+    const next = s.armyAge < BALANCE.ages.length - 1 ? ageDef(s.armyAge + 1) : null;
+    d.nine('ui.panel', rx, y, rw, 50);
+    if (!next) {
+      d.text('FUTURE ARMY', w / 2, y + 8, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
+      d.text('BEAT OMEGA CORE FOR A NEW TIMELINE', w / 2, y + 26, { align: 'center', color: '#3a2a30', outline: null });
+    } else {
+      d.text(`${age.name.toUpperCase()} > ${next.name.toUpperCase()}`, w / 2, y + 6, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
+      const cost = evolveCost(s) ?? 0;
+      if (!evolveUnlocked(s)) d.text(`BEAT ${BALANCE.bosses[age.id].name.toUpperCase()} FIRST`, w / 2, y + 24, { align: 'center', color: '#3a2a30', outline: null });
+      else {
+        const ok = canEvolve(s);
+        button(app, 'evolve', Math.round(w / 2 - 50), y + 19, 100, 20, fmt(cost), () => this.doEvolve(), { style: ok ? 'gold' : 'grey', disabled: !ok, icon: 'gold', font: 'small' });
+      }
+      d.text('RESETS GOLD AND UPGRADES. SLOTS STAY.', w / 2, y + 42, { align: 'center', color: '#3a2a30', outline: null });
     }
   }
 
@@ -385,7 +405,7 @@ export class MenuScene implements Scene {
         d.text(TAB_LABEL[t], lx, y + 16, { align: 'center', color: '#fff1c0' });
       }
       // Badges: NEW on a freshly revealed tab, else what you can afford.
-      const count = t === 'upgrades' ? affordableCount(app.save) + (canEvolve(app.save) ? 1 : 0) : 0;
+      const count = t === 'upgrades' ? (evolveUnlocked(app.save) ? (canEvolve(app.save) ? 1 : 0) : affordableCount(app.save)) : 0;
       if (!sel && (fresh || count > 0)) {
         const label = fresh ? 'NEW' : String(count);
         const bwid = d.measure(label) + 6;
