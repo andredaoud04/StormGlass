@@ -48,8 +48,9 @@ export class MenuScene implements Scene {
     if (k === 'Enter' && this.tab === 'battle') this.app.go('battle');
   }
 
+  /** The meadow lane sits two thirds of the way down, above the Battle button. */
   private get groundY(): number {
-    return this.app.h - TAB_H - 70;
+    return Math.round((this.app.h - TAB_H) * 0.68);
   }
 
   update(dt: number): void {

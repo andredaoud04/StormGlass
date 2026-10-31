@@ -40,6 +40,15 @@ Stone Age battlefield layer "ground". Row 22 lines up with the ground line.
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (16): #cfe27a #93c252 #5e9a40 #3b6c38 #a8744a #c99460 #dcd6c8 #7e7770 #e2b47a #fff1b8 #ff9a9a #aaa396 #fbf4e0 #575050 #e2d6b6 #b3a486
 
+## env.stone.field
+
+Stone Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.
+
+- File: `public/assets/env/stone/field.png`
+- Size: 64 x 64
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (2): #3b6c38 #5e9a40
+
 ## env.stone.cloud0
 
 Drifting cloud.
@@ -134,6 +143,15 @@ Ancient Age battlefield layer "ground". Row 22 lines up with the ground line.
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (17): #e2d886 #c4b860 #827a40 #a49a4c #d2a868 #ecca8c #fbe2ae #dcd6c8 #7e7770 #aaa396 #ffffff #c4b494 #ece2cc #575050 #e88a5a #c4683e #a24e30
 
+## env.ancient.field
+
+Ancient Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.
+
+- File: `public/assets/env/ancient/field.png`
+- Size: 64 x 64
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #827a40 #a24e30 #c4683e
+
 ## env.ancient.cloud0
 
 Drifting cloud.
@@ -209,6 +227,15 @@ Crusader Age battlefield layer "ground". Row 22 lines up with the ground line.
 - Anchor: (0, 22)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (23): #b0dc72 #84c056 #4a823e #62a046 #8a6648 #a8825c #c8a47a #bab0a0 #9a9284 #6a4a36 #fff1b8 #fffaf0 #ad6a3c #dcd6c8 #7e7770 #c8a0f0 #aaa396 #e8e0d0 #c8bca8 #c0504a #575050 #9aa2ae #52291b
+
+## env.crusader.field
+
+Crusader Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.
+
+- File: `public/assets/env/crusader/field.png`
+- Size: 64 x 64
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #4a823e #52291b #ad6a3c
 
 ## env.crusader.cloud0
 
@@ -295,6 +322,15 @@ Gunpowder Age battlefield layer "ground". Row 22 lines up with the ground line.
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (19): #bcd078 #94b25a #5a763e #76944a #8e6e4c #b08e62 #4a505e #d0b080 #9aa2ae #6a503a #5a4232 #dcd6c8 #7e7770 #aaa396 #575050 #f0e0c0 #c0504a #6a7280 #ad6a3c
 
+## env.gunpowder.field
+
+Gunpowder Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.
+
+- File: `public/assets/env/gunpowder/field.png`
+- Size: 64 x 64
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #5a763e #4a505e #6a7280
+
 ## env.gunpowder.cloud0
 
 Drifting cloud.
@@ -379,6 +415,15 @@ Industrial Age battlefield layer "ground". Row 22 lines up with the ground line.
 - Anchor: (0, 22)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (26): #aca46e #8c8658 #58563c #706c48 #6e5a44 #8a7254 #a8906c #4e4034 #8aa0b8 #5e6e88 #c4d4e4 #d99a5c #ad6a3c #52291b #8a8494 #4a4450 #dcd6c8 #7e7770 #aaa396 #575050 #d6cc96 #aea46c #807a4c #6a7280 ...
+
+## env.industrial.field
+
+Industrial Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.
+
+- File: `public/assets/env/industrial/field.png`
+- Size: 64 x 64
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (3): #58563c #30343f #706c48
 
 ## env.industrial.cloud0
 
@@ -473,6 +518,15 @@ Future Age battlefield layer "ground". Row 22 lines up with the ground line.
 - Anchor: (0, 22)
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (17): #7e8ac4 #5e68a4 #3c4278 #626a8a #c4fbff #5ce6ff #7c84a4 #a8b0cc #ffffff #4c5490 #8ad8ff #e0f4ff #4a90e0 #c8d0e8 #9aa6c8 #ff6a6a #6a76a0
+
+## env.future.field
+
+Future Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.
+
+- File: `public/assets/env/future/field.png`
+- Size: 64 x 64
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (2): #3c4278 #4c5490
 
 ## env.future.cloud0
 

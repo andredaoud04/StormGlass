@@ -2003,6 +2003,12 @@
     22
    ]
   },
+  "env.stone.field": {
+   "kind": "image",
+   "file": "env/stone/field.png",
+   "w": 64,
+   "h": 64
+  },
   "env.stone.cloud0": {
    "kind": "image",
    "file": "env/stone/cloud0.png",
@@ -2079,6 +2085,12 @@
     22
    ]
   },
+  "env.ancient.field": {
+   "kind": "image",
+   "file": "env/ancient/field.png",
+   "w": 64,
+   "h": 64
+  },
   "env.ancient.cloud0": {
    "kind": "image",
    "file": "env/ancient/cloud0.png",
@@ -2142,6 +2154,12 @@
     0,
     22
    ]
+  },
+  "env.crusader.field": {
+   "kind": "image",
+   "file": "env/crusader/field.png",
+   "w": 64,
+   "h": 64
   },
   "env.crusader.cloud0": {
    "kind": "image",
@@ -2213,6 +2231,12 @@
     22
    ]
   },
+  "env.gunpowder.field": {
+   "kind": "image",
+   "file": "env/gunpowder/field.png",
+   "w": 64,
+   "h": 64
+  },
   "env.gunpowder.cloud0": {
    "kind": "image",
    "file": "env/gunpowder/cloud0.png",
@@ -2282,6 +2306,12 @@
     0,
     22
    ]
+  },
+  "env.industrial.field": {
+   "kind": "image",
+   "file": "env/industrial/field.png",
+   "w": 64,
+   "h": 64
   },
   "env.industrial.cloud0": {
    "kind": "image",
@@ -2358,6 +2388,12 @@
     0,
     22
    ]
+  },
+  "env.future.field": {
+   "kind": "image",
+   "file": "env/future/field.png",
+   "w": 64,
+   "h": 64
   },
   "env.future.cloud0": {
    "kind": "image",
