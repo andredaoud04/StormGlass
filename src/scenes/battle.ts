@@ -4,7 +4,7 @@ import { BALANCE, ageDef } from '../game/balance';
 import { buildBattleConfig, isBossStage } from '../game/battleSetup';
 import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
 import { foodRateMilli, fortressMul } from '../game/upgrades';
-import { createBattle, food, stepBattle, totalGold } from '../sim/battle';
+import { createBattle, food, stepBattle, totalGold, waveComposition } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
 import { BattleView } from '../view/battleView';
@@ -14,8 +14,8 @@ const MAX_STEPS_PER_FRAME = 6;
 const BASE_INSET = 26;
 /** UI heights: the thin top bar and the slim bottom bar that holds Food and the cards. */
 const TOP_BAR = 26;
-/** World pixels units spread above and below the path's centre line (the road is about 64 rows wide). */
-const BAND_HALF = 22;
+/** World pixels units spread above and below the path's centre line (the road is about 120 rows wide). */
+const BAND_HALF = 50;
 const BOTTOM_BAR = 46;
 
 interface Coin {
@@ -60,6 +60,8 @@ export class BattleScene implements Scene {
   /** Replaying an earlier battle (no frontier progress, same Gold). */
   private readonly replay: boolean;
   private bossIntroT = -1;
+  /** WAVE banner: number, what it brings, and how long it has shown. */
+  private wave = { n: 0, t: 9, text: '' };
   private bossBarShown = 0;
   private hudTop = 0;
   private deployedOnce = false;
@@ -198,6 +200,7 @@ export class BattleScene implements Scene {
     dt = Math.min(dt, 0.1);
     this.introT += dt;
     if (this.bossIntroT >= 0) this.bossIntroT += dt;
+    this.wave.t += dt;
     if (this.sim.bossSpawned) this.bossBarShown = Math.min(1, this.bossBarShown + dt * 3);
     this.goldBump = Math.max(0, this.goldBump - dt);
     this.foodBump = Math.max(0, this.foodBump - dt);
@@ -227,6 +230,12 @@ export class BattleScene implements Scene {
         const events = stepBattle(this.sim, this.pending.splice(0));
         this.view.onEvents(events);
         for (const e of events) {
+          if (e.type === 'wave' && e.n >= 2) {
+            const c = waveComposition(this.sim.config, this.sim.waveIndex);
+            const parts = [c.melee ? `${c.melee} MELEE` : '', c.ranged ? `${c.ranged} RANGED` : '', c.tank ? `${c.tank} TANK${c.tank > 1 ? 'S' : ''}` : ''].filter(Boolean);
+            this.wave = { n: e.n, t: 0, text: parts.join('  ') };
+            this.app.sfx('ready', { vol: 0.5 });
+          }
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
             if (!this.app.reducedMotion) this.slowmo = 0.6;
@@ -288,6 +297,7 @@ export class BattleScene implements Scene {
     this.drawHud();
     this.drawCoins();
     this.drawBossBar();
+    if (this.phase === 'play' && this.wave.t < 2.2) this.drawWave();
     if (this.phase === 'play' && this.introT < 1.3) this.drawIntro();
     if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.4) this.drawBossIntro();
     if (this.phase === 'result') this.drawResult();
@@ -305,6 +315,22 @@ export class BattleScene implements Scene {
     const boss = isBossStage(this.stage);
     d.text(boss ? 'BOSS BATTLE!' : 'FIGHT!', this.app.w / 2, y, { font: 'big', color: boss ? '#ff7a5a' : '#ffd03c', shadow: true, align: 'center', alpha: a });
     if (boss) d.text('BREAK THE WARD: DEFEAT THE BOSS', this.app.w / 2, y + 13, { align: 'center', color: '#fff8ec', alpha: a });
+  }
+
+  /** WAVE pill under the top bar, with what the wave brings (pick troops that counter it). */
+  private drawWave(): void {
+    const app = this.app;
+    const d = app.draw;
+    const t = this.wave.t;
+    const a = t < 0.15 ? t / 0.15 : t > 1.8 ? (2.2 - t) / 0.4 : 1;
+    const label = `WAVE ${this.wave.n}`;
+    const pw = Math.max(d.measure(label, 'big'), d.measure(this.wave.text)) + 20;
+    const x = Math.round(app.w / 2 - pw / 2);
+    const y = TOP_BAR + (this.sim.bossSpawned ? 44 : 22) + (t < 0.15 ? Math.round((0.15 - t) * -40) : 0);
+    d.rect(x, y, pw, 26, '#1e1526', 0.75 * a);
+    d.rect(x + 1, y + 1, pw - 2, 1, '#4a3a58', a);
+    d.text(label, app.w / 2, y + 4, { font: 'big', align: 'center', color: '#ffd03c', shadow: true, alpha: a });
+    d.text(this.wave.text, app.w / 2, y + 17, { align: 'center', color: '#fff8ec', alpha: a });
   }
 
   /** Banner when the boss walks out. */

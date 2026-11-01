@@ -1,5 +1,5 @@
 import raw from '../data/balance.json';
-import type { BandRules, BossDef, StatusRules, TroopKind } from '../sim/types';
+import type { BandRules, BossDef, CombatRules, StatusKind, StatusRules, TroopKind } from '../sim/types';
 
 export type AgeId = 'stone' | 'ancient' | 'crusader' | 'gunpowder' | 'industrial' | 'future';
 export const AGE_IDS: AgeId[] = ['stone', 'ancient', 'crusader', 'gunpowder', 'industrial', 'future'];
@@ -14,6 +14,7 @@ export interface TroopDef {
   interval: number;
   range: number;
   speed: number;
+  traits?: { cleave?: number; pierce?: number; splash?: number; armor?: number; onHit?: StatusKind[] };
 }
 
 export interface AgeDef {
@@ -74,7 +75,8 @@ export interface Balance {
   economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
   status: StatusRules;
   ages: AgeDef[];
-  waves: Record<AgeId, StageWave[]> & { groupGap: number };
+  waves: Record<AgeId, StageWave[]> & { groupGap: number; density: number[]; escalation: { perWave: number; maxExtra: number; expandWaves: number } };
+  combat: CombatRules;
   upgrades: UpgradeRules;
   evolution: { cost: number[] };
   campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[] };

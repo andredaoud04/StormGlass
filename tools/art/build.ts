@@ -145,7 +145,7 @@ function portrait(frame: Img, w: number, h: number): Img {
 }
 
 /** Rows added to every Age's road so troops can spread across it (We Are Warriors-style band). */
-const LANE_EXTRA = 40;
+const LANE_EXTRA = 96;
 
 /**
  * Widen the road: insert LANE_EXTRA rows of the road's own interior texture at its centre line,

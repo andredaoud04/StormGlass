@@ -22,12 +22,11 @@ export interface ScreenSize {
 }
 
 /**
- * About two thirds of the UI scale, always a whole number of device pixels per art pixel: the
- * battlefield shows a long lane with small troops while cards and buttons stay big (We Are
- * Warriors proportions).
+ * The battle world uses the same pixel size as the UI: one consistent pixel grid, troops big
+ * enough to read, with the tall road (not a smaller scale) giving crowds their room.
  */
 export function worldScaleFor(scale: number): number {
-  return Math.max(1, Math.round((scale * 2) / 3));
+  return scale;
 }
 
 /** Pure sizing rule, shared with tests. */

@@ -262,8 +262,12 @@ export class MenuScene implements Scene {
       if (owned) {
         const rowW = 11 + d.measure(String(t.cost));
         const rx = Math.round(x + cw / 2 - rowW / 2);
-        d.image('icon.food', rx - 1, y + 47);
-        d.text(String(t.cost), rx + 11, y + 48);
+        d.image('icon.food', rx - 1, y + 46);
+        d.text(String(t.cost), rx + 11, y + 47);
+        // What makes this troop special (cleave, pierce, splash, armor, burn...).
+        const tr = t.traits;
+        const tag = tr ? [tr.splash ? 'SPLASH' : '', tr.pierce ? `PIERCE ${tr.pierce}` : '', tr.cleave ? `CLEAVE ${tr.cleave}` : '', tr.armor ? 'ARMOR' : '', ...(tr.onHit ?? []).map((k) => k.toUpperCase())].filter(Boolean).slice(0, 2).join(' ') : '';
+        if (tag) d.text(tag, x + cw / 2, y + 57, { align: 'center', color: '#ffd03c' });
       } else {
         const ok = canUnlockSlot(s, slot!);
         const needsRanged = slot === 'tank' && !hasSlot(s, 'ranged');
@@ -279,6 +283,8 @@ export class MenuScene implements Scene {
       }
     });
     y += 70;
+    d.text('MELEE CRUSHES RANGED. ARMOR STOPS ARROWS.', w / 2, y - 2, { align: 'center', color: '#e8dcc8' });
+    y += 8;
 
     // Gold upgrades: Food and Base. They reset when you Evolve (the new Age starts stronger).
     y = this.section(y, 'UPGRADES');

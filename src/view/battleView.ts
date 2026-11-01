@@ -41,6 +41,10 @@ interface VUnit {
   px: number;
   dying: boolean;
   deathT: number;
+  /** Thrown by a big hit: velocity and height above the ground while flying. */
+  lvx: number;
+  lvy: number;
+  lift: number;
   poofed: boolean;
   stepT: number;
   status: number;
@@ -90,6 +94,8 @@ export class BattleView {
   private flash = 0;
   private wardBroken = 0;
   private bossDash = 0;
+  /** Damage that counts as a big hit for this battle (twice the player's strongest troop). */
+  private bigHit = 1e9;
 
   constructor(
     private app: App,
@@ -100,6 +106,7 @@ export class BattleView {
     private playerAgeKey: string = ageKey,
   ) {
     this.env = new EnvView(app, ageKey);
+    this.bigHit = 2 * Math.max(1, ...sim.config.playerTroops.map((t) => t.dmg));
     this.fx = new FxSystem((k) => app.assets.strip(k).frames);
     this.shake.enabled = !app.reducedMotion;
   }
@@ -140,7 +147,7 @@ export class BattleView {
       const meta = this.app.assets.meta(`troop.${sheet.split('.')[1]}`);
       v = {
         id: u.id, side: u.side, sheet, troop: u.def.id, kind: u.def.kind, anim: 'walk', animT: Math.random(), windup: 0.4, flash: 0, knock: 0, hitT: 0, hpShow: 0,
-        hp: u.hp, maxHp: u.maxHp, depth: Math.round(u.lane * this.layout.bandHalf), top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
+        hp: u.hp, maxHp: u.maxHp, depth: Math.round(u.lane * this.layout.bandHalf), top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, lvx: 0, lvy: 0, lift: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
       };
       this.units.set(u.id, v);
     }
@@ -211,13 +218,39 @@ export class BattleView {
           const hx = v.px + dir * 3;
           const hy = G + v.depth + Math.round(v.top * 0.45);
           this.fx.add('fx.spark', hx + (Math.random() * 4 - 2), hy + (Math.random() * 4 - 2));
-          if (e.heavy) {
+          if (e.heavy && !e.area) {
             this.fx.add('fx.ring', v.px, G + v.depth - 2);
             this.shake.add(2, 0.18);
             this.hooks.onImpact?.(true, false);
           }
-          if (e.side === 1) this.fx.text(String(Math.round(e.dmg)), v.px + (Math.random() * 6 - 3), G + v.depth + v.top - 4, { color: e.heavy ? '#ffd03c' : '#fff8ec' });
+          if (e.area === 'cleave') this.fx.add('fx.smear', v.px - dir * 4, hy, { flip: v.side === 0 });
+          if (e.area === 'pierce') this.fx.add('fx.spark', v.px - dir * 2, hy - 2);
+          // A killing blow from a heavy, area or piercing hit throws the body.
+          if (e.kill && (e.heavy || e.area)) {
+            v.lvx = -dir * (e.area === 'splash' ? 34 : 22) * (0.7 + Math.random() * 0.6);
+            v.lvy = -(e.area === 'splash' ? 70 : 48) * (0.8 + Math.random() * 0.4);
+          }
+          // Damage numbers grow with the size of the hit.
+          const big = e.dmg >= this.bigHit;
+          if (e.side === 1 || big) {
+            this.fx.text(String(Math.round(e.dmg)), v.px + (Math.random() * 6 - 3), G + v.depth + v.top - 4, {
+              color: e.side === 0 ? '#ff8a8a' : big ? '#ffb03c' : e.heavy || e.area ? '#ffd03c' : '#fff8ec',
+              font: big ? 'big' : 'small',
+            });
+          }
           this.app.sfx(e.heavy ? 'hit_heavy' : e.ranged ? 'hit_ranged' : 'hit', { vol: e.heavy ? 0.8 : 0.5, minGapMs: 40 });
+          break;
+        }
+        case 'splash': {
+          // Area hit: a blast at the impact, dust thrown out across the path, a short shake.
+          const cx = this.laneToPx(e.x);
+          const half = Math.max(5, this.laneToPx(e.x + e.radius) - cx);
+          this.fx.add('fx.boom', cx, G + 6);
+          for (let k = -1; k <= 1; k++) this.fx.add('fx.dust', cx + k * half * 0.7, G + this.layout.bandHalf * k * 0.6, { behind: true, vx: k * 14 });
+          for (let k = 0; k < 4; k++) this.fx.add('fx.debris', cx, G, { vx: (Math.random() - 0.5) * 90, vy: -50 - Math.random() * 50, gravity: 300, life: 0.7, fps: 14 });
+          this.shake.add(2.5, 0.2);
+          this.hooks.onImpact?.(true, false);
+          this.app.sfx('boom', { vol: 0.55, minGapMs: 120 });
           break;
         }
         case 'dot': {
@@ -448,6 +481,16 @@ export class BattleView {
     v.animT += dt;
     if (v.dying) {
       v.deathT += dt;
+      if (v.lvy !== 0 || v.lift < 0) {
+        v.px += v.lvx * dt;
+        v.lvy += 260 * dt;
+        v.lift = Math.min(0, v.lift + v.lvy * dt);
+        if (v.lift >= 0 && v.lvy > 0) {
+          v.lvy = 0;
+          v.lvx = 0;
+          this.fx.add('fx.dust', v.px, this.layout.groundY + v.depth, { behind: true });
+        }
+      }
       if (!v.poofed && v.deathT > 0.75) {
         v.poofed = true;
         this.fx.add('fx.poof', v.px, this.layout.groundY + v.depth);
@@ -511,7 +554,7 @@ export class BattleView {
       const knockDir = v.side === 0 ? -1 : 1;
       const kx = v.knock > 0 ? knockDir * (v.knock > 0.06 ? 2 : 1) : 0;
       const x = Math.round(v.px + kx + sx);
-      const y = G + v.depth + sy;
+      const y = G + v.depth + sy + Math.round(v.lift);
       let alpha = 1;
       if (v.dying && v.deathT > 0.5) alpha = Math.floor(v.deathT * 20) % 2 ? 0.35 : 0.9;
       if (v.dying && v.deathT > 0.75) alpha = 0;

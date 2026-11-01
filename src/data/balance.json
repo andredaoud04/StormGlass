@@ -1,11 +1,11 @@
 {
-  "version": 3,
+  "version": 4,
   "notes": "All numbers are MODEL unless docs/WAW_PARITY.md says otherwise. Change numbers here, never in code. Bump version when a change breaks old tuning.",
   "sim": {
     "tickRate": 20,
     "laneLength": 1000,
     "spawnOffset": 40,
-    "maxUnitsPerSide": 24,
+    "maxUnitsPerSide": 28,
     "projectileSpeed": 520,
     "band": {
       "notes": "Units spread across the width of the path (lane -1..1). Allies that overlap slide apart; heavy hits shove. Combat stays left-right only.",
@@ -83,17 +83,20 @@
           "dmg": 28,
           "interval": 1.4,
           "range": 110,
-          "speed": 50
+          "speed": 50,
+          "traits": {
+            "cleave": 2
+          }
         }
       ],
       "foodRate": 1.0,
       "enemyPower": 0.85,
       "stagePower": [
         1.0,
-        1.758,
-        1.83,
-        1.833,
-        2.21
+        2.11,
+        2.21,
+        1.894,
+        2.37
       ]
     },
     {
@@ -111,7 +114,10 @@
           "dmg": 20,
           "interval": 1.0,
           "range": 110,
-          "speed": 75
+          "speed": 75,
+          "traits": {
+            "cleave": 2
+          }
         },
         {
           "id": "ancient_archer",
@@ -122,7 +128,12 @@
           "dmg": 16,
           "interval": 1.0,
           "range": 230,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "onHit": [
+              "poison"
+            ]
+          }
         },
         {
           "id": "ancient_guard",
@@ -133,17 +144,21 @@
           "dmg": 44,
           "interval": 1.4,
           "range": 110,
-          "speed": 50
+          "speed": 50,
+          "traits": {
+            "armor": 0.5,
+            "cleave": 2
+          }
         }
       ],
-      "foodRate": 1.2,
+      "foodRate": 1.4,
       "enemyPower": 0.85,
       "stagePower": [
-        1.272,
-        1.34,
-        1.334,
-        1.576,
-        1.184
+        1.133,
+        1.316,
+        1.522,
+        1.187,
+        1.565
       ]
     },
     {
@@ -172,7 +187,10 @@
           "dmg": 25,
           "interval": 1.0,
           "range": 250,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "pierce": 2
+          }
         },
         {
           "id": "crusader_knight",
@@ -183,17 +201,21 @@
           "dmg": 70,
           "interval": 1.4,
           "range": 115,
-          "speed": 55
+          "speed": 55,
+          "traits": {
+            "armor": 0.5,
+            "cleave": 3
+          }
         }
       ],
-      "foodRate": 1.4,
+      "foodRate": 1.9,
       "enemyPower": 0.9,
       "stagePower": [
-        1.088,
-        1.278,
-        1.304,
-        1.521,
-        1.493
+        0.91,
+        1.54,
+        0.894,
+        1.058,
+        1.132
       ]
     },
     {
@@ -211,7 +233,10 @@
           "dmg": 51,
           "interval": 1.0,
           "range": 115,
-          "speed": 75
+          "speed": 75,
+          "traits": {
+            "cleave": 2
+          }
         },
         {
           "id": "gunpowder_musketeer",
@@ -222,7 +247,10 @@
           "dmg": 41,
           "interval": 1.0,
           "range": 270,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "pierce": 2
+          }
         },
         {
           "id": "gunpowder_cannon",
@@ -233,17 +261,20 @@
           "dmg": 112,
           "interval": 1.4,
           "range": 120,
-          "speed": 45
+          "speed": 45,
+          "traits": {
+            "splash": 55
+          }
         }
       ],
-      "foodRate": 1.6,
+      "foodRate": 2.5,
       "enemyPower": 0.92,
       "stagePower": [
-        1.549,
-        1.232,
-        1.408,
-        1.797,
-        1.737
+        1.323,
+        0.905,
+        0.964,
+        1.086,
+        1.207
       ]
     },
     {
@@ -261,7 +292,10 @@
           "dmg": 82,
           "interval": 1.0,
           "range": 110,
-          "speed": 75
+          "speed": 75,
+          "traits": {
+            "cleave": 2
+          }
         },
         {
           "id": "industrial_rifleman",
@@ -272,7 +306,10 @@
           "dmg": 65,
           "interval": 1.0,
           "range": 280,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "pierce": 3
+          }
         },
         {
           "id": "industrial_walker",
@@ -283,17 +320,23 @@
           "dmg": 180,
           "interval": 1.4,
           "range": 120,
-          "speed": 45
+          "speed": 45,
+          "traits": {
+            "splash": 50,
+            "onHit": [
+              "burn"
+            ]
+          }
         }
       ],
-      "foodRate": 1.8,
+      "foodRate": 3.2,
       "enemyPower": 0.98,
       "stagePower": [
-        1.029,
-        1.032,
-        1.061,
-        1.404,
-        1.254
+        0.769,
+        0.785,
+        0.75,
+        0.854,
+        1.395
       ]
     },
     {
@@ -311,7 +354,10 @@
           "dmg": 131,
           "interval": 1.0,
           "range": 110,
-          "speed": 80
+          "speed": 80,
+          "traits": {
+            "cleave": 3
+          }
         },
         {
           "id": "future_gunner",
@@ -322,7 +368,13 @@
           "dmg": 105,
           "interval": 1.0,
           "range": 290,
-          "speed": 70
+          "speed": 70,
+          "traits": {
+            "pierce": 2,
+            "onHit": [
+              "burn"
+            ]
+          }
         },
         {
           "id": "future_mech",
@@ -333,17 +385,23 @@
           "dmg": 289,
           "interval": 1.4,
           "range": 125,
-          "speed": 45
+          "speed": 45,
+          "traits": {
+            "splash": 65,
+            "onHit": [
+              "cold"
+            ]
+          }
         }
       ],
-      "foodRate": 2.0,
+      "foodRate": 4.0,
       "enemyPower": 1.0,
       "stagePower": [
-        0.845,
-        1.046,
-        0.976,
-        0.945,
-        0.877
+        0.663,
+        0.706,
+        0.671,
+        0.55,
+        0.84
       ]
     }
   ],
@@ -511,7 +569,21 @@
         "loopFrom": 1,
         "loopPeriod": 44
       }
-    ]
+    ],
+    "density": [
+      1.0,
+      1.35,
+      1.75,
+      2.2,
+      2.7,
+      3.2
+    ],
+    "escalation": {
+      "notes": "Each repeat of the wave tail is a new wave: groups grow by perWave x the Age density, up to maxExtra extra units per group.",
+      "perWave": 0.5,
+      "maxExtra": 4,
+      "expandWaves": 6
+    }
   },
   "timeline": {
     "enemyStatPerTimeline": 0.12,
@@ -704,11 +776,28 @@
     "notes": "Gold to evolve INTO each Age (index = target Age). Needs your current Age's boss beaten. Evolving resets Gold and upgrades; slots stay.",
     "cost": [
       0,
-      800,
-      2600,
-      6500,
-      14700,
-      19000
+      1500,
+      4800,
+      10500,
+      22000,
+      34000
     ]
+  },
+  "combat": {
+    "notes": "Class matchups (attacker kind -> defender kind multiplier) make composition matter: melee rushes ranged, ranged picks off melee, tanks shrug off melee. Traits: cleave n (melee hits up to n), pierce n (shots pass through up to n), splash r (area hit, others take splashShare), armor x (damage taken from ranged).",
+    "matchup": {
+      "melee": {
+        "ranged": 1.4
+      },
+      "ranged": {
+        "melee": 1.25
+      },
+      "tank": {
+        "melee": 1.2
+      }
+    },
+    "splashShare": 0.6,
+    "cleaveShare": 0.75,
+    "pierceShare": 0.7
   }
 }

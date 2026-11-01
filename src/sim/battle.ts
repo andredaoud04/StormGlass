@@ -86,6 +86,29 @@ export function waveSpawnTime(config: BattleConfig, n: number): { time: number; 
   return { time: t / config.waveSpeed, kind: spawns[idx][1] };
 }
 
+/** Wave number if spawn n opens a new wave, else 0. Every repeat of the tail is a new wave. */
+export function waveNumberAt(config: BattleConfig, n: number): number {
+  const { spawns, loopFrom, waveStarts } = config.wave;
+  if (!waveStarts) return 0;
+  if (n < spawns.length) {
+    const i = waveStarts.indexOf(n);
+    return i >= 0 ? i + 1 : 0;
+  }
+  const segLen = spawns.length - loopFrom;
+  const k = n - spawns.length;
+  return k % segLen === 0 ? waveStarts.length + 1 + k / segLen : 0;
+}
+
+/** What the wave opened by spawn n will send: counts per kind until the next wave starts. */
+export function waveComposition(config: BattleConfig, n: number): Record<TroopStats['kind'], number> {
+  const out = { melee: 0, ranged: 0, tank: 0 };
+  for (let k = n; k < n + 80; k++) {
+    if (k > n && waveNumberAt(config, k) > 0) break;
+    out[waveSpawnTime(config, k).kind]++;
+  }
+  return out;
+}
+
 function aliveCount(s: BattleState, side: Side): number {
   let n = 0;
   for (const u of s.units) if (u.alive && u.side === side) n++;
@@ -265,11 +288,32 @@ function separate(s: BattleState): void {
   }
 }
 
-function hitUnit(s: BattleState, attackerSide: Side, attacker: TroopStats, target: Unit, dmg: number, ranged: boolean): void {
+/** Damage after class matchups and armor. */
+function dealt(s: BattleState, attacker: TroopStats, target: Unit, base: number, ranged: boolean): number {
+  const m = s.config.combat.matchup[attacker.kind]?.[target.def.kind] ?? 1;
+  const armor = ranged && target.def.armor ? target.def.armor : 1;
+  return Math.max(1, Math.round(base * m * armor));
+}
+
+/** Living enemies of `side` within `radius` of x, nearest first (stable by id). */
+function enemiesNear(s: BattleState, side: Side, x: number, radius: number, skip: number): Unit[] {
+  const out: Unit[] = [];
+  for (const e of s.units) if (e.alive && e.side !== side && e.id !== skip && Math.abs(e.x - x) <= radius) out.push(e);
+  return out.sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x) || a.id - b.id);
+}
+
+/** Splash: everyone else around the impact takes a share. */
+function splashAt(s: BattleState, side: Side, attacker: TroopStats, x: number, primary: number, ranged: boolean): void {
+  const r = attacker.splash!;
+  s.events.push({ type: 'splash', x, radius: r, side });
+  for (const e of enemiesNear(s, side, x, r, primary)) hitUnit(s, side, attacker, e, dealt(s, attacker, e, attacker.dmg * s.config.combat.splashShare, ranged), ranged, 'splash');
+}
+
+function hitUnit(s: BattleState, attackerSide: Side, attacker: TroopStats, target: Unit, dmg: number, ranged: boolean, area?: 'splash' | 'pierce' | 'cleave'): void {
   if (!target.alive) return;
   if (attacker.bossDef) shove(s, target, s.config.band.bossShove);
   else if (attacker.kind === 'tank' && !ranged) shove(s, target, s.config.band.hitShove);
-  s.events.push({ type: 'hit', target: target.id, side: target.side, dmg, x: target.x, heavy: attacker.kind === 'tank', ranged });
+  s.events.push({ type: 'hit', target: target.id, side: target.side, dmg, x: target.x, heavy: attacker.kind === 'tank', ranged, ...(area ? { area } : {}), ...(target.hp - dmg <= 0 ? { kill: true } : {}) });
   if (attacker.onHit) for (const k of attacker.onHit) applyStatus(s, target, k, attacker.dmg);
   damageUnit(s, target, dmg, attackerSide);
 }
@@ -301,6 +345,7 @@ function landAttack(s: BattleState, u: Unit): void {
       dmg: def.dmg,
       attackerDmg: def.dmg,
       onHit: def.onHit,
+      src: def,
       done: false,
     };
     s.projectiles.push(p);
@@ -316,7 +361,16 @@ function landAttack(s: BattleState, u: Unit): void {
     const n = nearestEnemy(s, u);
     t = n.unit && n.dist <= def.range ? n.unit : undefined;
   }
-  if (t) hitUnit(s, u.side, def, t, def.dmg, false);
+  if (!t) return;
+  const primary = t;
+  const tx = t.x;
+  hitUnit(s, u.side, def, primary, dealt(s, def, primary, def.dmg, false), false);
+  if (def.cleave && def.cleave > 1) {
+    // Cleave: the swing also catches the next enemies within reach.
+    const more = enemiesNear(s, u.side, u.x, def.range + BEHIND_SLACK, primary.id).slice(0, def.cleave - 1);
+    for (const e of more) hitUnit(s, u.side, def, e, dealt(s, def, e, def.dmg * s.config.combat.cleaveShare, false), false, 'cleave');
+  }
+  if (def.splash) splashAt(s, u.side, def, tx, primary.id, false);
 }
 
 function stepUnit(s: BattleState, u: Unit): void {
@@ -382,9 +436,19 @@ function stepProjectiles(s: BattleState): void {
       p.done = true;
       if (p.target === BASE_TARGET) damageBase(s, p.side === 0 ? 1 : 0, p.dmg, false);
       else if (t && t.alive) {
-        s.events.push({ type: 'hit', target: t.id, side: t.side, dmg: p.dmg, x: t.x, heavy: false, ranged: true });
-        if (p.onHit) for (const k of p.onHit) applyStatus(s, t, k, p.attackerDmg);
-        damageUnit(s, t, p.dmg, p.side);
+        const tx = t.x;
+        const primary = t.id;
+        hitUnit(s, p.side, p.src, t, dealt(s, p.src, t, p.dmg, true), true);
+        if (p.src.pierce && p.src.pierce > 1) {
+          // Pierce: the shot carries on through the next enemies behind the target.
+          const dir = p.side === 0 ? 1 : -1;
+          const behind = s.units
+            .filter((e) => e.alive && e.side !== p.side && e.id !== primary && (e.x - tx) * dir >= 0 && (e.x - tx) * dir <= 90)
+            .sort((a, b) => (a.x - b.x) * dir || a.id - b.id)
+            .slice(0, p.src.pierce - 1);
+          for (const e of behind) hitUnit(s, p.side, p.src, e, dealt(s, p.src, e, p.dmg * s.config.combat.pierceShare, true), true, 'pierce');
+        }
+        if (p.src.splash) splashAt(s, p.side, p.src, tx, primary, true);
       } else s.events.push({ type: 'fizzle', projectile: p.id, x: p.x });
     } else p.x += Math.sign(dx) * move;
   }
@@ -405,6 +469,8 @@ function stepEnemySpawns(s: BattleState): void {
   // At most one spawn per tick; a full lane holds the queue instead of banking spawns.
   const next = waveSpawnTime(s.config, s.waveIndex);
   if (next.time <= now + 1e-9 && aliveCount(s, 1) < s.config.maxUnitsPerSide) {
+    const wave = waveNumberAt(s.config, s.waveIndex);
+    if (wave > 0) s.events.push({ type: 'wave', n: wave });
     spawnUnit(s, 1, s.config.enemyTroops[next.kind]);
     s.waveIndex++;
   }
