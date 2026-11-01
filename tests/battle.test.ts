@@ -299,3 +299,32 @@ describe('Stormcall', () => {
     expect(Math.round(hp - boss.hp)).toBe(Math.round(cfg.skill!.dmg * cfg.skill!.bossMul));
   });
 });
+
+describe('path band', () => {
+  it('a crowd spreads across the width of the path and stays inside it', () => {
+    const s = createBattle(config({ playerBaseHp: 1e9, wave: { spawns: [[999, 'melee']], loopFrom: 0, loopPeriod: 999 } }));
+    s.foodMilli = 1_000_000;
+    // Twelve Clubbers sent at once walk out of the same gate.
+    for (let i = 0; i < 12; i++) stepBattle(s, [{ type: 'deploy', slot: 0 }]);
+    for (let i = 0; i < 60; i++) stepBattle(s);
+    const lanes = s.units.filter((u) => u.side === 0).map((u) => u.lane);
+    for (const l of lanes) {
+      expect(l).toBeGreaterThanOrEqual(-1);
+      expect(l).toBeLessThanOrEqual(1);
+    }
+    const spread = Math.max(...lanes) - Math.min(...lanes);
+    expect(spread).toBeGreaterThan(1);
+    // No two allies sit on top of each other.
+    const sorted = [...lanes].sort((a, b) => a - b);
+    let close = 0;
+    for (let i = 1; i < sorted.length; i++) if (sorted[i] - sorted[i - 1] < 0.02) close++;
+    expect(close).toBeLessThan(3);
+  });
+
+  it('spreading never changes who wins: combat is left-right only', () => {
+    const a = runBattle(config(), cyclePolicy([0, 1, 0, 2]));
+    const b = runBattle(config({ band: { ...config().band, push: 0, hitShove: 0, bossShove: 0 } }), cyclePolicy([0, 1, 0, 2]));
+    expect(a.result).toBe(b.result);
+    expect(a.seconds).toBe(b.seconds);
+  });
+});

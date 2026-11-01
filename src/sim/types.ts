@@ -91,6 +91,20 @@ export interface StatusRules {
   bossMultiplier: number;
 }
 
+/** How units spread across the width of the path. Positions are -1 (far edge) to 1 (near edge). */
+export interface BandRules {
+  /** Spawn positions are picked in [-spawnSpread, spawnSpread]. */
+  spawnSpread: number;
+  /** Allies closer than sepX lane units (left-right) and sepLane (across) push apart. */
+  sepX: number;
+  sepLane: number;
+  /** Across-the-path push per tick at full overlap. */
+  push: number;
+  /** Across-the-path shove from a heavy hit, and from a boss strike or charge. */
+  hitShove: number;
+  bossShove: number;
+}
+
 export interface BattleConfig {
   seed: number;
   tickRate: number;
@@ -98,6 +112,7 @@ export interface BattleConfig {
   spawnOffset: number;
   maxUnitsPerSide: number;
   projectileSpeed: number;
+  band: BandRules;
   /** Player Food income in milli-Food per second (1000 = 1 Food/s). */
   foodRateMilli: number;
   playerBaseHp: number;
@@ -143,8 +158,8 @@ export interface Unit {
   def: TroopStats;
   x: number;
   prevX: number;
-  /** Visual depth jitter in art pixels, picked from the seeded RNG. */
-  depth: number;
+  /** Position across the width of the path, -1 (far edge) to 1 (near edge). Does not affect combat. */
+  lane: number;
   hp: number;
   maxHp: number;
   /** Ticks until the next attack may start. */

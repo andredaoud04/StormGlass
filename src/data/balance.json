@@ -6,7 +6,16 @@
     "laneLength": 1000,
     "spawnOffset": 40,
     "maxUnitsPerSide": 24,
-    "projectileSpeed": 520
+    "projectileSpeed": 520,
+    "band": {
+      "notes": "Units spread across the width of the path (lane -1..1). Allies that overlap slide apart; heavy hits shove. Combat stays left-right only.",
+      "spawnSpread": 0.75,
+      "sepX": 45,
+      "sepLane": 0.45,
+      "push": 0.04,
+      "hitShove": 0.16,
+      "bossShove": 0.4
+    }
   },
   "economy": {
     "startingGold": 18,

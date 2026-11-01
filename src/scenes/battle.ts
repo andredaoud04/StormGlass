@@ -14,6 +14,8 @@ const MAX_STEPS_PER_FRAME = 6;
 const BASE_INSET = 26;
 /** UI heights: the thin top bar and the slim bottom bar that holds Food and the cards. */
 const TOP_BAR = 26;
+/** World pixels units spread above and below the path's centre line (the road is about 64 rows wide). */
+const BAND_HALF = 22;
 const BOTTOM_BAR = 46;
 
 interface Coin {
@@ -108,7 +110,7 @@ export class BattleScene implements Scene {
     const ww = this.app.screen.size.ww;
     // The lane sits a little below the middle of the screen, as in We Are Warriors.
     const groundUi = Math.round(TOP_BAR + (h - TOP_BAR - BOTTOM_BAR) * 0.56);
-    return { groundY: Math.floor(groundUi / k), laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
+    return { groundY: Math.floor(groundUi / k), bandHalf: BAND_HALF, laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
   }
 
   /** World x/y to UI x/y. */

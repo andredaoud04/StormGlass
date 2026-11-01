@@ -1,5 +1,5 @@
 import raw from '../data/balance.json';
-import type { BossDef, StatusRules, TroopKind } from '../sim/types';
+import type { BandRules, BossDef, StatusRules, TroopKind } from '../sim/types';
 
 export type AgeId = 'stone' | 'ancient' | 'crusader' | 'gunpowder' | 'industrial' | 'future';
 export const AGE_IDS: AgeId[] = ['stone', 'ancient', 'crusader', 'gunpowder', 'industrial', 'future'];
@@ -70,7 +70,7 @@ export interface BossInfo extends Omit<BossDef, 'move'> {
 
 export interface Balance {
   version: number;
-  sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number };
+  sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number; band: BandRules };
   economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
   status: StatusRules;
   ages: AgeDef[];

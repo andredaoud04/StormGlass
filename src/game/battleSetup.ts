@@ -106,6 +106,7 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     spawnOffset: b.sim.spawnOffset,
     maxUnitsPerSide: b.sim.maxUnitsPerSide,
     projectileSpeed: b.sim.projectileSpeed,
+    band: b.sim.band,
     foodRateMilli: input.foodRateMilli ?? Math.round(ageDef(input.armyAge).foodRate * 1000),
     playerBaseHp: Math.round(ageDef(input.armyAge).fortressHp * b.economy.playerBaseHpMul * (input.fortressMul ?? 1)),
     enemyBaseHp: Math.round(enemy.fortressHp * (1 + b.timeline.enemyFortressPerTimeline * tl) * c.stageFortress[stage]),

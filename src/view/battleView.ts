@@ -10,7 +10,9 @@ import { EnvView } from './environment';
 import { FxSystem, Shake } from './fx';
 
 export interface BattleLayout {
+  /** Centre line of the path (world pixels). Units spread bandHalf above and below it. */
   groundY: number;
+  bandHalf: number;
   /** Screen x of each fortress's lane-facing front. */
   laneL: number;
   laneR: number;
@@ -138,7 +140,7 @@ export class BattleView {
       const meta = this.app.assets.meta(`troop.${sheet.split('.')[1]}`);
       v = {
         id: u.id, side: u.side, sheet, troop: u.def.id, kind: u.def.kind, anim: 'walk', animT: Math.random(), windup: 0.4, flash: 0, knock: 0, hitT: 0, hpShow: 0,
-        hp: u.hp, maxHp: u.maxHp, depth: u.depth, top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
+        hp: u.hp, maxHp: u.maxHp, depth: Math.round(u.lane * this.layout.bandHalf), top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
       };
       this.units.set(u.id, v);
     }
@@ -187,7 +189,8 @@ export class BattleView {
           const targetIsBase = p?.target === BASE_TARGET;
           const tmeta = this.app.assets.meta(`troop.${v.sheet.split('.')[1]}`);
           const projKey = String(tmeta.projectile ?? 'proj.stone');
-          this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: projKey, sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G - 12, t: 0 });
+          const tv = p && !targetIsBase ? this.units.get(p.target) : undefined;
+          this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: projKey, sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G + (tv?.depth ?? 0) - 12, t: 0 });
           // Muzzle effects (flash, powder smoke) for gun troops, listed in the troop's manifest meta.
           if (tmeta.muzzleFx) {
             for (const k of String(tmeta.muzzleFx).split(',')) {
@@ -405,6 +408,9 @@ export class BattleView {
       if (!v.dying) {
         v.px = this.unitScreen(u, alpha);
         v.hp = u.hp;
+        // Ease across the path so pushes and shoves read as movement, not jumps.
+        const want = u.lane * this.layout.bandHalf;
+        v.depth += (want - v.depth) * Math.min(1, dt * 10);
       }
       this.animate(v, u, adt);
     }
@@ -590,10 +596,14 @@ export class BattleView {
       const half = Math.max(6, Math.round(this.laneToPx(m.x + m.r) - cx));
       const p = Math.min(1, m.t / Math.max(0.05, m.dur));
       const blink = Math.floor(m.t * 12) % 2 ? 0.55 : 0.85;
-      d.rect(Math.round(cx - half + sx), G + 3 + sy, half * 2, 1, '#ff5a4f', blink);
-      d.rect(Math.round(cx - half * p + sx), G + 4 + sy, Math.round(half * 2 * p), 2, '#ff5a4f', 0.35 + 0.4 * p);
-      d.rect(Math.round(cx - half + sx), G + 1 + sy, 1, 4, '#ff9a7a', blink);
-      d.rect(Math.round(cx + half - 1 + sx), G + 1 + sy, 1, 4, '#ff9a7a', blink);
+      // A box across the whole width of the path: everyone inside it will be hit.
+      const top = G - this.layout.bandHalf - 2 + sy;
+      const bot = G + this.layout.bandHalf + 3 + sy;
+      d.rect(Math.round(cx - half + sx), top, half * 2, bot - top, '#ff5a4f', 0.08 + 0.16 * p);
+      d.rect(Math.round(cx - half + sx), bot, half * 2, 1, '#ff5a4f', blink);
+      d.rect(Math.round(cx - half * p + sx), bot + 1, Math.round(half * 2 * p), 2, '#ff5a4f', 0.35 + 0.4 * p);
+      d.rect(Math.round(cx - half + sx), top, 1, bot - top, '#ff9a7a', blink);
+      d.rect(Math.round(cx + half - 1 + sx), top, 1, bot - top, '#ff9a7a', blink);
       if (m.move === 'barrage') {
         // A falling shell over the mark.
         const y = G - 70 + 70 * p * p;

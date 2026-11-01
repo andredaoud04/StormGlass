@@ -144,6 +144,30 @@ function portrait(frame: Img, w: number, h: number): Img {
   return frame.crop(cx - Math.floor(w / 2), b.y - 2, w, h);
 }
 
+/** Rows added to every Age's road so troops can spread across it (We Are Warriors-style band). */
+const LANE_EXTRA = 40;
+
+/**
+ * Widen the road: insert LANE_EXTRA rows of the road's own interior texture at its centre line,
+ * sampled from shifted columns so the added stretch doesn't visibly repeat. Rows and shifts are
+ * multiples of 4 so the ordered dither lines up. The anchor moves to the new road centre.
+ */
+function widenLane(src: Img, gy: number): { img: Img; groundY: number } {
+  const out = new Img(src.w, src.h + LANE_EXTRA);
+  const band0 = gy - 8;
+  const band = 16;
+  for (let x = 0; x < src.w; x++) {
+    for (let y = 0; y <= gy; y++) out.set(x, y, src.get(x, y));
+    for (let k = 0; k < LANE_EXTRA; k++) {
+      const rep = Math.floor(k / band);
+      const sx = (x + 36 + rep * 52) % src.w;
+      out.set(x, gy + 1 + k, src.get(sx, band0 + ((gy + 1 + k - band0) % band)));
+    }
+    for (let y = gy + 1; y < src.h; y++) out.set(x, y + LANE_EXTRA, src.get(x, y));
+  }
+  return { img: out, groundY: gy + LANE_EXTRA / 2 };
+}
+
 /**
  * A seamless 64x64 meadow tile that continues an Age's ground layer downward: its base colour is
  * the ground layer's bottom row, with that layer's own lighter and darker tones as speckles,
@@ -221,6 +245,7 @@ export function buildAll(): void {
   // Environments
   const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()], ['gunpowder', 'Gunpowder', gunpowderEnv()], ['industrial', 'Industrial', industrialEnv()], ['future', 'Future', futureEnv()]];
   for (const [age, label, env] of envs) {
+    env.layers.ground = widenLane(env.layers.ground.img, env.layers.ground.groundY);
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
     }

@@ -5,7 +5,7 @@
  * It runs on a fixed tick (config.tickRate per second) and never reads the clock, the DOM or
  * Math.random. The renderer reads state and the per-tick `events` list; it never writes state.
  */
-import { createRng, nextInt } from './rng';
+import { createRng, nextFloat } from './rng';
 import { damageUnit } from './damage';
 import { applyStatus, slowFactor, tickStatus } from './status';
 import {
@@ -101,7 +101,7 @@ function spawnUnit(s: BattleState, side: Side, def: TroopStats): Unit {
     def,
     x,
     prevX: x,
-    depth: nextInt(s.rng, -3, 3),
+    lane: (nextFloat(s.rng) * 2 - 1) * s.config.band.spawnSpread,
     hp: def.hp,
     maxHp: def.hp,
     cooldown: 0,
@@ -236,8 +236,39 @@ function payBaseGold(s: BattleState): void {
   }
 }
 
+/** Shove a unit across the path (up or down at random), kept inside the band. */
+function shove(s: BattleState, u: Unit, amount: number): void {
+  const dir = nextFloat(s.rng) < 0.5 ? -1 : 1;
+  u.lane = Math.max(-1, Math.min(1, u.lane + dir * amount));
+}
+
+/**
+ * Allies that overlap slide apart across the path, so a crowd fills the width of the road
+ * instead of stacking on one line. Pure position: combat stays left-right only.
+ */
+function separate(s: BattleState): void {
+  const { sepX, sepLane, push } = s.config.band;
+  const live = s.units.filter((u) => u.alive);
+  for (let i = 0; i < live.length; i++) {
+    const a = live[i];
+    for (let j = i + 1; j < live.length; j++) {
+      const b = live[j];
+      if (a.side !== b.side || Math.abs(a.x - b.x) >= sepX) continue;
+      const dl = b.lane - a.lane;
+      if (Math.abs(dl) >= sepLane) continue;
+      const k = push * (1 - Math.abs(dl) / sepLane) * (1 - Math.abs(a.x - b.x) / sepX);
+      // Exactly on top of each other: the newer unit gives way to the near side.
+      const dir = dl !== 0 ? Math.sign(dl) : 1;
+      a.lane = Math.max(-1, Math.min(1, a.lane - dir * k));
+      b.lane = Math.max(-1, Math.min(1, b.lane + dir * k));
+    }
+  }
+}
+
 function hitUnit(s: BattleState, attackerSide: Side, attacker: TroopStats, target: Unit, dmg: number, ranged: boolean): void {
   if (!target.alive) return;
+  if (attacker.bossDef) shove(s, target, s.config.band.bossShove);
+  else if (attacker.kind === 'tank' && !ranged) shove(s, target, s.config.band.hitShove);
   s.events.push({ type: 'hit', target: target.id, side: target.side, dmg, x: target.x, heavy: attacker.kind === 'tank', ranged });
   if (attacker.onHit) for (const k of attacker.onHit) applyStatus(s, target, k, attacker.dmg);
   damageUnit(s, target, dmg, attackerSide);
@@ -405,6 +436,7 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
   stepEnemySpawns(s);
   for (const u of s.units) if (u.alive) tickStatus(s, u);
   for (const u of s.units) if (u.alive) stepUnit(s, u);
+  separate(s);
   stepProjectiles(s);
   if (s.wardUp && s.bossSpawned && !s.units.some((u) => u.id === s.bossId && u.alive)) {
     s.wardUp = false;
@@ -614,7 +646,7 @@ function stepBoss(s: BattleState, u: Unit): void {
 /** Stable digest of the battle state for determinism tests and replays. */
 export function stateHash(s: BattleState): string {
   const parts: (string | number)[] = [s.tick, s.foodMilli, s.playerBaseHp, s.enemyBaseHp, s.waveIndex, s.result ?? '-', s.wardUp ? 1 : 0];
-  for (const u of s.units) parts.push(u.id, u.side, u.x.toFixed(6), u.hp.toFixed(6), u.alive ? 1 : 0);
+  for (const u of s.units) parts.push(u.id, u.side, u.x.toFixed(6), u.lane.toFixed(6), u.hp.toFixed(6), u.alive ? 1 : 0);
   for (const p of s.projectiles) parts.push(p.id, p.x.toFixed(6));
   let h = 2166136261;
   const str = parts.join('|');
