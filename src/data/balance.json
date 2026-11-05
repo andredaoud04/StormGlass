@@ -1,23 +1,40 @@
 {
-  "version": 3,
+  "version": 5,
   "notes": "All numbers are MODEL unless docs/WAW_PARITY.md says otherwise. Change numbers here, never in code. Bump version when a change breaks old tuning.",
   "sim": {
     "tickRate": 20,
     "laneLength": 1000,
     "spawnOffset": 40,
-    "maxUnitsPerSide": 24,
-    "projectileSpeed": 520
+    "maxUnitsPerSide": 28,
+    "projectileSpeed": 520,
+    "band": {
+      "notes": "Units spread across the width of the path (lane -1..1). Allies that overlap slide apart; heavy hits shove. Combat stays left-right only.",
+      "spawnSpread": 0.75,
+      "sepX": 45,
+      "sepLane": 0.45,
+      "push": 0.04,
+      "hitShove": 0.16,
+      "bossShove": 0.4
+    }
   },
   "economy": {
     "startingGold": 18,
-    "goldPerKill": 1,
-    "goldPerTankKill": 5,
     "baseGoldSteps": 10,
     "playerBaseHpMul": 0.75,
     "slotUnlock": {
       "ranged": 30,
       "tank": 70
-    }
+    },
+    "killGold": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      13
+    ],
+    "startFood": 1,
+    "tankKillMul": 5
   },
   "status": {
     "poison": {
@@ -70,21 +87,24 @@
           "name": "Brute",
           "kind": "tank",
           "cost": 12,
-          "hp": 260,
+          "hp": 195,
           "dmg": 28,
           "interval": 1.4,
           "range": 110,
-          "speed": 50
+          "speed": 50,
+          "traits": {
+            "cleave": 2
+          }
         }
       ],
       "foodRate": 1.0,
       "enemyPower": 0.85,
       "stagePower": [
-        1.0,
-        1.758,
-        1.83,
-        1.833,
-        2.21
+        0.8,
+        0.766,
+        0.765,
+        0.802,
+        1.128
       ]
     },
     {
@@ -102,7 +122,10 @@
           "dmg": 20,
           "interval": 1.0,
           "range": 110,
-          "speed": 75
+          "speed": 75,
+          "traits": {
+            "cleave": 2
+          }
         },
         {
           "id": "ancient_archer",
@@ -113,28 +136,37 @@
           "dmg": 16,
           "interval": 1.0,
           "range": 230,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "onHit": [
+              "poison"
+            ]
+          }
         },
         {
           "id": "ancient_guard",
           "name": "Shieldwall",
           "kind": "tank",
           "cost": 14,
-          "hp": 416,
+          "hp": 312,
           "dmg": 44,
           "interval": 1.4,
           "range": 110,
-          "speed": 50
+          "speed": 50,
+          "traits": {
+            "armor": 0.7,
+            "cleave": 2
+          }
         }
       ],
-      "foodRate": 1.2,
+      "foodRate": 1.4,
       "enemyPower": 0.85,
       "stagePower": [
-        1.272,
-        1.34,
-        1.334,
-        1.576,
-        1.184
+        0.751,
+        0.819,
+        0.892,
+        0.838,
+        0.892
       ]
     },
     {
@@ -163,28 +195,35 @@
           "dmg": 25,
           "interval": 1.0,
           "range": 250,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "pierce": 2
+          }
         },
         {
           "id": "crusader_knight",
           "name": "Knight",
           "kind": "tank",
           "cost": 16,
-          "hp": 666,
+          "hp": 500,
           "dmg": 70,
           "interval": 1.4,
           "range": 115,
-          "speed": 55
+          "speed": 55,
+          "traits": {
+            "armor": 0.7,
+            "cleave": 3
+          }
         }
       ],
-      "foodRate": 1.4,
+      "foodRate": 1.9,
       "enemyPower": 0.9,
       "stagePower": [
-        1.088,
-        1.278,
-        1.304,
-        1.521,
-        1.493
+        0.629,
+        0.763,
+        0.69,
+        0.62,
+        0.912
       ]
     },
     {
@@ -202,7 +241,10 @@
           "dmg": 51,
           "interval": 1.0,
           "range": 115,
-          "speed": 75
+          "speed": 75,
+          "traits": {
+            "cleave": 2
+          }
         },
         {
           "id": "gunpowder_musketeer",
@@ -213,28 +255,34 @@
           "dmg": 41,
           "interval": 1.0,
           "range": 270,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "pierce": 2
+          }
         },
         {
           "id": "gunpowder_cannon",
           "name": "Cannon",
           "kind": "tank",
           "cost": 18,
-          "hp": 1065,
+          "hp": 799,
           "dmg": 112,
           "interval": 1.4,
           "range": 120,
-          "speed": 45
+          "speed": 45,
+          "traits": {
+            "splash": 55
+          }
         }
       ],
-      "foodRate": 1.6,
+      "foodRate": 2.5,
       "enemyPower": 0.92,
       "stagePower": [
-        1.549,
-        1.232,
-        1.408,
-        1.797,
-        1.737
+        0.72,
+        0.768,
+        0.583,
+        0.695,
+        0.905
       ]
     },
     {
@@ -252,7 +300,10 @@
           "dmg": 82,
           "interval": 1.0,
           "range": 110,
-          "speed": 75
+          "speed": 75,
+          "traits": {
+            "cleave": 2
+          }
         },
         {
           "id": "industrial_rifleman",
@@ -263,28 +314,37 @@
           "dmg": 65,
           "interval": 1.0,
           "range": 280,
-          "speed": 65
+          "speed": 65,
+          "traits": {
+            "pierce": 3
+          }
         },
         {
           "id": "industrial_walker",
           "name": "Steam Walker",
           "kind": "tank",
           "cost": 20,
-          "hp": 1704,
+          "hp": 1278,
           "dmg": 180,
           "interval": 1.4,
           "range": 120,
-          "speed": 45
+          "speed": 45,
+          "traits": {
+            "splash": 50,
+            "onHit": [
+              "burn"
+            ]
+          }
         }
       ],
-      "foodRate": 1.8,
+      "foodRate": 3.2,
       "enemyPower": 0.98,
       "stagePower": [
-        1.029,
-        1.032,
-        1.061,
-        1.404,
-        1.254
+        0.694,
+        0.47,
+        0.526,
+        0.694,
+        1.015
       ]
     },
     {
@@ -302,7 +362,10 @@
           "dmg": 131,
           "interval": 1.0,
           "range": 110,
-          "speed": 80
+          "speed": 80,
+          "traits": {
+            "cleave": 3
+          }
         },
         {
           "id": "future_gunner",
@@ -313,196 +376,172 @@
           "dmg": 105,
           "interval": 1.0,
           "range": 290,
-          "speed": 70
+          "speed": 70,
+          "traits": {
+            "pierce": 2,
+            "onHit": [
+              "burn"
+            ]
+          }
         },
         {
           "id": "future_mech",
           "name": "Mech",
           "kind": "tank",
           "cost": 23,
-          "hp": 2726,
+          "hp": 2044,
           "dmg": 289,
           "interval": 1.4,
           "range": 125,
-          "speed": 45
+          "speed": 45,
+          "traits": {
+            "splash": 65,
+            "onHit": [
+              "cold"
+            ]
+          }
         }
       ],
-      "foodRate": 2.0,
+      "foodRate": 4.0,
       "enemyPower": 1.0,
       "stagePower": [
-        0.845,
-        1.046,
-        0.976,
-        0.945,
-        0.877
+        0.671,
+        0.461,
+        0.524,
+        0.581,
+        0.723
       ]
     }
   ],
   "waves": {
-    "notes": "Hand-made waves per Age and stage. Each group is 'second:units' (m melee, r ranged, t tank); a group's units walk out groupGap seconds apart. After the last group, the groups from loopFrom repeat: loopPeriod is the time from the first repeated group to its next repeat (always longer than the repeated span, so spawns never go backwards).",
-    "groupGap": 1.2,
+    "notes": "We Are Warriors-style pressure: the enemy is on the lane from the first second. Every `period` seconds a numbered WAVE arrives as one clump (units `clumpGap` apart) built from the stage's hand-made recipe letters; each wave is `growth` times bigger than the last (up to `maxWave` units). Between waves a trickle of single units keeps the lane busy. Size = baseSize x Age density x stageSize[stage].",
     "stone": [
       {
-        "groups": "8:m 20:m 32:mm 46:mm",
-        "loopFrom": 2,
-        "loopPeriod": 26
+        "groups": "8:m 20:m 32:mm 46:mm"
       },
       {
-        "groups": "8:m 18:mm 32:mr 46:mm 58:mmr",
-        "loopFrom": 3,
-        "loopPeriod": 24
+        "groups": "8:m 18:mm 32:mr 46:mm 58:mmr"
       },
       {
-        "groups": "8:mm 22:mr 36:mmm 50:mr 62:mmr",
-        "loopFrom": 2,
-        "loopPeriod": 38
+        "groups": "8:mm 22:mr 36:mmm 50:mr 62:mmr"
       },
       {
-        "groups": "8:mr 20:mm 32:mmr 46:mt 58:mmmr",
-        "loopFrom": 2,
-        "loopPeriod": 39
+        "groups": "8:mr 20:mm 32:mmr 46:mt 58:mmmr"
       },
       {
-        "groups": "8:m 20:mm 34:mr 48:mm",
-        "loopFrom": 1,
-        "loopPeriod": 40
+        "groups": "8:m 20:mm 34:mr 48:mm"
       }
     ],
     "ancient": [
       {
-        "groups": "8:m 20:mr 34:mm 48:mt",
-        "loopFrom": 2,
-        "loopPeriod": 26
+        "groups": "8:m 20:mr 34:mm 48:mt"
       },
       {
-        "groups": "8:mm 22:rr 36:mmt 52:mr",
-        "loopFrom": 1,
-        "loopPeriod": 42
+        "groups": "8:mm 22:rr 36:mmt 52:mr"
       },
       {
-        "groups": "8:mr 20:mmr 36:t 44:mmrr 60:mm",
-        "loopFrom": 2,
-        "loopPeriod": 36
+        "groups": "8:mr 20:mmr 36:t 44:mmrr 60:mm"
       },
       {
-        "groups": "8:mm 18:rr 30:mmt 46:mrr 60:tmm",
-        "loopFrom": 2,
-        "loopPeriod": 42
+        "groups": "8:mm 18:rr 30:mmt 46:mrr 60:tmm"
       },
       {
-        "groups": "8:mr 22:mm 38:mrr 54:t",
-        "loopFrom": 1,
-        "loopPeriod": 44
+        "groups": "8:mr 22:mm 38:mrr 54:t"
       }
     ],
     "crusader": [
       {
-        "groups": "8:mm 22:mr 38:t 48:mmr",
-        "loopFrom": 1,
-        "loopPeriod": 38
+        "groups": "8:mm 22:mr 38:t 48:mmr"
       },
       {
-        "groups": "8:m 16:mr 30:mmt 46:rr 58:mm",
-        "loopFrom": 2,
-        "loopPeriod": 40
+        "groups": "8:m 16:mr 30:mmt 46:rr 58:mm"
       },
       {
-        "groups": "8:mmm 24:rt 40:mmr 56:tm",
-        "loopFrom": 1,
-        "loopPeriod": 44
+        "groups": "8:mmm 24:rt 40:mmr 56:tm"
       },
       {
-        "groups": "8:mr 18:mmt 34:rrm 50:mmtr",
-        "loopFrom": 1,
-        "loopPeriod": 45
+        "groups": "8:mr 18:mmt 34:rrm 50:mmtr"
       },
       {
-        "groups": "8:mm 24:mr 40:t 50:mmr",
-        "loopFrom": 1,
-        "loopPeriod": 38
+        "groups": "8:mm 24:mr 40:t 50:mmr"
       }
     ],
     "gunpowder": [
       {
-        "groups": "8:m 18:rr 32:mm 46:mrr",
-        "loopFrom": 1,
-        "loopPeriod": 40
+        "groups": "8:m 18:rr 32:mm 46:mrr"
       },
       {
-        "groups": "8:mr 22:mrr 38:t 48:mmr",
-        "loopFrom": 1,
-        "loopPeriod": 38
+        "groups": "8:mr 22:mrr 38:t 48:mmr"
       },
       {
-        "groups": "8:rr 18:mm 30:mrt 48:rrm",
-        "loopFrom": 1,
-        "loopPeriod": 42
+        "groups": "8:rr 18:mm 30:mrt 48:rrm"
       },
       {
-        "groups": "8:mm 20:rrr 36:mmt 54:mrr",
-        "loopFrom": 1,
-        "loopPeriod": 46
+        "groups": "8:mm 20:rrr 36:mmt 54:mrr"
       },
       {
-        "groups": "8:mr 22:rr 38:mm 52:t",
-        "loopFrom": 1,
-        "loopPeriod": 42
+        "groups": "8:mr 22:rr 38:mm 52:t"
       }
     ],
     "industrial": [
       {
-        "groups": "8:mm 24:t 36:mr 50:mmr",
-        "loopFrom": 1,
-        "loopPeriod": 38
+        "groups": "8:mm 24:t 36:mr 50:mmr"
       },
       {
-        "groups": "8:mr 20:mmt 38:rr 52:mmt",
-        "loopFrom": 1,
-        "loopPeriod": 44
+        "groups": "8:mr 20:mmt 38:rr 52:mmt"
       },
       {
-        "groups": "8:mmr 26:tt 44:mrr",
-        "loopFrom": 0,
-        "loopPeriod": 48
+        "groups": "8:mmr 26:tt 44:mrr"
       },
       {
-        "groups": "8:mr 18:mmt 36:rrt 54:mmm",
-        "loopFrom": 1,
-        "loopPeriod": 48
+        "groups": "8:mr 18:mmt 36:rrt 54:mmm"
       },
       {
-        "groups": "8:mm 24:mr 40:t 54:mrr",
-        "loopFrom": 1,
-        "loopPeriod": 42
+        "groups": "8:mm 24:mr 40:t 54:mrr"
       }
     ],
     "future": [
       {
-        "groups": "8:mr 20:mm 32:rt 46:mmr",
-        "loopFrom": 1,
-        "loopPeriod": 38
+        "groups": "8:mr 20:mm 32:rt 46:mmr"
       },
       {
-        "groups": "8:mm 18:rr 30:mmt 46:rrm",
-        "loopFrom": 1,
-        "loopPeriod": 40
+        "groups": "8:mm 18:rr 30:mmt 46:rrm"
       },
       {
-        "groups": "8:mrm 24:tr 38:mmrr 56:t",
-        "loopFrom": 1,
-        "loopPeriod": 44
+        "groups": "8:mrm 24:tr 38:mmrr 56:t"
       },
       {
-        "groups": "8:mm 18:rrt 34:mmrr 52:tt",
-        "loopFrom": 1,
-        "loopPeriod": 46
+        "groups": "8:mm 18:rrt 34:mmrr 52:tt"
       },
       {
-        "groups": "8:mr 22:mmr 38:rt 54:mm",
-        "loopFrom": 1,
-        "loopPeriod": 44
+        "groups": "8:mr 22:mmr 38:rt 54:mm"
       }
-    ]
+    ],
+    "density": [
+      1.0,
+      1.35,
+      1.75,
+      2.2,
+      2.7,
+      3.2
+    ],
+    "stream": {
+      "period": 20,
+      "firstAt": 0.5,
+      "clumpGap": 0.4,
+      "baseSize": 2,
+      "growth": 1.22,
+      "maxWave": 16,
+      "trickle": 2,
+      "waves": 15,
+      "stageSize": [
+        1.0,
+        1.15,
+        1.3,
+        1.45,
+        1.2
+      ]
+    }
   },
   "timeline": {
     "enemyStatPerTimeline": 0.12,
@@ -666,7 +705,16 @@
       "bossMul": 0.5,
       "unlockStage": 4
     },
-    "speedUnlockStage": 3
+    "speedUnlockStage": 3,
+    "kitchen": {
+      "name": "Kitchen",
+      "notes": "Spend Food in battle to raise Food income. Cost = cheapest troop cost x costMul x growth^level.",
+      "costMul": 2,
+      "growth": 1.6,
+      "perLevel": 0.2,
+      "maxLevel": 5,
+      "unlockStage": 2
+    }
   },
   "upgrades": {
     "notes": "We Are Warriors format: Gold buys Food rate and Base HP. Both reset when you Evolve (the new Age starts stronger). Cost = baseCost x ageCostGrowth^armyAge x costGrowth^level.",
@@ -695,11 +743,28 @@
     "notes": "Gold to evolve INTO each Age (index = target Age). Needs your current Age's boss beaten. Evolving resets Gold and upgrades; slots stay.",
     "cost": [
       0,
-      800,
-      2600,
-      6500,
-      14700,
-      19000
+      0,
+      4000,
+      16000,
+      36000,
+      65000
     ]
+  },
+  "combat": {
+    "notes": "Class matchups (attacker kind -> defender kind multiplier) make composition matter: melee rushes ranged, ranged picks off melee, tanks shrug off melee. Traits: cleave n (melee hits up to n), pierce n (shots pass through up to n), splash r (area hit, others take splashShare), armor x (damage taken from ranged).",
+    "matchup": {
+      "melee": {
+        "ranged": 1.4
+      },
+      "ranged": {
+        "melee": 1.25
+      },
+      "tank": {
+        "melee": 1.2
+      }
+    },
+    "splashShare": 0.6,
+    "cleaveShare": 0.75,
+    "pierceShare": 0.7
   }
 }

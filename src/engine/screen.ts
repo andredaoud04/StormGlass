@@ -15,15 +15,18 @@ export interface ScreenSize {
   /** Device pixels per art pixel. */
   scale: number;
   dpr: number;
-  /** The battle world is drawn on its own layer at a larger whole-number scale (units read bigger, HUD stays compact). */
+  /** The battle world is drawn on its own layer at a smaller whole-number scale than the UI. */
   worldScale: number;
   ww: number;
   wh: number;
 }
 
-/** About a third larger than the UI, always a whole number of device pixels per art pixel. */
+/**
+ * The battle world uses the same pixel size as the UI: one consistent pixel grid, troops big
+ * enough to read, with the tall road (not a smaller scale) giving crowds their room.
+ */
 export function worldScaleFor(scale: number): number {
-  return Math.max(scale + 1, Math.round(scale * 1.34));
+  return scale;
 }
 
 /** Pure sizing rule, shared with tests. */

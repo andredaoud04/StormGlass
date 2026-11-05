@@ -1,5 +1,5 @@
 /** Simple player policies for the headless simulator and tests. Pure: no clock, no randomness. */
-import { createBattle, food, stepBattle } from '../sim/battle';
+import { createBattle, food, kitchenCost, stepBattle } from '../sim/battle';
 import type { BattleConfig, BattleState, Command } from '../sim/types';
 
 export type Policy = (s: BattleState) => Command[];
@@ -59,6 +59,9 @@ export function smartPolicy(): Policy {
     const melee = troops.findIndex((t) => t.kind === 'melee');
     const ranged = troops.findIndex((t) => t.kind === 'ranged');
     const tank = troops.findIndex((t) => t.kind === 'tank');
+    // Grow the economy early while the lane is safe (two Kitchen levels, like a sensible player).
+    const kc = kitchenCost(s);
+    if (!threat && kc !== null && s.kitchenLevel < 2 && s.foodMilli >= kc) return [{ type: 'kitchen' }];
     if (threat) {
       const pick = tank >= 0 && f >= troops[tank].cost ? tank : melee;
       return pick >= 0 && f >= troops[pick].cost ? [{ type: 'deploy', slot: pick }] : [];

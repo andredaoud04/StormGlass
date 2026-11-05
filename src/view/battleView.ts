@@ -10,7 +10,9 @@ import { EnvView } from './environment';
 import { FxSystem, Shake } from './fx';
 
 export interface BattleLayout {
+  /** Centre line of the path (world pixels). Units spread bandHalf above and below it. */
   groundY: number;
+  bandHalf: number;
   /** Screen x of each fortress's lane-facing front. */
   laneL: number;
   laneR: number;
@@ -39,6 +41,10 @@ interface VUnit {
   px: number;
   dying: boolean;
   deathT: number;
+  /** Thrown by a big hit: velocity and height above the ground while flying. */
+  lvx: number;
+  lvy: number;
+  lift: number;
   poofed: boolean;
   stepT: number;
   status: number;
@@ -88,6 +94,8 @@ export class BattleView {
   private flash = 0;
   private wardBroken = 0;
   private bossDash = 0;
+  /** Damage that counts as a big hit for this battle (twice the player's strongest troop). */
+  private bigHit = 1e9;
 
   constructor(
     private app: App,
@@ -98,6 +106,7 @@ export class BattleView {
     private playerAgeKey: string = ageKey,
   ) {
     this.env = new EnvView(app, ageKey);
+    this.bigHit = 2 * Math.max(1, ...sim.config.playerTroops.map((t) => t.dmg));
     this.fx = new FxSystem((k) => app.assets.strip(k).frames);
     this.shake.enabled = !app.reducedMotion;
   }
@@ -138,7 +147,7 @@ export class BattleView {
       const meta = this.app.assets.meta(`troop.${sheet.split('.')[1]}`);
       v = {
         id: u.id, side: u.side, sheet, troop: u.def.id, kind: u.def.kind, anim: 'walk', animT: Math.random(), windup: 0.4, flash: 0, knock: 0, hitT: 0, hpShow: 0,
-        hp: u.hp, maxHp: u.maxHp, depth: u.depth, top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
+        hp: u.hp, maxHp: u.maxHp, depth: Math.round(u.lane * this.layout.bandHalf), top: Number(meta.top ?? -26), px: this.laneToPx(u.x), dying: false, deathT: 0, lvx: 0, lvy: 0, lift: 0, poofed: false, stepT: 0, status: 0, statusColor: '#ffffff',
       };
       this.units.set(u.id, v);
     }
@@ -187,7 +196,8 @@ export class BattleView {
           const targetIsBase = p?.target === BASE_TARGET;
           const tmeta = this.app.assets.meta(`troop.${v.sheet.split('.')[1]}`);
           const projKey = String(tmeta.projectile ?? 'proj.stone');
-          this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: projKey, sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G - 12, t: 0 });
+          const tv = p && !targetIsBase ? this.units.get(p.target) : undefined;
+          this.projs.set(e.projectile, { id: e.projectile, side: u.side, key: projKey, sx: v.px + m[0] * dir, sy: G + v.depth + m[1], ty: targetIsBase ? G - 30 : G + (tv?.depth ?? 0) - 12, t: 0 });
           // Muzzle effects (flash, powder smoke) for gun troops, listed in the troop's manifest meta.
           if (tmeta.muzzleFx) {
             for (const k of String(tmeta.muzzleFx).split(',')) {
@@ -208,13 +218,35 @@ export class BattleView {
           const hx = v.px + dir * 3;
           const hy = G + v.depth + Math.round(v.top * 0.45);
           this.fx.add('fx.spark', hx + (Math.random() * 4 - 2), hy + (Math.random() * 4 - 2));
-          if (e.heavy) {
-            this.fx.add('fx.ring', v.px, G + v.depth - 2);
-            this.shake.add(2, 0.18);
-            this.hooks.onImpact?.(true, false);
+          // Routine heavy hits get a ring, not a shake or a freeze: the big effects are kept for big moments.
+          if (e.heavy && !e.area) this.fx.add('fx.ring', v.px, G + v.depth - 2);
+          if (e.area === 'cleave') this.fx.add('fx.smear', v.px - dir * 4, hy, { flip: v.side === 0 });
+          if (e.area === 'pierce') this.fx.add('fx.spark', v.px - dir * 2, hy - 2);
+          // A killing blow from a heavy, area or piercing hit throws the body.
+          if (e.kill && (e.heavy || e.area)) {
+            v.lvx = -dir * (e.area === 'splash' ? 34 : 22) * (0.7 + Math.random() * 0.6);
+            v.lvy = -(e.area === 'splash' ? 70 : 48) * (0.8 + Math.random() * 0.4);
           }
-          if (e.side === 1) this.fx.text(String(Math.round(e.dmg)), v.px + (Math.random() * 6 - 3), G + v.depth + v.top - 4, { color: e.heavy ? '#ffd03c' : '#fff8ec' });
+          // Damage numbers grow with the size of the hit.
+          const big = e.dmg >= this.bigHit;
+          if (e.side === 1 || big) {
+            this.fx.text(String(Math.round(e.dmg)), v.px + (Math.random() * 6 - 3), G + v.depth + v.top - 4, {
+              color: e.side === 0 ? '#ff8a8a' : big ? '#ffb03c' : e.heavy || e.area ? '#ffd03c' : '#fff8ec',
+              font: big ? 'big' : 'small',
+            });
+          }
           this.app.sfx(e.heavy ? 'hit_heavy' : e.ranged ? 'hit_ranged' : 'hit', { vol: e.heavy ? 0.8 : 0.5, minGapMs: 40 });
+          break;
+        }
+        case 'splash': {
+          // Area hit: a blast at the impact, dust thrown out across the path, a short shake.
+          const cx = this.laneToPx(e.x);
+          const half = Math.max(5, this.laneToPx(e.x + e.radius) - cx);
+          this.fx.add('fx.boom', cx, G + 6);
+          for (let k = -1; k <= 1; k++) this.fx.add('fx.dust', cx + k * half * 0.7, G + this.layout.bandHalf * k * 0.6, { behind: true, vx: k * 14 });
+          for (let k = 0; k < 4; k++) this.fx.add('fx.debris', cx, G, { vx: (Math.random() - 0.5) * 90, vy: -50 - Math.random() * 50, gravity: 300, life: 0.7, fps: 14 });
+          this.shake.add(1.2, 0.15);
+          this.app.sfx('boom', { vol: 0.45, minGapMs: 150 });
           break;
         }
         case 'dot': {
@@ -237,8 +269,10 @@ export class BattleView {
           v.deathT = 0;
           v.anim = 'death';
           v.hpShow = 0;
-          this.hooks.onImpact?.(e.tank, true);
-          if (e.tank) this.shake.add(3, 0.25);
+          if (e.id === this.sim.bossId) {
+            this.hooks.onImpact?.(true, true);
+            this.shake.add(6, 0.5);
+          }
           this.app.sfx(e.side === 1 ? 'death' : 'death_ally', { vol: 0.6, minGapMs: 60 });
           break;
         }
@@ -247,7 +281,8 @@ export class BattleView {
           const v = [...this.units.values()].find((q) => q.dying && q.side === 1 && Math.abs(q.px - this.laneToPx(e.x)) < 1.5) ?? null;
           const x = v ? v.px : this.laneToPx(e.x);
           const y = G + (v?.top ?? -24);
-          this.fx.text(`+${e.amount}`, x, y - 6, { color: '#ffd03c', font: e.amount >= 5 ? 'big' : 'small', life: 0.9, vy: -22 });
+          // Kill coins fly to the Coins counter; only boss Gold gets a number.
+          if (e.reason === 'boss') this.fx.text(`+${e.amount}`, x, y - 6, { color: '#ffd03c', font: 'big', life: 0.9, vy: -22 });
           this.hooks.onCoin?.(x, y, e.amount);
           break;
         }
@@ -405,6 +440,9 @@ export class BattleView {
       if (!v.dying) {
         v.px = this.unitScreen(u, alpha);
         v.hp = u.hp;
+        // Ease across the path so pushes and shoves read as movement, not jumps.
+        const want = u.lane * this.layout.bandHalf;
+        v.depth += (want - v.depth) * Math.min(1, dt * 10);
       }
       this.animate(v, u, adt);
     }
@@ -442,6 +480,16 @@ export class BattleView {
     v.animT += dt;
     if (v.dying) {
       v.deathT += dt;
+      if (v.lvy !== 0 || v.lift < 0) {
+        v.px += v.lvx * dt;
+        v.lvy += 260 * dt;
+        v.lift = Math.min(0, v.lift + v.lvy * dt);
+        if (v.lift >= 0 && v.lvy > 0) {
+          v.lvy = 0;
+          v.lvx = 0;
+          this.fx.add('fx.dust', v.px, this.layout.groundY + v.depth, { behind: true });
+        }
+      }
       if (!v.poofed && v.deathT > 0.75) {
         v.poofed = true;
         this.fx.add('fx.poof', v.px, this.layout.groundY + v.depth);
@@ -505,13 +553,14 @@ export class BattleView {
       const knockDir = v.side === 0 ? -1 : 1;
       const kx = v.knock > 0 ? knockDir * (v.knock > 0.06 ? 2 : 1) : 0;
       const x = Math.round(v.px + kx + sx);
-      const y = G + v.depth + sy;
+      const y = G + v.depth + sy + Math.round(v.lift);
       let alpha = 1;
       if (v.dying && v.deathT > 0.5) alpha = Math.floor(v.deathT * 20) % 2 ? 0.35 : 0.9;
       if (v.dying && v.deathT > 0.75) alpha = 0;
       d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, alpha });
       if (v.flash > 0) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.85 });
-      if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0 });
+      // Poisoned, burning or chilled: a soft pulse so status effects are visible.
+      if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.18 + 0.12 * Math.sin(this.t * 20) });
       // HP bar when hurt (the boss has its own bar in the HUD).
       if (v.hpShow > 0 && !v.dying && v.hp < v.maxHp && v.id !== this.sim.bossId) {
         const bw = v.kind === 'tank' ? 16 : 12;
@@ -549,6 +598,8 @@ export class BattleView {
       } else d.strip(p.key, Math.floor(p.t * 12), cur + sx, y + sy);
     }
     this.fx.drawFront(d, sx, sy);
+    // Stormcall: the whole field flashes white for a moment.
+    if (this.flash > 0 && !this.app.reducedMotion) d.rect(0, 0, this.app.w, this.app.h, '#eaf6ff', Math.min(0.55, this.flash * 3));
   }
 
   private drawBase(side: 0 | 1, sx: number, sy: number): void {
@@ -590,10 +641,14 @@ export class BattleView {
       const half = Math.max(6, Math.round(this.laneToPx(m.x + m.r) - cx));
       const p = Math.min(1, m.t / Math.max(0.05, m.dur));
       const blink = Math.floor(m.t * 12) % 2 ? 0.55 : 0.85;
-      d.rect(Math.round(cx - half + sx), G + 3 + sy, half * 2, 1, '#ff5a4f', blink);
-      d.rect(Math.round(cx - half * p + sx), G + 4 + sy, Math.round(half * 2 * p), 2, '#ff5a4f', 0.35 + 0.4 * p);
-      d.rect(Math.round(cx - half + sx), G + 1 + sy, 1, 4, '#ff9a7a', blink);
-      d.rect(Math.round(cx + half - 1 + sx), G + 1 + sy, 1, 4, '#ff9a7a', blink);
+      // A box across the whole width of the path: everyone inside it will be hit.
+      const top = G - this.layout.bandHalf - 2 + sy;
+      const bot = G + this.layout.bandHalf + 3 + sy;
+      d.rect(Math.round(cx - half + sx), top, half * 2, bot - top, '#ff5a4f', 0.08 + 0.16 * p);
+      d.rect(Math.round(cx - half + sx), bot, half * 2, 1, '#ff5a4f', blink);
+      d.rect(Math.round(cx - half * p + sx), bot + 1, Math.round(half * 2 * p), 2, '#ff5a4f', 0.35 + 0.4 * p);
+      d.rect(Math.round(cx - half + sx), top, 1, bot - top, '#ff9a7a', blink);
+      d.rect(Math.round(cx + half - 1 + sx), top, 1, bot - top, '#ff9a7a', blink);
       if (m.move === 'barrage') {
         // A falling shell over the mark.
         const y = G - 70 + 70 * p * p;

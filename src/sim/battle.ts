@@ -5,7 +5,7 @@
  * It runs on a fixed tick (config.tickRate per second) and never reads the clock, the DOM or
  * Math.random. The renderer reads state and the per-tick `events` list; it never writes state.
  */
-import { createRng, nextInt } from './rng';
+import { createRng, nextFloat } from './rng';
 import { damageUnit } from './damage';
 import { applyStatus, slowFactor, tickStatus } from './status';
 import {
@@ -31,7 +31,7 @@ export function createBattle(config: BattleConfig): BattleState {
     config,
     rng: createRng(config.seed),
     tick: 0,
-    foodMilli: 0,
+    foodMilli: config.startFoodMilli ?? 0,
     foodRemainder: 0,
     foodSpentMilli: 0,
     playerBaseHp: config.playerBaseHp,
@@ -48,6 +48,7 @@ export function createBattle(config: BattleConfig): BattleState {
     bossMilestonesPaid: 0,
     skillCooldown: config.skill?.firstTicks ?? 0,
     skillsUsed: 0,
+    kitchenLevel: 0,
     baseMilestonesPaid: 0,
     kills: 0,
     tankKills: 0,
@@ -86,6 +87,29 @@ export function waveSpawnTime(config: BattleConfig, n: number): { time: number; 
   return { time: t / config.waveSpeed, kind: spawns[idx][1] };
 }
 
+/** Wave number if spawn n opens a new wave, else 0. Every repeat of the tail is a new wave. */
+export function waveNumberAt(config: BattleConfig, n: number): number {
+  const { spawns, loopFrom, waveStarts } = config.wave;
+  if (!waveStarts) return 0;
+  if (n < spawns.length) {
+    const i = waveStarts.indexOf(n);
+    return i >= 0 ? i + 1 : 0;
+  }
+  const segLen = spawns.length - loopFrom;
+  const k = n - spawns.length;
+  return k % segLen === 0 ? waveStarts.length + 1 + k / segLen : 0;
+}
+
+/** What the wave opened by spawn n will send: counts per kind until the next wave starts. */
+export function waveComposition(config: BattleConfig, n: number): Record<TroopStats['kind'], number> {
+  const out = { melee: 0, ranged: 0, tank: 0 };
+  for (let k = n; k < n + 80; k++) {
+    if (k > n && waveNumberAt(config, k) > 0) break;
+    out[waveSpawnTime(config, k).kind]++;
+  }
+  return out;
+}
+
 function aliveCount(s: BattleState, side: Side): number {
   let n = 0;
   for (const u of s.units) if (u.alive && u.side === side) n++;
@@ -101,7 +125,7 @@ function spawnUnit(s: BattleState, side: Side, def: TroopStats): Unit {
     def,
     x,
     prevX: x,
-    depth: nextInt(s.rng, -3, 3),
+    lane: (nextFloat(s.rng) * 2 - 1) * s.config.band.spawnSpread,
     hp: def.hp,
     maxHp: def.hp,
     cooldown: 0,
@@ -129,6 +153,10 @@ function applyCommand(s: BattleState, cmd: Command): void {
     castStormcall(s);
     return;
   }
+  if (cmd.type === 'kitchen') {
+    buyKitchen(s);
+    return;
+  }
   const def = s.config.playerTroops[cmd.slot];
   if (!def) {
     s.events.push({ type: 'deployFail', slot: cmd.slot, reason: 'slot' });
@@ -147,6 +175,28 @@ function applyCommand(s: BattleState, cmd: Command): void {
   s.foodSpentMilli += costMilli;
   s.deployed++;
   spawnUnit(s, 0, def);
+}
+
+/** Cost of the next Kitchen level in milli-Food, or null when maxed or locked. */
+export function kitchenCost(s: BattleState): number | null {
+  const k = s.config.kitchen;
+  if (!k || s.kitchenLevel >= k.maxLevel) return null;
+  return Math.round(k.baseCostMilli * Math.pow(k.growth, s.kitchenLevel));
+}
+
+/** Current Food income in milli-Food per second, including Kitchen levels. */
+export function foodRate(s: BattleState): number {
+  const k = s.config.kitchen;
+  return Math.round(s.config.foodRateMilli * (1 + (k ? k.perLevel * s.kitchenLevel : 0)));
+}
+
+function buyKitchen(s: BattleState): void {
+  const c = kitchenCost(s);
+  if (c === null || s.foodMilli < c) return;
+  s.foodMilli -= c;
+  s.foodSpentMilli += c;
+  s.kitchenLevel++;
+  s.events.push({ type: 'kitchen', level: s.kitchenLevel });
 }
 
 /** Lightning on the enemy closest to your fortress; everything within the radius is hit. */
@@ -236,9 +286,61 @@ function payBaseGold(s: BattleState): void {
   }
 }
 
-function hitUnit(s: BattleState, attackerSide: Side, attacker: TroopStats, target: Unit, dmg: number, ranged: boolean): void {
+/** Shove a unit across the path (up or down at random), kept inside the band. */
+function shove(s: BattleState, u: Unit, amount: number): void {
+  const dir = nextFloat(s.rng) < 0.5 ? -1 : 1;
+  u.lane = Math.max(-1, Math.min(1, u.lane + dir * amount));
+}
+
+/**
+ * Allies that overlap slide apart across the path, so a crowd fills the width of the road
+ * instead of stacking on one line. Pure position: combat stays left-right only.
+ */
+function separate(s: BattleState): void {
+  const { sepX, sepLane, push } = s.config.band;
+  const live = s.units.filter((u) => u.alive);
+  for (let i = 0; i < live.length; i++) {
+    const a = live[i];
+    for (let j = i + 1; j < live.length; j++) {
+      const b = live[j];
+      if (a.side !== b.side || Math.abs(a.x - b.x) >= sepX) continue;
+      const dl = b.lane - a.lane;
+      if (Math.abs(dl) >= sepLane) continue;
+      const k = push * (1 - Math.abs(dl) / sepLane) * (1 - Math.abs(a.x - b.x) / sepX);
+      // Exactly on top of each other: the newer unit gives way to the near side.
+      const dir = dl !== 0 ? Math.sign(dl) : 1;
+      a.lane = Math.max(-1, Math.min(1, a.lane - dir * k));
+      b.lane = Math.max(-1, Math.min(1, b.lane + dir * k));
+    }
+  }
+}
+
+/** Damage after class matchups and armor. */
+function dealt(s: BattleState, attacker: TroopStats, target: Unit, base: number, ranged: boolean): number {
+  const m = s.config.combat.matchup[attacker.kind]?.[target.def.kind] ?? 1;
+  const armor = ranged && target.def.armor ? target.def.armor : 1;
+  return Math.max(1, Math.round(base * m * armor));
+}
+
+/** Living enemies of `side` within `radius` of x, nearest first (stable by id). */
+function enemiesNear(s: BattleState, side: Side, x: number, radius: number, skip: number): Unit[] {
+  const out: Unit[] = [];
+  for (const e of s.units) if (e.alive && e.side !== side && e.id !== skip && Math.abs(e.x - x) <= radius) out.push(e);
+  return out.sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x) || a.id - b.id);
+}
+
+/** Splash: everyone else around the impact takes a share. */
+function splashAt(s: BattleState, side: Side, attacker: TroopStats, x: number, primary: number, ranged: boolean): void {
+  const r = attacker.splash!;
+  s.events.push({ type: 'splash', x, radius: r, side });
+  for (const e of enemiesNear(s, side, x, r, primary)) hitUnit(s, side, attacker, e, dealt(s, attacker, e, attacker.dmg * s.config.combat.splashShare, ranged), ranged, 'splash');
+}
+
+function hitUnit(s: BattleState, attackerSide: Side, attacker: TroopStats, target: Unit, dmg: number, ranged: boolean, area?: 'splash' | 'pierce' | 'cleave'): void {
   if (!target.alive) return;
-  s.events.push({ type: 'hit', target: target.id, side: target.side, dmg, x: target.x, heavy: attacker.kind === 'tank', ranged });
+  if (attacker.bossDef) shove(s, target, s.config.band.bossShove);
+  else if (attacker.kind === 'tank' && !ranged) shove(s, target, s.config.band.hitShove);
+  s.events.push({ type: 'hit', target: target.id, side: target.side, dmg, x: target.x, heavy: attacker.kind === 'tank', ranged, ...(area ? { area } : {}), ...(target.hp - dmg <= 0 ? { kill: true } : {}) });
   if (attacker.onHit) for (const k of attacker.onHit) applyStatus(s, target, k, attacker.dmg);
   damageUnit(s, target, dmg, attackerSide);
 }
@@ -270,6 +372,7 @@ function landAttack(s: BattleState, u: Unit): void {
       dmg: def.dmg,
       attackerDmg: def.dmg,
       onHit: def.onHit,
+      src: def,
       done: false,
     };
     s.projectiles.push(p);
@@ -285,7 +388,16 @@ function landAttack(s: BattleState, u: Unit): void {
     const n = nearestEnemy(s, u);
     t = n.unit && n.dist <= def.range ? n.unit : undefined;
   }
-  if (t) hitUnit(s, u.side, def, t, def.dmg, false);
+  if (!t) return;
+  const primary = t;
+  const tx = t.x;
+  hitUnit(s, u.side, def, primary, dealt(s, def, primary, def.dmg, false), false);
+  if (def.cleave && def.cleave > 1) {
+    // Cleave: the swing also catches the next enemies within reach.
+    const more = enemiesNear(s, u.side, u.x, def.range + BEHIND_SLACK, primary.id).slice(0, def.cleave - 1);
+    for (const e of more) hitUnit(s, u.side, def, e, dealt(s, def, e, def.dmg * s.config.combat.cleaveShare, false), false, 'cleave');
+  }
+  if (def.splash) splashAt(s, u.side, def, tx, primary.id, false);
 }
 
 function stepUnit(s: BattleState, u: Unit): void {
@@ -351,9 +463,19 @@ function stepProjectiles(s: BattleState): void {
       p.done = true;
       if (p.target === BASE_TARGET) damageBase(s, p.side === 0 ? 1 : 0, p.dmg, false);
       else if (t && t.alive) {
-        s.events.push({ type: 'hit', target: t.id, side: t.side, dmg: p.dmg, x: t.x, heavy: false, ranged: true });
-        if (p.onHit) for (const k of p.onHit) applyStatus(s, t, k, p.attackerDmg);
-        damageUnit(s, t, p.dmg, p.side);
+        const tx = t.x;
+        const primary = t.id;
+        hitUnit(s, p.side, p.src, t, dealt(s, p.src, t, p.dmg, true), true);
+        if (p.src.pierce && p.src.pierce > 1) {
+          // Pierce: the shot carries on through the next enemies behind the target.
+          const dir = p.side === 0 ? 1 : -1;
+          const behind = s.units
+            .filter((e) => e.alive && e.side !== p.side && e.id !== primary && (e.x - tx) * dir >= 0 && (e.x - tx) * dir <= 90)
+            .sort((a, b) => (a.x - b.x) * dir || a.id - b.id)
+            .slice(0, p.src.pierce - 1);
+          for (const e of behind) hitUnit(s, p.side, p.src, e, dealt(s, p.src, e, p.dmg * s.config.combat.pierceShare, true), true, 'pierce');
+        }
+        if (p.src.splash) splashAt(s, p.side, p.src, tx, primary, true);
       } else s.events.push({ type: 'fizzle', projectile: p.id, x: p.x });
     } else p.x += Math.sign(dx) * move;
   }
@@ -374,13 +496,15 @@ function stepEnemySpawns(s: BattleState): void {
   // At most one spawn per tick; a full lane holds the queue instead of banking spawns.
   const next = waveSpawnTime(s.config, s.waveIndex);
   if (next.time <= now + 1e-9 && aliveCount(s, 1) < s.config.maxUnitsPerSide) {
+    const wave = waveNumberAt(s.config, s.waveIndex);
+    if (wave > 0) s.events.push({ type: 'wave', n: wave });
     spawnUnit(s, 1, s.config.enemyTroops[next.kind]);
     s.waveIndex++;
   }
 }
 
 function stepFood(s: BattleState): void {
-  const total = s.config.foodRateMilli + s.foodRemainder;
+  const total = foodRate(s) + s.foodRemainder;
   const gain = Math.floor(total / s.config.tickRate);
   s.foodRemainder = total - gain * s.config.tickRate;
   s.foodMilli += gain;
@@ -405,6 +529,7 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
   stepEnemySpawns(s);
   for (const u of s.units) if (u.alive) tickStatus(s, u);
   for (const u of s.units) if (u.alive) stepUnit(s, u);
+  separate(s);
   stepProjectiles(s);
   if (s.wardUp && s.bossSpawned && !s.units.some((u) => u.id === s.bossId && u.alive)) {
     s.wardUp = false;
@@ -614,7 +739,7 @@ function stepBoss(s: BattleState, u: Unit): void {
 /** Stable digest of the battle state for determinism tests and replays. */
 export function stateHash(s: BattleState): string {
   const parts: (string | number)[] = [s.tick, s.foodMilli, s.playerBaseHp, s.enemyBaseHp, s.waveIndex, s.result ?? '-', s.wardUp ? 1 : 0];
-  for (const u of s.units) parts.push(u.id, u.side, u.x.toFixed(6), u.hp.toFixed(6), u.alive ? 1 : 0);
+  for (const u of s.units) parts.push(u.id, u.side, u.x.toFixed(6), u.lane.toFixed(6), u.hp.toFixed(6), u.alive ? 1 : 0);
   for (const p of s.projectiles) parts.push(p.id, p.x.toFixed(6));
   let h = 2166136261;
   const str = parts.join('|');

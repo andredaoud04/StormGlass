@@ -23,6 +23,23 @@ export interface TroopStats {
   onHit?: StatusKind[];
   /** Boss behaviour; only set on boss units. */
   bossDef?: BossDef;
+  /** Melee hits up to this many enemies in reach. */
+  cleave?: number;
+  /** Shots pass through up to this many enemies. */
+  pierce?: number;
+  /** Area hit radius (lane units) around the target. */
+  splash?: number;
+  /** Damage taken from ranged attacks (0.5 = half). */
+  armor?: number;
+}
+
+/** How traits and class matchups scale damage. */
+export interface CombatRules {
+  /** matchup[attacker kind][defender kind] damage multiplier (default 1). */
+  matchup: Partial<Record<TroopKind, Partial<Record<TroopKind, number>>>>;
+  splashShare: number;
+  cleaveShare: number;
+  pierceShare: number;
 }
 
 /**
@@ -82,6 +99,8 @@ export interface WaveScript {
   spawns: [number, TroopKind][];
   loopFrom: number;
   loopPeriod: number;
+  /** Spawn indices that open a new wave (for the WAVE banner). Each loop repeat is a new wave too. */
+  waveStarts?: number[];
 }
 
 export interface StatusRules {
@@ -91,6 +110,20 @@ export interface StatusRules {
   bossMultiplier: number;
 }
 
+/** How units spread across the width of the path. Positions are -1 (far edge) to 1 (near edge). */
+export interface BandRules {
+  /** Spawn positions are picked in [-spawnSpread, spawnSpread]. */
+  spawnSpread: number;
+  /** Allies closer than sepX lane units (left-right) and sepLane (across) push apart. */
+  sepX: number;
+  sepLane: number;
+  /** Across-the-path push per tick at full overlap. */
+  push: number;
+  /** Across-the-path shove from a heavy hit, and from a boss strike or charge. */
+  hitShove: number;
+  bossShove: number;
+}
+
 export interface BattleConfig {
   seed: number;
   tickRate: number;
@@ -98,6 +131,8 @@ export interface BattleConfig {
   spawnOffset: number;
   maxUnitsPerSide: number;
   projectileSpeed: number;
+  band: BandRules;
+  combat: CombatRules;
   /** Player Food income in milli-Food per second (1000 = 1 Food/s). */
   foodRateMilli: number;
   playerBaseHp: number;
@@ -121,6 +156,19 @@ export interface BattleConfig {
   boss?: TroopStats;
   /** Stormcall, once unlocked: a lightning strike on the enemy nearest your fortress. */
   skill?: SkillConfig;
+  /** Food you start the battle with (milli-Food). */
+  startFoodMilli?: number;
+  /** In-battle Food upgrade, once unlocked. */
+  kitchen?: KitchenConfig;
+}
+
+/** The in-battle Food upgrade: spend Food to raise Food income for the rest of the battle. */
+export interface KitchenConfig {
+  baseCostMilli: number;
+  growth: number;
+  /** Income added per level, as a fraction of the starting rate. */
+  perLevel: number;
+  maxLevel: number;
 }
 
 export interface SkillConfig {
@@ -143,8 +191,8 @@ export interface Unit {
   def: TroopStats;
   x: number;
   prevX: number;
-  /** Visual depth jitter in art pixels, picked from the seeded RNG. */
-  depth: number;
+  /** Position across the width of the path, -1 (far edge) to 1 (near edge). Does not affect combat. */
+  lane: number;
   hp: number;
   maxHp: number;
   /** Ticks until the next attack may start. */
@@ -176,6 +224,8 @@ export interface Projectile {
   dmg: number;
   attackerDmg: number;
   onHit?: StatusKind[];
+  /** The shooter's stats (traits and matchups apply on impact). */
+  src: TroopStats;
   done: boolean;
 }
 
@@ -184,13 +234,16 @@ export type BattleResult = 'victory' | 'defeat' | 'retreat' | null;
 export type Command =
   | { type: 'deploy'; slot: number }
   | { type: 'skill' }
+  | { type: 'kitchen' }
   | { type: 'retreat' };
 
 export type SimEvent =
   | { type: 'spawn'; id: number; side: Side }
   | { type: 'swing'; id: number }
   | { type: 'shoot'; id: number; projectile: number }
-  | { type: 'hit'; target: number; side: Side; dmg: number; x: number; heavy: boolean; ranged: boolean }
+  | { type: 'hit'; target: number; side: Side; dmg: number; x: number; heavy: boolean; ranged: boolean; area?: 'splash' | 'pierce' | 'cleave'; kill?: boolean }
+  | { type: 'splash'; x: number; radius: number; side: Side }
+  | { type: 'wave'; n: number }
   | { type: 'baseHit'; side: Side; dmg: number; heavy: boolean }
   | { type: 'dot'; target: number; kind: 'poison' | 'burn'; dmg: number; x: number }
   | { type: 'status'; target: number; kind: StatusKind }
@@ -204,6 +257,7 @@ export type SimEvent =
   | { type: 'bossDash'; id: number }
   | { type: 'bossBlink'; id: number; from: number; to: number }
   | { type: 'skill'; x: number; radius: number }
+  | { type: 'kitchen'; level: number }
   | { type: 'skillFail'; reason: 'locked' | 'cooldown' | 'target' }
   | { type: 'wardHit'; dmg: number }
   | { type: 'wardBreak' }
@@ -234,6 +288,8 @@ export interface BattleState {
   bossMilestonesPaid: number;
   /** Ticks until Stormcall is ready. */
   skillCooldown: number;
+  /** In-battle Food upgrade level bought this battle. */
+  kitchenLevel: number;
   skillsUsed: number;
   baseMilestonesPaid: number;
   kills: number;

@@ -2,16 +2,21 @@
 import type { App, Scene } from '../app';
 import { BALANCE, ageDef } from '../game/balance';
 import { buildBattleConfig, isBossStage } from '../game/battleSetup';
-import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
+import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, kitchenUnlocked, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
 import { foodRateMilli, fortressMul } from '../game/upgrades';
-import { createBattle, food, stepBattle, totalGold } from '../sim/battle';
+import { createBattle, food, foodRate, kitchenCost, stepBattle, totalGold, waveComposition } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
 import { BattleView } from '../view/battleView';
 
 const MAX_STEPS_PER_FRAME = 6;
 /** World pixels of each fortress left on screen in front of its anchor (the rest is off the edge). */
-const BASE_INSET = 30;
+const BASE_INSET = 26;
+/** UI heights: the thin top bar and the slim bottom bar that holds Food and the cards. */
+const TOP_BAR = 26;
+/** World pixels units spread above and below the path's centre line (the road is about 120 rows wide). */
+const BAND_HALF = 50;
+const BOTTOM_BAR = 46;
 
 interface Coin {
   x: number;
@@ -55,6 +60,8 @@ export class BattleScene implements Scene {
   /** Replaying an earlier battle (no frontier progress, same Gold). */
   private readonly replay: boolean;
   private bossIntroT = -1;
+  /** WAVE banner: number, what it brings, and how long it has shown. */
+  private wave = { n: 0, t: 9, text: '' };
   private bossBarShown = 0;
   private hudTop = 0;
   private deployedOnce = false;
@@ -79,6 +86,7 @@ export class BattleScene implements Scene {
       fortressMul: fortressMul(s),
       campaign: true,
       stormcall: stormcallUnlocked(s),
+      kitchen: kitchenUnlocked(s),
     });
     this.sim = createBattle(config);
     this.wallKey = app.assets.has(`ui.wall_${ageDef(this.enemyAge).id}`) ? `ui.wall_${ageDef(this.enemyAge).id}` : 'ui.wall_stone';
@@ -99,11 +107,13 @@ export class BattleScene implements Scene {
   /** Layout in world pixels; the HUD (UI pixels) sits under the ground line. */
   private layout() {
     const { h } = this.app;
-    const hudH = Math.max(98, Math.min(112, Math.round(h * 0.24)));
-    this.hudTop = h - hudH;
+    // Skill sockets float over the meadow just above the bottom bar.
+    this.hudTop = h - BOTTOM_BAR - 46;
     const k = this.app.worldToUi;
     const ww = this.app.screen.size.ww;
-    return { groundY: Math.floor((this.hudTop - 22) / k), laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
+    // The lane sits a little below the middle of the screen, as in We Are Warriors.
+    const groundUi = Math.round(TOP_BAR + (h - TOP_BAR - BOTTOM_BAR) * 0.56);
+    return { groundY: Math.floor(groundUi / k), bandHalf: BAND_HALF, laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
   }
 
   /** World x/y to UI x/y. */
@@ -119,6 +129,7 @@ export class BattleScene implements Scene {
   key(k: string): void {
     if (k === '1' || k === '2' || k === '3') this.deploy(Number(k) - 1);
     if (k === '4' || k === 'q') this.cast();
+    if (k === '5' || k === 'w') this.buyKitchen();
     if (k === 'Escape' || k === 'p') this.paused = !this.paused;
     if (k === 'blur' && this.phase === 'play') this.paused = true;
   }
@@ -141,6 +152,41 @@ export class BattleScene implements Scene {
   }
 
   private skillShake = 0;
+
+  /** Kitchen: spend Food now to earn more Food for the rest of the battle (the WAW meat button). */
+  private buyKitchen(): void {
+    if (this.phase !== 'play' || this.paused) return;
+    const c = kitchenCost(this.sim);
+    if (c === null) return;
+    if (this.sim.foodMilli < c) {
+      this.app.sfx('nope', { vol: 0.5 });
+      return;
+    }
+    if (!this.pending.some((p) => p.type === 'kitchen')) this.pending.push({ type: 'kitchen' });
+  }
+
+  private drawKitchen(cx: number, top: number): void {
+    const app = this.app;
+    const d = app.draw;
+    const c = kitchenCost(this.sim);
+    const ok = c !== null && this.sim.foodMilli >= c && this.phase === 'play';
+    const fi = app.assets.image('icon.food');
+    d.image('icon.food', Math.round(cx - fi.w / 2) - 2, top + 6, { alpha: ok || c === null ? 1 : 0.6 });
+    d.image('icon.up', cx + 2, top + 11, { alpha: ok ? 1 : 0.6 });
+    // Price (in Food) inside the circle, and level pips along its lower rim.
+    if (c === null) d.text('MAX', cx, top + 20, { align: 'center', color: '#ffe68a' });
+    else d.text(String(Math.ceil(c / 1000)), cx, top + 20, { align: 'center', color: ok ? '#fff8ec' : '#ff8a8a' });
+    const max = this.sim.config.kitchen!.maxLevel;
+    for (let k = 0; k < max; k++) d.rect(cx - max * 2 + k * 4, top + 29, 3, 2, k < this.sim.kitchenLevel ? '#ffd03c' : '#3a2a30');
+    if (ok) {
+      const pulse = 0.35 + 0.35 * Math.sin(app.time * 6);
+      for (let a = 0; a < 20; a++) {
+        const th = (a / 20) * Math.PI * 2;
+        d.rect(Math.round(cx + Math.cos(th) * 14), Math.round(top + 16 + Math.sin(th) * 14), 1, 1, '#ffd03c', pulse);
+      }
+    }
+    if (this.phase === 'play' && !this.paused) app.input.region({ id: 'kitchen', x: cx - 14, y: top + 2, w: 28, h: 40, onTap: () => this.buyKitchen(), onDown: true });
+  }
 
   /** Stormcall: queue the cast; the sim decides if it fires (ready, a target in reach). */
   private cast(): void {
@@ -191,6 +237,7 @@ export class BattleScene implements Scene {
     dt = Math.min(dt, 0.1);
     this.introT += dt;
     if (this.bossIntroT >= 0) this.bossIntroT += dt;
+    this.wave.t += dt;
     if (this.sim.bossSpawned) this.bossBarShown = Math.min(1, this.bossBarShown + dt * 3);
     this.goldBump = Math.max(0, this.goldBump - dt);
     this.foodBump = Math.max(0, this.foodBump - dt);
@@ -220,6 +267,12 @@ export class BattleScene implements Scene {
         const events = stepBattle(this.sim, this.pending.splice(0));
         this.view.onEvents(events);
         for (const e of events) {
+          if (e.type === 'wave') {
+            const c = waveComposition(this.sim.config, this.sim.waveIndex);
+            const parts = [c.melee ? `${c.melee} MELEE` : '', c.ranged ? `${c.ranged} RANGED` : '', c.tank ? `${c.tank} TANK${c.tank > 1 ? 'S' : ''}` : ''].filter(Boolean);
+            this.wave = { n: e.n, t: 0, text: parts.join('  ') };
+            if (e.n >= 2) this.app.sfx('fight', { vol: 0.35, jitter: 0 });
+          }
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
             if (!this.app.reducedMotion) this.slowmo = 0.6;
@@ -255,7 +308,7 @@ export class BattleScene implements Scene {
     this.lastFood = f;
     this.sim.config.playerTroops.forEach((t, i) => {
       const ready = f >= t.cost;
-      if (ready && !this.cardReady[i] && this.phase === 'play') this.app.sfx('ready', { vol: 0.35, minGapMs: 120 });
+      if (ready && !this.cardReady[i] && this.phase === 'play' && t.cost >= 12) this.app.sfx('ready', { vol: 0.3, minGapMs: 1500 });
       this.cardReady[i] = ready;
     });
 
@@ -281,6 +334,7 @@ export class BattleScene implements Scene {
     this.drawHud();
     this.drawCoins();
     this.drawBossBar();
+    if (this.phase === 'play' && this.wave.n > 0) this.drawWave();
     if (this.phase === 'play' && this.introT < 1.3) this.drawIntro();
     if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.4) this.drawBossIntro();
     if (this.phase === 'result') this.drawResult();
@@ -298,6 +352,35 @@ export class BattleScene implements Scene {
     const boss = isBossStage(this.stage);
     d.text(boss ? 'BOSS BATTLE!' : 'FIGHT!', this.app.w / 2, y, { font: 'big', color: boss ? '#ff7a5a' : '#ffd03c', shadow: true, align: 'center', alpha: a });
     if (boss) d.text('BREAK THE WARD: DEFEAT THE BOSS', this.app.w / 2, y + 13, { align: 'center', color: '#fff8ec', alpha: a });
+  }
+
+  /** WAVE pill under the top bar, with what the wave brings (pick troops that counter it). */
+  /**
+   * Persistent WAVE pill under the top bar (as in We Are Warriors), with a bar counting down to the
+   * next wave. When a wave arrives the pill pops and names what it brings for a moment.
+   */
+  private drawWave(): void {
+    const app = this.app;
+    const d = app.draw;
+    const t = this.wave.t;
+    const fresh = t < 2.2;
+    const pop = t < 0.2 ? Math.round((0.2 - t) * -20) : 0;
+    const label = `WAVE ${this.wave.n}`;
+    const pw = Math.max(d.measure(label, 'big') + 20, fresh ? d.measure(this.wave.text) + 16 : 0, 60);
+    const ph = fresh ? 28 : 20;
+    const x = Math.round(app.w / 2 - pw / 2);
+    const y = TOP_BAR + (this.sim.bossSpawned ? 44 : 22) + pop;
+    d.rect(x, y, pw, ph, '#1e1526', 0.8);
+    d.rect(x + 1, y + 1, pw - 2, 1, fresh ? '#ffd03c' : '#4a3a58');
+    d.text(label, app.w / 2, y + 4, { font: 'big', align: 'center', color: fresh ? '#ffd03c' : '#fff8ec', shadow: true });
+    if (fresh) d.text(this.wave.text, app.w / 2, y + 18, { align: 'center', color: '#fff8ec', alpha: Math.min(1, (2.2 - t) / 0.4) });
+    // Countdown to the next wave.
+    const period = BALANCE.waves.stream.period;
+    const p = Math.min(1, (this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt) / period) % 1;
+    const frac = ((this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt) % period) / period;
+    void p;
+    d.rect(x + 3, y + ph - 3, pw - 6, 1, '#3a2a48');
+    d.rect(x + 3, y + ph - 3, Math.round((pw - 6) * frac), 1, frac > 0.8 ? '#ff7a5a' : '#cfe0a0');
   }
 
   /** Banner when the boss walks out. */
@@ -327,7 +410,7 @@ export class BattleScene implements Scene {
     const max = boss?.maxHp ?? 1;
     const bw = Math.min(150, app.w - 40);
     const x = Math.round(app.w / 2 - bw / 2);
-    const y = 40 - Math.round((1 - this.bossBarShown) * 10);
+    const y = TOP_BAR + 26 - Math.round((1 - this.bossBarShown) * 10);
     const a = this.bossBarShown;
     d.image('icon.skull', x - 11, y - 2, { alpha: a });
     d.rect(x - 1, y - 1, bw + 2, 7, '#1e1526', a);
@@ -342,23 +425,24 @@ export class BattleScene implements Scene {
     d.text(`${this.bossName}  ${tag}`, app.w / 2, y + 8, { align: 'center', color: boss?.alive ? '#fff8ec' : '#a8e070', alpha: a });
   }
 
+  /** Thin top bar: Gold, the battle number, pause; double speed and the stage pips just under it. */
   private drawHeader(): void {
     const app = this.app;
     const d = app.draw;
+    d.rect(0, 0, app.w, TOP_BAR, '#2a2236');
+    d.rect(0, TOP_BAR, app.w, 1, '#1e1526');
+    d.rect(0, TOP_BAR - 1, app.w, 1, '#3e3450');
     const bump = this.goldBump > 0 ? -1 : 0;
-    counter(app, 10, 5 + bump, 40, 'gold', '+' + fmt(this.goldShown), '#ffe68a');
-    const title = ageDef(this.enemyAge).name.toUpperCase() + ' AGE';
-    const tw = d.measure(title, 'big');
-    const pw = Math.min(app.w - 110, Math.max(72, tw + 28));
-    d.nine('ui.plaque', Math.round(app.w / 2 - pw / 2), 3, pw, 24);
-    d.text(title, app.w / 2, 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    this.drawPips(app.w / 2 + 14, 30);
-    d.text(`BATTLE ${battleNumber({ age: this.enemyAge, stage: this.stage })}`, app.w / 2 - 10, 30, { align: 'right', color: this.replay ? '#cfe0a0' : '#fff8ec' });
+    counter(app, 6, 6 + bump, 44, 'gold', '+' + fmt(this.goldShown), '#ffe68a');
+    const n = battleNumber({ age: this.enemyAge, stage: this.stage });
+    d.text(`BATTLE ${n}`, app.w / 2, 7, { font: 'big', align: 'center', color: this.replay ? '#cfe0a0' : '#fff8ec', shadow: true });
+    d.text(ageDef(this.enemyAge).name.toUpperCase() + (this.replay ? ' REPLAY' : ''), app.w / 2, TOP_BAR + 4, { align: 'center', color: '#fff8ec' });
+    this.drawPips(app.w / 2, TOP_BAR + 13);
     if (this.phase === 'play') {
-      iconButton(app, 'pause', app.w - 24, 4, 20, 'pause', () => (this.paused = true));
+      iconButton(app, 'pause', app.w - 24, 3, 20, 'pause', () => (this.paused = true));
       if (speedUnlocked(app.save)) {
         const on = app.save.settings.fast;
-        button(app, 'speed', app.w - 48, 4, 22, 20, on ? 'X2' : 'X1', () => {
+        button(app, 'speed', 6, TOP_BAR + 4, 26, 16, on ? 'X2' : 'X1', () => {
           app.save.settings.fast = !app.save.settings.fast;
           app.persist();
         }, { style: on ? 'gold' : 'wood', font: 'small' });
@@ -417,21 +501,29 @@ export class BattleScene implements Scene {
     const d = app.draw;
     const { w, h } = app;
     const top = this.hudTop;
-    d.image(this.wallKey, Math.floor(w / 2), top);
+    // Slim bottom bar in the Age's own wall material.
+    const barTop = h - BOTTOM_BAR;
+    d.image(this.wallKey, Math.floor(w / 2), barTop);
+    d.rect(0, barTop - 1, w, 1, '#1e1526', 0.6);
 
     // Hero medallion, raised on the left (locked until the first Prestige).
     const heroUnlocked = app.save.prestige > 0;
-    d.image('ui.hero_socket', 24, top + 4);
-    d.image('icon.lock', 20, top + 1, { alpha: heroUnlocked ? 0 : 0.75 });
+    d.image('ui.hero_socket', 24, top + 4, { alpha: heroUnlocked ? 1 : 0.35 });
 
     // Three Skill sockets in a row on the right; the first (leftmost) holds Stormcall once unlocked.
     for (let i = 0; i < 3; i++) {
       const cx = w - 18 - i * 30;
       const storm = i === 2 && !!this.sim.config.skill;
+      const kitchen = i === 1 && !!this.sim.config.kitchen;
       const sh = storm && this.skillShake > 0 ? Math.round(Math.sin(this.skillShake * 80) * 2) : 0;
+      // Sockets that hold nothing yet stay dim and quiet (no padlocks cluttering the field).
+      if (!storm && !kitchen) {
+        d.image('ui.skill_socket', cx, top + 20, { alpha: 0.35 });
+        continue;
+      }
       d.image('ui.skill_socket', cx + sh, top + 20);
-      if (!storm) {
-        d.image('icon.lock', cx - 4, top + 17, { alpha: 0.55 });
+      if (kitchen) {
+        this.drawKitchen(cx, top);
         continue;
       }
       const sk = this.sim.config.skill!;
@@ -458,7 +550,7 @@ export class BattleScene implements Scene {
 
     // Food and rate, lower left.
     const fx = 5;
-    const fy = h - 50;
+    const fy = h - BOTTOM_BAR + 1;
     const fw = 48;
     d.nine('ui.small_plaque', fx, fy, fw, 45);
     const f = food(this.sim);
@@ -470,14 +562,15 @@ export class BattleScene implements Scene {
     d.rect(fx + 6, fy + 29, fw - 12, 3, '#120c18');
     d.rect(fx + 6, fy + 29, Math.round((fw - 12) * frac), 3, '#e8a020');
     d.rect(fx + 6, fy + 29, Math.round((fw - 12) * frac), 1, '#ffd03c');
-    const rate = this.sim.config.foodRateMilli / 1000;
+    const rate = foodRate(this.sim) / 1000;
     d.text(`+${rate % 1 ? rate.toFixed(1) : rate}/S`, fx + fw / 2, fy + 35, { align: 'center', color: '#a8e070' });
 
     // Troop cards, lower right.
     const cw = 38;
     const gap = 3;
     const x0 = w - 5 - (3 * cw + 2 * gap) - 2;
-    const cy = h - 52;
+    // Cards stand up out of the bar.
+    const cy = h - BOTTOM_BAR - 8;
     for (let i = 0; i < 3; i++) {
       const x = x0 + i * (cw + gap);
       const id = this.troops[i];

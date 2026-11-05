@@ -1,5 +1,5 @@
 import raw from '../data/balance.json';
-import type { BossDef, StatusRules, TroopKind } from '../sim/types';
+import type { BandRules, BossDef, CombatRules, StatusKind, StatusRules, TroopKind } from '../sim/types';
 
 export type AgeId = 'stone' | 'ancient' | 'crusader' | 'gunpowder' | 'industrial' | 'future';
 export const AGE_IDS: AgeId[] = ['stone', 'ancient', 'crusader', 'gunpowder', 'industrial', 'future'];
@@ -14,6 +14,7 @@ export interface TroopDef {
   interval: number;
   range: number;
   speed: number;
+  traits?: { cleave?: number; pierce?: number; splash?: number; armor?: number; onHit?: StatusKind[] };
 }
 
 export interface AgeDef {
@@ -50,12 +51,21 @@ export interface UpgradeRules {
   tracks: Record<UpgradeId, UpgradeTrack>;
 }
 
-/** One stage's hand-made wave: groups as "second:units" (m, r, t), e.g. "8:mm 20:mr". */
+/** One stage's hand-made recipe: groups as "second:units" (m, r, t). The unit letters, in order, are the stage's wave recipe. */
 export interface StageWave {
   groups: string;
-  /** Index of the first group in the repeating tail. */
-  loopFrom: number;
-  loopPeriod: number;
+}
+
+export interface WaveStream {
+  period: number;
+  firstAt: number;
+  clumpGap: number;
+  baseSize: number;
+  growth: number;
+  maxWave: number;
+  trickle: number;
+  waves: number;
+  stageSize: number[];
 }
 
 export interface BossInfo extends Omit<BossDef, 'move'> {
@@ -70,16 +80,17 @@ export interface BossInfo extends Omit<BossDef, 'move'> {
 
 export interface Balance {
   version: number;
-  sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number };
-  economy: { startingGold: number; goldPerKill: number; goldPerTankKill: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
+  sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number; band: BandRules };
+  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
   status: StatusRules;
   ages: AgeDef[];
-  waves: Record<AgeId, StageWave[]> & { groupGap: number };
+  waves: Record<AgeId, StageWave[]> & { density: number[]; stream: WaveStream };
+  combat: CombatRules;
   upgrades: UpgradeRules;
   evolution: { cost: number[] };
   campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[] };
   bosses: Record<AgeId, BossInfo>;
-  skills: { stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
+  skills: { kitchen: { name: string; costMul: number; growth: number; perLevel: number; maxLevel: number; unlockStage: number }; stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
   timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number; goldGrowthPerTimeline: number };
 }
 
