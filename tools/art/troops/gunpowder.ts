@@ -1,14 +1,15 @@
 /** Gunpowder Age troops: morions and pikes, tricornes and muskets, and a crewed field cannon. */
 import { Img, hex, mix, rotSprite } from '../img';
-import { BRONZE, FELT, FIRE, INK, IRON, WHITE, WOOD, type Ramp } from '../palette';
+import { BRONZE, FELT, FIRE, INK, IRON, WHITE, WOOD, teamTint, type Ramp } from '../palette';
 import { buildFrame, rotateFrame, type AnimSpec, type Pose, type RigParts } from '../rig';
 import { darkOf, grid, groups, hurtHead, palOf } from './kit';
 import { toGround } from './anims';
 
-const over = { extra: FELT };
+/** Hats and coats dyed in the team colour so the two armies read apart (D39). */
+const overOf = (team: Ramp) => ({ extra: teamTint(FELT, team, 0.5) });
 
 export function pikemanRig(team: Ramp): RigParts {
-  const gs = groups(team, over);
+  const gs = groups(team, overOf(team));
   const p = palOf(gs);
   const dk = darkOf(gs);
   // Steel morion with a comb, cavalier moustache.
@@ -62,7 +63,7 @@ const TRICORNE = [
 ];
 
 export function musketeerRig(team: Ramp): RigParts {
-  const gs = groups(team, over);
+  const gs = groups(team, overOf(team));
   const p = palOf(gs);
   const dk = darkOf(gs);
   const head = [
@@ -104,7 +105,7 @@ export function musketeerRig(team: Ramp): RigParts {
 /** Gun crew: a musketeer holding a linstock with a smouldering match. */
 function gunnerRig(team: Ramp): RigParts {
   const r = musketeerRig(team);
-  const p = palOf(groups(team, over));
+  const p = palOf(groups(team, overOf(team)));
   const linstock = ['F..', 'oF.', '.B.', '.B.', '.B.', '.B.', '.B.', '.B.', '.B.', '.b.', '.b.'];
   p.F = FIRE.base;
   p.o = FIRE.hl;
@@ -118,10 +119,12 @@ export interface CannonRig {
   frameH: number;
   hip: [number, number];
   crew: RigParts;
+  /** Carriage paint: the team colour on the gun's biggest mass (D39). */
+  paint: { hl: number; base: number; shade: number; deep: number };
 }
 
 export function cannonRig(team: Ramp): CannonRig {
-  return { frameW: 64, frameH: 46, hip: [30, 37], crew: gunnerRig(team) };
+  return { frameW: 64, frameH: 46, hip: [30, 37], crew: gunnerRig(team), paint: teamTint(WOOD, team, 0.55) };
 }
 
 const GROUND = 41;
@@ -168,12 +171,12 @@ function barrel(): Img {
   return img.outlined(INK);
 }
 
-function carriage(broken: boolean): Img {
+function carriage(broken: boolean, paint: { hl: number; base: number; shade: number; deep: number }): Img {
   const img = new Img(64, 46);
   const pts: [number, number][] = broken
     ? [[24, 36], [40, 34], [41, 38], [22, 41], [14, 41], [14, 39]]
     : [[31, 27], [42, 27], [42, 32], [36, 36], [20, 41], [15, 41], [15, 39]];
-  img.poly(pts, (x, y) => (y < 29 && !broken ? WOOD.hl : x > 38 ? WOOD.shade : (x + y) % 9 === 0 ? WOOD.shade : WOOD.base));
+  img.poly(pts, (x, y) => (y < 29 && !broken ? paint.hl : x > 38 ? paint.shade : (x + y) % 9 === 0 ? paint.shade : paint.base));
   // Iron fittings.
   if (!broken) {
     img.hline(32, 41, 27, IRON.base);
@@ -225,7 +228,7 @@ function cannonFrame(c: CannonRig, q: CannonPose): Img {
   f.blit(crew, 10 + dx + (q.crewDx ?? 0) - c.crew.hip[0], GROUND - (c.crew.hip[1] + 4));
   // Far wheel peeks out behind the carriage.
   f.blit(wheel((q.wheel ?? 0) + 30, true), AXLE[0] - 10 + dx, AXLE[1] - 10);
-  f.blit(carriage(!!q.broken), dx, 0);
+  f.blit(carriage(!!q.broken, c.paint), dx, 0);
   // Barrel on its trunnion.
   const b = barrel();
   const bx = TRUNNION[0] - 12 + dx + (q.recoil ?? 0);

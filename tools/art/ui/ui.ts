@@ -252,7 +252,7 @@ export function tabButton(selected: boolean): UiPiece {
     img.vline(0, 0, H - 1, GOLD.shade);
     img.vline(W - 1, 0, H - 1, GOLD.deep);
   }
-  return { img: roundCorners(img.outlined(INK), 2), desc: selected ? 'Selected tab (raised, gold trim).' : 'Tab.' };
+  return { img: roundCorners(img.outlined(INK), 2), slice: [6, 6, 6, 5], desc: selected ? 'Selected tab (raised, gold trim). 9-slice.' : 'Tab. 9-slice.' };
 }
 
 export function tabBar(): UiPiece {

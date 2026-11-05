@@ -46,6 +46,13 @@ export class App {
   get h(): number {
     return this.worldPass ? this.screen.size.wh : this.screen.size.h;
   }
+  /** Safe-area insets in UI pixels: nothing tappable or written goes inside them. */
+  get safeTop(): number {
+    return this.screen.insetTop;
+  }
+  get safeBottom(): number {
+    return this.screen.insetBottom;
+  }
   /** World pixels to UI pixels. */
   get worldToUi(): number {
     return this.screen.size.worldScale / this.screen.size.scale;

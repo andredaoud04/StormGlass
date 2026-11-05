@@ -2,7 +2,7 @@
  * Stormglass master palette (original). Ramps go highlight -> base -> shade -> deep.
  * Every generated asset draws from these ramps so the whole game reads as one set.
  */
-import { hex } from './img';
+import { hex, mix as mixC } from './img';
 
 export const INK = hex('#1e1526'); // universal outline
 export const INK2 = hex('#3b2a40'); // soft inner line
@@ -42,3 +42,11 @@ export const BRICK = { hl: hex('#e28a6a'), base: hex('#b8573e'), shade: hex('#8c
 export const ALLOY = { hl: hex('#f2f6fb'), base: hex('#c6d0dc'), shade: hex('#8e9aae'), deep: hex('#5a6680') };
 export const SUIT = { hl: hex('#5e6688'), base: hex('#404668'), shade: hex('#2c304e'), deep: hex('#1e2038') };
 export const PLASMA = { hl: hex('#ffffff'), base: hex('#c4fbff'), shade: hex('#5ce6ff'), deep: hex('#2a9cf0') };
+
+/**
+ * A material ramp dyed toward a team colour (D39 team readability: at least 15% of a troop's
+ * pixels carry its team, on the main mass, not only on trim).
+ */
+export function teamTint<T extends { hl: number; base: number; shade: number; deep: number }>(base: T, team: { hl: number; base: number; shade: number; deep: number }, t: number): { hl: number; base: number; shade: number; deep: number } {
+  return { hl: mixC(base.hl, team.hl, t), base: mixC(base.base, team.base, t), shade: mixC(base.shade, team.shade, t), deep: mixC(base.deep, team.deep, t) };
+}

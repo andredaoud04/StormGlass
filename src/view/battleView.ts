@@ -230,7 +230,8 @@ export class BattleView {
           // Damage numbers grow with the size of the hit.
           const big = e.dmg >= this.bigHit;
           if (e.side === 1 || big) {
-            this.fx.text(String(Math.round(e.dmg)), v.px + (Math.random() * 6 - 3), G + v.depth + v.top - 4, {
+            // Hits on the same unit inside a short window merge into one rising number.
+            this.fx.number(`u${v.id}`, e.dmg, v.px, G + v.depth + v.top - 4, {
               color: e.side === 0 ? '#ff8a8a' : big ? '#ffb03c' : e.heavy || e.area ? '#ffd03c' : '#fff8ec',
               font: big ? 'big' : 'small',
             });
@@ -297,7 +298,8 @@ export class BattleView {
           for (let i = 0; i < (e.heavy ? 4 : 2); i++) {
             this.fx.add('fx.debris', fx, hy, { vx: away * (20 + Math.random() * 40) - away * 30, vy: -30 - Math.random() * 50, gravity: 260, life: 0.7, fps: 14 });
           }
-          this.fx.text(String(Math.round(e.dmg)), fx + away * 10, hy - 6, { color: e.side === 1 ? '#ffd03c' : '#ff8a8a', font: 'big' });
+          // Fortress damage is one running total that bumps, not a tower of numbers.
+          this.fx.number(`base${e.side}`, e.dmg, fx + away * 10, G - 52, { color: e.side === 1 ? '#ffd03c' : '#ff8a8a', font: 'big', merge: 0.9, life: 1.1 });
           if (e.heavy) this.shake.add(2, 0.15);
           this.app.sfx('base_hit', { vol: 0.6, minGapMs: 70 });
           this.hooks.onBaseHit?.(e.side);
@@ -543,10 +545,16 @@ export class BattleView {
 
     // Shadows first, then units sorted by depth.
     const list = [...this.units.values()].sort((a, b) => a.depth - b.depth || a.id - b.id);
+    // Opaque contact shadows in the road's own deep tone (D39): they place each unit at its depth.
+    const shadow = String(this.app.assets.meta(`env.${this.env.age}`).shadow ?? '#3a2a2e');
     for (const v of list) {
-      const w = v.id === this.sim.bossId ? 14 : v.kind === 'tank' ? 9 : 6;
-      d.rect(v.px - w + sx, G + v.depth + sy, w * 2, 1, '#1e1526', v.dying ? 0.15 : 0.28);
-      d.rect(v.px - w + 1 + sx, G + v.depth + 1 + sy, w * 2 - 2, 1, '#1e1526', v.dying ? 0.08 : 0.16);
+      if (v.dying && v.deathT > 0.5) continue;
+      const boss = v.id === this.sim.bossId;
+      const w = boss ? 14 : v.kind === 'tank' ? 8 : 5;
+      const rows = boss ? [w - 4, w - 1, w, w - 1, w - 4] : [w - 2, w, w - 2];
+      const x = Math.round(v.px + sx);
+      const y0 = G + v.depth + sy - Math.floor(rows.length / 2) + 1;
+      rows.forEach((hw, j) => d.rect(x - hw, y0 + j, hw * 2, 1, shadow));
     }
     for (const v of list) {
       const [anim, idx] = this.frameIndex(v);
@@ -560,7 +568,7 @@ export class BattleView {
       d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, alpha });
       if (v.flash > 0) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.85 });
       // Poisoned, burning or chilled: a soft pulse so status effects are visible.
-      if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.18 + 0.12 * Math.sin(this.t * 20) });
+      if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, tint: v.statusColor, alpha: 0.4 + 0.15 * Math.sin(this.t * 12) });
       // HP bar when hurt (the boss has its own bar in the HUD).
       if (v.hpShow > 0 && !v.dying && v.hp < v.maxHp && v.id !== this.sim.bossId) {
         const bw = v.kind === 'tank' ? 16 : 12;

@@ -1,11 +1,12 @@
 /** Industrial Age troops: steel helmets, puttees and rifles, and a riveted Steam Walker. */
 import { hex, type Img } from '../img';
-import { BRONZE, DRAB, IRON, KHAKI, WHITE, type Ramp } from '../palette';
+import { BRONZE, DRAB, IRON, KHAKI, WHITE, teamTint, type Ramp } from '../palette';
 import type { RigParts } from '../rig';
 import { darkOf, grid, groups, hurtHead, palOf } from './kit';
 import { bipedAnims, bipedFrame, type BipedRig } from './machines';
 
-const over = { extra: DRAB, extra2: KHAKI };
+/** Helmets painted in the team colour so the two armies read apart in a crowd (D39). */
+const overOf = (team: Ramp) => ({ extra: teamTint(DRAB, team, 0.5), extra2: KHAKI });
 
 const BRODIE = ['....FFGGG.....', '...FGGGGGGf...', '..FGGGGGGGGf..', 'fGGGGGGGGGGGGf', '.EEEEEEEEEEEE.'];
 
@@ -16,7 +17,7 @@ function soldierHead(): { head: string[]; hurt: string[] } {
 }
 
 function base(team: Ramp, weapon: { img: Img; pivot: [number, number] }, back?: { img: Img; pivot: [number, number] }): RigParts {
-  const gs = groups(team, over);
+  const gs = groups(team, overOf(team));
   const p = palOf(gs);
   const dk = darkOf(gs);
   const { head, hurt } = soldierHead();
@@ -44,13 +45,13 @@ function base(team: Ramp, weapon: { img: Img; pivot: [number, number] }, back?: 
 }
 
 export function trencherRig(team: Ramp): RigParts {
-  const p = palOf(groups(team, over));
+  const p = palOf(groups(team, overOf(team)));
   const club = ['.q.q.', 'qgggp', '.ggp.', 'qgggp', '.ggp.', '..B..', '..B..', '..B..', '..b..', '..L..', '..L..'];
   return base(team, { img: grid(club, p), pivot: [2, 9] });
 }
 
 export function riflemanRig(team: Ramp): RigParts {
-  const p = palOf(groups(team, over));
+  const p = palOf(groups(team, overOf(team)));
   const rifle = ['.q..', '.p..', '.p..', '.p..', '.pB.', '.pB.', '.pB.', '.pB.', '.pB.', '.pBb', 'qpBb', '.zBb', '..Bb', '.CBb', 'CBBb', 'CBBb', 'BBbb', 'bbD.'];
   const pack = ['.uu.', 'iIiu', 'iIiu', 'iiuu', '.uu.'];
   return base(team, { img: grid(rifle, p), pivot: [1, 11] }, { img: grid(pack, p), pivot: [5, 1] });
@@ -59,7 +60,7 @@ export function riflemanRig(team: Ramp): RigParts {
 // ---------- Steam Walker ----------
 
 function walkerBody(team: Ramp, hurt: boolean): Img {
-  const gs = groups(team, { ...over, metal: IRON });
+  const gs = groups(team, { ...overOf(team), metal: teamTint(IRON, team, 0.38) });
   const p = palOf(gs);
   const rows = [
     '..PP................',
@@ -87,7 +88,7 @@ function walkerBody(team: Ramp, hurt: boolean): Img {
 }
 
 export function walkerRig(team: Ramp): BipedRig {
-  const p = palOf(groups(team, { metal: IRON }));
+  const p = palOf(groups(team, { metal: teamTint(IRON, team, 0.38) }));
   const arm = ['.qgp.', 'qggpP', '.zxx.', '.zx..', '.zx..', '.gp..', 'qggpP', 'qgggP', 'gggpP', '.PPP.'];
   const foot = ['.qggp..', 'qggggpP', 'PPPPPPP'];
   return {

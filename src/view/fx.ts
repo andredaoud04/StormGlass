@@ -18,6 +18,10 @@ export interface Fx {
 }
 
 export interface FloatText {
+  /** Numbers with a key merge with the live one of the same key. */
+  key?: string;
+  value?: number;
+  merge?: number;
   text: string;
   x: number;
   y: number;
@@ -46,6 +50,26 @@ export class FxSystem {
   text(text: string, x: number, y: number, o: Partial<Omit<FloatText, 'text' | 'x' | 'y' | 't'>> = {}): void {
     this.texts.push({ text, x, y, t: 0, life: o.life ?? 0.7, color: o.color ?? '#fff8ec', font: o.font ?? 'small', vy: o.vy ?? -18 });
     if (this.texts.length > 40) this.texts.shift();
+  }
+
+  /**
+   * A damage number. Hits with the same key inside `merge` seconds add into the live number (which
+   * pops and restarts its rise) instead of stacking; at most 6 merged numbers are live at once.
+   */
+  number(key: string, value: number, x: number, y: number, o: { color?: string; font?: FontKey; merge?: number; life?: number } = {}): void {
+    const merge = o.merge ?? 0.3;
+    const live = this.texts.find((t) => t.key === key && t.t < (t.merge ?? merge));
+    if (live) {
+      live.value = (live.value ?? 0) + value;
+      live.text = String(Math.round(live.value));
+      live.t = 0;
+      if (o.font === 'big') live.font = 'big';
+      if (o.color) live.color = o.color;
+      return;
+    }
+    const keyed = this.texts.filter((t) => t.key);
+    if (keyed.length >= 6) this.texts.splice(this.texts.indexOf(keyed[0]), 1);
+    this.texts.push({ key, value, merge, text: String(Math.round(value)), x, y, t: 0, life: o.life ?? 0.7, color: o.color ?? '#fff8ec', font: o.font ?? 'small', vy: -18 });
   }
 
   update(dt: number, defaultFps: (key: string) => number): void {

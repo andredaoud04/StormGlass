@@ -6,14 +6,14 @@ import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, kitch
 import { foodRateMilli, fortressMul } from '../game/upgrades';
 import { createBattle, food, foodRate, kitchenCost, stepBattle, totalGold, waveComposition } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
-import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
+import { blocker, button, dim, fmt, iconButton } from '../ui/widgets';
 import { BattleView } from '../view/battleView';
 
 const MAX_STEPS_PER_FRAME = 6;
 /** World pixels of each fortress left on screen in front of its anchor (the rest is off the edge). */
 const BASE_INSET = 26;
 /** UI heights: the thin top bar and the slim bottom bar that holds Food and the cards. */
-const TOP_BAR = 26;
+const TOP_BAR = 24;
 /** World pixels units spread above and below the path's centre line (the road is about 120 rows wide). */
 const BAND_HALF = 50;
 const BOTTOM_BAR = 46;
@@ -66,6 +66,10 @@ export class BattleScene implements Scene {
   private hudTop = 0;
   private deployedOnce = false;
   private wallKey = 'ui.wall_stone';
+  /** The battle's Age: every HUD piece is cut from its wall material (D39). */
+  private hudAge = 'stone';
+  private kitchenPop = 0;
+  private confirmRetreat = false;
 
   constructor(private app: App) {
     const s = app.save;
@@ -89,7 +93,8 @@ export class BattleScene implements Scene {
       kitchen: kitchenUnlocked(s),
     });
     this.sim = createBattle(config);
-    this.wallKey = app.assets.has(`ui.wall_${ageDef(this.enemyAge).id}`) ? `ui.wall_${ageDef(this.enemyAge).id}` : 'ui.wall_stone';
+    this.hudAge = app.assets.has(`ui.card_${ageDef(this.enemyAge).id}`) ? ageDef(this.enemyAge).id : 'stone';
+    this.wallKey = `ui.wall_${this.hudAge}`;
     this.view = new BattleView(app, this.sim, this.layout(), ageDef(this.enemyAge).id, {
       onCoin: (x, y, amount) => {
         const [ux, uy] = this.ui(x, y);
@@ -107,12 +112,14 @@ export class BattleScene implements Scene {
   /** Layout in world pixels; the HUD (UI pixels) sits under the ground line. */
   private layout() {
     const { h } = this.app;
+    const topH = this.app.safeTop + TOP_BAR;
+    const barTop = h - BOTTOM_BAR - this.app.safeBottom;
     // Skill sockets float over the meadow just above the bottom bar.
-    this.hudTop = h - BOTTOM_BAR - 46;
+    this.hudTop = barTop - 46;
     const k = this.app.worldToUi;
     const ww = this.app.screen.size.ww;
-    // The lane sits a little below the middle of the screen, as in We Are Warriors.
-    const groundUi = Math.round(TOP_BAR + (h - TOP_BAR - BOTTOM_BAR) * 0.56);
+    // The lane sits a little below the middle of the play area, as in We Are Warriors.
+    const groundUi = Math.round(topH + (barTop - topH) * 0.56);
     return { groundY: Math.floor(groundUi / k), bandHalf: BAND_HALF, laneL: BASE_INSET, laneR: ww - 1 - BASE_INSET };
   }
 
@@ -130,7 +137,10 @@ export class BattleScene implements Scene {
     if (k === '1' || k === '2' || k === '3') this.deploy(Number(k) - 1);
     if (k === '4' || k === 'q') this.cast();
     if (k === '5' || k === 'w') this.buyKitchen();
-    if (k === 'Escape' || k === 'p') this.paused = !this.paused;
+    if (k === 'Escape' || k === 'p') {
+      this.paused = !this.paused;
+      this.confirmRetreat = false;
+    }
     if (k === 'blur' && this.phase === 'play') this.paused = true;
   }
 
@@ -165,27 +175,39 @@ export class BattleScene implements Scene {
     if (!this.pending.some((p) => p.type === 'kitchen')) this.pending.push({ type: 'kitchen' });
   }
 
-  private drawKitchen(cx: number, top: number): void {
+  private drawKitchen(cx: number, cy: number): void {
     const app = this.app;
     const d = app.draw;
     const c = kitchenCost(this.sim);
     const ok = c !== null && this.sim.foodMilli >= c && this.phase === 'play';
     const fi = app.assets.image('icon.food');
-    d.image('icon.food', Math.round(cx - fi.w / 2) - 2, top + 6, { alpha: ok || c === null ? 1 : 0.6 });
-    d.image('icon.up', cx + 2, top + 11, { alpha: ok ? 1 : 0.6 });
-    // Price (in Food) inside the circle, and level pips along its lower rim.
-    if (c === null) d.text('MAX', cx, top + 20, { align: 'center', color: '#ffe68a' });
-    else d.text(String(Math.ceil(c / 1000)), cx, top + 20, { align: 'center', color: ok ? '#fff8ec' : '#ff8a8a' });
+    d.image('icon.food', Math.round(cx - fi.w / 2) - 2, cy - 14, { alpha: ok || c === null ? 1 : 0.6 });
+    d.image('icon.up', cx + 2, cy - 9, { alpha: ok ? 1 : 0.6 });
+    // Price (in Food) inside the socket, level pips along its lower rim.
+    if (c === null) d.text('MAX', cx, cy, { align: 'center', color: '#ffe68a' });
+    else d.text(String(Math.ceil(c / 1000)), cx, cy, { font: 'big', align: 'center', color: ok ? '#fff8ec' : '#ff6a5a' });
     const max = this.sim.config.kitchen!.maxLevel;
-    for (let k = 0; k < max; k++) d.rect(cx - max * 2 + k * 4, top + 29, 3, 2, k < this.sim.kitchenLevel ? '#ffd03c' : '#3a2a30');
-    if (ok) {
-      const pulse = 0.35 + 0.35 * Math.sin(app.time * 6);
-      for (let a = 0; a < 20; a++) {
-        const th = (a / 20) * Math.PI * 2;
-        d.rect(Math.round(cx + Math.cos(th) * 14), Math.round(top + 16 + Math.sin(th) * 14), 1, 1, '#ffd03c', pulse);
-      }
+    const px0 = Math.round(cx - (max * 5 - 1) / 2);
+    for (let k = 0; k < max; k++) {
+      d.rect(px0 + k * 5, cy + 10, 4, 4, '#1e1526');
+      d.rect(px0 + k * 5 + 1, cy + 11, 2, 2, k < this.sim.kitchenLevel ? '#ffd03c' : '#4a3a48');
     }
-    if (this.phase === 'play' && !this.paused) app.input.region({ id: 'kitchen', x: cx - 14, y: top + 2, w: 28, h: 40, onTap: () => this.buyKitchen(), onDown: true });
+    if (ok) this.ring(cx, cy - 4, 14, '#ffd03c', 0.35 + 0.35 * Math.sin(app.time * 6));
+    // Just bought: a gold ring bursts out of the socket.
+    if (this.kitchenPop > 0.5) this.ring(cx, cy - 4, 14 + (0.9 - this.kitchenPop) * 30, '#ffe68a', 1);
+    if (this.phase === 'play' && !this.paused) app.input.region({ id: 'kitchen', x: cx - 15, y: cy - 19, w: 30, h: 34, onTap: () => this.buyKitchen(), onDown: true });
+  }
+
+  /** A dotted pixel ring (ready glows, bursts). */
+  private ring(cx: number, cy: number, r: number, color: string, alpha: number, from = 0, to = 1): void {
+    const d = this.app.draw;
+    const n = Math.max(16, Math.round(r * 1.8));
+    for (let a = 0; a < n; a++) {
+      const f = a / n;
+      if (f < from || f >= to) continue;
+      const th = f * Math.PI * 2 - Math.PI / 2;
+      d.rect(Math.round(cx + Math.cos(th) * r), Math.round(cy + Math.sin(th) * r), 1, 1, color, alpha);
+    }
   }
 
   /** Stormcall: queue the cast; the sim decides if it fires (ready, a target in reach). */
@@ -243,6 +265,7 @@ export class BattleScene implements Scene {
     this.foodBump = Math.max(0, this.foodBump - dt);
     for (let i = 0; i < 3; i++) this.cardShake[i] = Math.max(0, this.cardShake[i] - dt);
     this.skillShake = Math.max(0, this.skillShake - dt);
+    this.kitchenPop = Math.max(0, this.kitchenPop - dt);
     if (this.phase === 'result') this.resultT += dt;
     if (this.paused) return;
 
@@ -273,6 +296,7 @@ export class BattleScene implements Scene {
             this.wave = { n: e.n, t: 0, text: parts.join('  ') };
             if (e.n >= 2) this.app.sfx('fight', { vol: 0.35, jitter: 0 });
           }
+          if (e.type === 'kitchen') this.kitchenPop = 0.9;
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
             if (!this.app.reducedMotion) this.slowmo = 0.6;
@@ -332,11 +356,11 @@ export class BattleScene implements Scene {
     this.drawBaseBars();
     this.drawHeader();
     this.drawHud();
+    if (this.phase === 'play') this.drawWave();
     this.drawCoins();
-    this.drawBossBar();
-    if (this.phase === 'play' && this.wave.n > 0) this.drawWave();
     if (this.phase === 'play' && this.introT < 1.3) this.drawIntro();
-    if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.4) this.drawBossIntro();
+    else if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.2) this.drawBossIntro();
+    else if (this.phase === 'play' && this.wave.n >= 2 && this.wave.t < 1.8) this.drawWaveCall();
     if (this.phase === 'result') this.drawResult();
     else if (this.paused) this.drawPause();
     void d;
@@ -344,108 +368,142 @@ export class BattleScene implements Scene {
     void h;
   }
 
+  /** The one place for transient callouts, just under the wave plaque (never over the HP bars). */
+  private get eventY(): number {
+    return this.app.safeTop + TOP_BAR + 32;
+  }
+
   private drawIntro(): void {
     const d = this.app.draw;
     const t = this.introT;
-    const y = Math.round(this.ui(0, this.view.layout.groundY)[1] - 80 + (t < 0.15 ? (0.15 - t) * -60 : 0));
+    const y = this.eventY + (t < 0.15 ? Math.round((0.15 - t) * -60) : 0);
     const a = t > 1 ? (1.3 - t) / 0.3 : 1;
     const boss = isBossStage(this.stage);
     d.text(boss ? 'BOSS BATTLE!' : 'FIGHT!', this.app.w / 2, y, { font: 'big', color: boss ? '#ff7a5a' : '#ffd03c', shadow: true, align: 'center', alpha: a });
-    if (boss) d.text('BREAK THE WARD: DEFEAT THE BOSS', this.app.w / 2, y + 13, { align: 'center', color: '#fff8ec', alpha: a });
   }
 
-  /** WAVE pill under the top bar, with what the wave brings (pick troops that counter it). */
+  /** A new wave: what it brings, as unit icons (melee, ranged, tanks) rather than words. */
+  private drawWaveCall(): void {
+    const d = this.app.draw;
+    const t = this.wave.t;
+    const a = t > 1.4 ? (1.8 - t) / 0.4 : 1;
+    const c = waveComposition(this.sim.config, this.sim.waveIndex);
+    const parts: [string, number][] = ([['sword', c.melee], ['bow', c.ranged], ['shield', c.tank]] as [string, number][]).filter(([, n]) => n > 0);
+    const widths = parts.map(([, n]) => 12 + d.measure('X' + n, 'big'));
+    const total = widths.reduce((x, y) => x + y, 0) + (parts.length - 1) * 8;
+    let x = Math.round(this.app.w / 2 - total / 2);
+    const y = this.eventY + (t < 0.12 ? -2 : 0);
+    parts.forEach(([icon, n], i) => {
+      d.image('icon.' + icon, x, y, { alpha: a });
+      d.text('X' + n, x + 11, y + 1, { font: 'big', color: '#fff8ec', shadow: true, alpha: a });
+      x += widths[i] + 8;
+    });
+  }
+
   /**
-   * Persistent WAVE pill under the top bar (as in We Are Warriors), with a bar counting down to the
-   * next wave. When a wave arrives the pill pops and names what it brings for a moment.
+   * The wave plaque under the top band: an opaque recess in the Age material with WAVE N, the stage
+   * pips and a countdown to the next wave. On a boss stage it widens into the boss bar.
    */
   private drawWave(): void {
     const app = this.app;
     const d = app.draw;
     const t = this.wave.t;
-    const fresh = t < 2.2;
-    const pop = t < 0.2 ? Math.round((0.2 - t) * -20) : 0;
-    const label = `WAVE ${this.wave.n}`;
-    const pw = Math.max(d.measure(label, 'big') + 20, fresh ? d.measure(this.wave.text) + 16 : 0, 60);
-    const ph = fresh ? 28 : 20;
+    const n = Math.max(1, this.wave.n);
+    const fresh = this.wave.n > 0 && t < 1.2;
+    const pop = t < 0.15 && this.wave.n > 0 ? -1 : 0;
+    const boss = this.sim.bossSpawned && this.bossBarShown > 0;
+    const pw = boss ? Math.min(app.w - 70, 150) : 64;
+    const ph = 24;
     const x = Math.round(app.w / 2 - pw / 2);
-    const y = TOP_BAR + (this.sim.bossSpawned ? 44 : 22) + pop;
-    d.rect(x, y, pw, ph, '#1e1526', 0.8);
-    d.rect(x + 1, y + 1, pw - 2, 1, fresh ? '#ffd03c' : '#4a3a58');
-    d.text(label, app.w / 2, y + 4, { font: 'big', align: 'center', color: fresh ? '#ffd03c' : '#fff8ec', shadow: true });
-    if (fresh) d.text(this.wave.text, app.w / 2, y + 18, { align: 'center', color: '#fff8ec', alpha: Math.min(1, (2.2 - t) / 0.4) });
-    // Countdown to the next wave.
+    const y = app.safeTop + TOP_BAR + 3 + pop;
+    d.nine(`ui.food_${this.hudAge}`, x, y, pw, ph);
+    if (boss) {
+      const s = this.sim;
+      const u = s.units.find((q) => q.id === s.bossId);
+      const hp = u?.alive ? u.hp : 0;
+      const max = u?.maxHp ?? 1;
+      d.image('icon.skull', x + 5, y + 4);
+      // The name fits beside the wave tag; on narrow screens it drops "THE" and then the tag.
+      const tag = `W${n}`;
+      let name = this.bossName;
+      const room = (withTag: boolean) => pw - 22 - (withTag ? d.measure(tag) + 6 : 0);
+      if (d.measure(name) > room(true)) name = name.replace(/^THE /, '');
+      const showTag = d.measure(name) <= room(true);
+      d.text(name, x + 16, y + 5, { color: u?.alive ? '#ff9a7a' : '#a8e070' });
+      if (showTag) d.text(tag, x + pw - 6, y + 5, { align: 'right', color: fresh ? '#ffd03c' : '#fff8ec' });
+      const bw = pw - 12;
+      d.rect(x + 5, y + 12, bw + 2, 6, '#120c18');
+      const fill = Math.ceil((hp / max) * bw);
+      if (fill > 0) {
+        d.rect(x + 6, y + 13, fill, 4, '#c0304a');
+        d.rect(x + 6, y + 13, fill, 1, '#ff7a6a');
+      }
+    } else {
+      d.text(`WAVE ${n}`, app.w / 2, y + 4, { font: 'big', align: 'center', color: fresh ? '#ffd03c' : '#fff8ec', shadow: true });
+      this.drawPips(app.w / 2, y + 14);
+    }
+    // Countdown to the next wave along the plaque's lip.
     const period = BALANCE.waves.stream.period;
-    const p = Math.min(1, (this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt) / period) % 1;
-    const frac = ((this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt) % period) / period;
-    void p;
-    d.rect(x + 3, y + ph - 3, pw - 6, 1, '#3a2a48');
-    d.rect(x + 3, y + ph - 3, Math.round((pw - 6) * frac), 1, frac > 0.8 ? '#ff7a5a' : '#cfe0a0');
+    const since = this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt;
+    const frac = since < 0 ? 0 : (since % period) / period;
+    d.rect(x + 4, y + ph - 4, pw - 8, 1, '#120c18');
+    d.rect(x + 4, y + ph - 4, Math.round((pw - 8) * frac), 1, frac > 0.8 ? '#ff7a5a' : '#cfe0a0');
   }
 
-  /** Banner when the boss walks out. */
+  /** Banner when the boss walks out: its name on a ribbon in the callout slot. */
   private drawBossIntro(): void {
     const app = this.app;
     const d = app.draw;
     const t = this.bossIntroT;
-    const a = t < 0.2 ? t / 0.2 : t > 2 ? (2.4 - t) / 0.4 : 1;
-    const y = Math.round(this.ui(0, this.view.layout.groundY)[1] - 96);
+    const a = t < 0.2 ? t / 0.2 : t > 1.8 ? (2.2 - t) / 0.4 : 1;
+    const y = this.eventY - 4;
     const slide = t < 0.2 ? (0.2 - t) * 200 : 0;
     const label = this.bossName;
     const bw = Math.min(app.w - 8, d.measure(label, 'big') + 40);
-    d.rect(0, y - 4, app.w, 30, '#1e1526', 0.55 * a);
     d.nine('ui.ribbon_grey', Math.round(app.w / 2 - bw / 2 + slide), y, bw, 22, a);
     d.text(label, app.w / 2 + slide, y + 7, { font: 'big', align: 'center', color: '#ff9a7a', shadow: true, alpha: a });
-    d.text('APPROACHES!', app.w / 2, y + 25, { align: 'center', color: '#fff1c0', alpha: a });
   }
 
-  /** Boss HP bar under the header, with the ward state. */
-  private drawBossBar(): void {
-    const s = this.sim;
-    if (!s.bossSpawned || this.bossBarShown <= 0) return;
-    const app = this.app;
-    const d = app.draw;
-    const boss = s.units.find((u) => u.id === s.bossId);
-    const hp = boss?.alive ? boss.hp : 0;
-    const max = boss?.maxHp ?? 1;
-    const bw = Math.min(150, app.w - 40);
-    const x = Math.round(app.w / 2 - bw / 2);
-    const y = TOP_BAR + 26 - Math.round((1 - this.bossBarShown) * 10);
-    const a = this.bossBarShown;
-    d.image('icon.skull', x - 11, y - 2, { alpha: a });
-    d.rect(x - 1, y - 1, bw + 2, 7, '#1e1526', a);
-    d.rect(x, y, bw, 5, '#4a2a33', a);
-    const fill = Math.ceil((hp / max) * bw);
-    if (fill > 0) {
-      d.rect(x, y, fill, 5, '#c0304a', a);
-      d.rect(x, y, fill, 1, '#ff7a6a', a);
-    }
-    const phase = boss?.alive ? boss.boss?.phase : null;
-    const tag = !boss?.alive ? 'DEFEATED' : phase === 'rest' ? 'RECOVERING' : phase === 'retreat' ? 'FALLING BACK' : 'RAIDING';
-    d.text(`${this.bossName}  ${tag}`, app.w / 2, y + 8, { align: 'center', color: boss?.alive ? '#fff8ec' : '#a8e070', alpha: a });
-  }
-
-  /** Thin top bar: Gold, the battle number, pause; double speed and the stage pips just under it. */
+  /**
+   * Thin top band cut from the Age wall (darkened, the coping as its trim): Gold, the battle number
+   * and pause. Its body runs up under the status bar; nothing tappable or written goes there.
+   */
   private drawHeader(): void {
     const app = this.app;
     const d = app.draw;
-    d.rect(0, 0, app.w, TOP_BAR, '#2a2236');
-    d.rect(0, TOP_BAR, app.w, 1, '#1e1526');
-    d.rect(0, TOP_BAR - 1, app.w, 1, '#3e3450');
+    const top0 = app.safeTop;
+    d.image(`ui.beam_${this.hudAge}`, Math.floor(app.w / 2), top0 + TOP_BAR);
     const bump = this.goldBump > 0 ? -1 : 0;
-    counter(app, 6, 6 + bump, 44, 'gold', '+' + fmt(this.goldShown), '#ffe68a');
+    d.image('icon.gold', 6, top0 + 6 + bump);
+    d.text(fmt(this.goldShown), 18, top0 + 6 + bump, { font: 'big', color: '#ffe68a', shadow: true });
     const n = battleNumber({ age: this.enemyAge, stage: this.stage });
-    d.text(`BATTLE ${n}`, app.w / 2, 7, { font: 'big', align: 'center', color: this.replay ? '#cfe0a0' : '#fff8ec', shadow: true });
-    d.text(ageDef(this.enemyAge).name.toUpperCase() + (this.replay ? ' REPLAY' : ''), app.w / 2, TOP_BAR + 4, { align: 'center', color: '#fff8ec' });
-    this.drawPips(app.w / 2, TOP_BAR + 13);
+    d.text(`BATTLE ${n}`, app.w / 2, top0 + 6, { font: 'big', align: 'center', color: '#fff8ec', shadow: true });
     if (this.phase === 'play') {
-      iconButton(app, 'pause', app.w - 24, 3, 20, 'pause', () => (this.paused = true));
+      iconButton(app, 'pause', app.w - 25, top0 + 1, 22, 'pause', () => {
+        this.paused = true;
+        this.confirmRetreat = false;
+      });
+      const sy = top0 + TOP_BAR + 3;
+      if (this.replay) d.text('REPLAY', app.w - 6, sy + 9, { align: 'right', color: '#cfe0a0' });
       if (speedUnlocked(app.save)) {
+        // Double speed: a round socket, lit gold while on.
         const on = app.save.settings.fast;
-        button(app, 'speed', 6, TOP_BAR + 4, 26, 16, on ? 'X2' : 'X1', () => {
-          app.save.settings.fast = !app.save.settings.fast;
-          app.persist();
-        }, { style: on ? 'gold' : 'wood', font: 'small' });
+        const cx = 20;
+        const cy = sy + 11;
+        d.image(`ui.socket_${this.hudAge}`, cx, cy);
+        d.text('>>', cx + 1, cy - 3, { font: 'big', align: 'center', color: on ? '#ffd03c' : '#9a8a96', shadow: on });
+        app.input.region({
+          id: 'speed',
+          x: cx - 15,
+          y: cy - 15,
+          w: 30,
+          h: 30,
+          onTap: () => {
+            app.save.settings.fast = !app.save.settings.fast;
+            app.sfx('click', { vol: 0.6 });
+            app.persist();
+          },
+        });
       }
     }
   }
@@ -459,12 +517,9 @@ export class BattleScene implements Scene {
       const x = x0 + i * gap;
       const done = i < this.stage;
       const cur = i === this.stage;
-      if (i === STAGES - 1) {
-        d.image('icon.skull', x - 4, y - 2, { alpha: cur || done ? 1 : 0.5 });
-        continue;
-      }
-      d.rect(x - 2, y, 5, 5, '#1e1526');
-      d.rect(x - 1, y + 1, 3, 3, done ? '#a8e070' : cur ? '#ffd03c' : '#4a3a48');
+      d.rect(x - 2, y, 5, 5, '#120c18');
+      const boss = i === STAGES - 1;
+      d.rect(x - 1, y + 1, 3, 3, done ? '#a8e070' : cur ? (boss ? '#ff5a4f' : '#ffd03c') : boss ? '#6a2a33' : '#4a3a48');
       if (cur && Math.floor(this.app.time * 3) % 2 === 0) d.rect(x - 1, y + 1, 3, 1, '#fff8ec');
     }
   }
@@ -501,29 +556,29 @@ export class BattleScene implements Scene {
     const d = app.draw;
     const { w, h } = app;
     const top = this.hudTop;
-    // Slim bottom bar in the Age's own wall material.
-    const barTop = h - BOTTOM_BAR;
+    const age = this.hudAge;
+    // Bottom bar: the Age's own wall, running down under the home indicator.
+    const barTop = h - BOTTOM_BAR - app.safeBottom;
     d.image(this.wallKey, Math.floor(w / 2), barTop);
-    d.rect(0, barTop - 1, w, 1, '#1e1526', 0.6);
 
-    // Hero medallion, raised on the left (locked until the first Prestige).
+    // Hero niche, raised on the left: a carved, empty niche until the first Hero exists.
     const heroUnlocked = app.save.prestige > 0;
-    d.image('ui.hero_socket', 24, top + 4, { alpha: heroUnlocked ? 1 : 0.35 });
+    d.image(heroUnlocked ? 'ui.hero_socket' : `ui.hero_niche_${age}`, 24, top + 8);
 
-    // Three Skill sockets in a row on the right; the first (leftmost) holds Stormcall once unlocked.
+    // Three Skill sockets in a row on the right: Stormcall (left), Kitchen (middle), one empty niche.
+    const cy = top + 20;
     for (let i = 0; i < 3; i++) {
       const cx = w - 18 - i * 30;
       const storm = i === 2 && !!this.sim.config.skill;
       const kitchen = i === 1 && !!this.sim.config.kitchen;
       const sh = storm && this.skillShake > 0 ? Math.round(Math.sin(this.skillShake * 80) * 2) : 0;
-      // Sockets that hold nothing yet stay dim and quiet (no padlocks cluttering the field).
       if (!storm && !kitchen) {
-        d.image('ui.skill_socket', cx, top + 20, { alpha: 0.35 });
+        d.image(`ui.niche_${age}`, cx, cy);
         continue;
       }
-      d.image('ui.skill_socket', cx + sh, top + 20);
+      d.image(`ui.socket_${age}`, cx + sh, cy);
       if (kitchen) {
-        this.drawKitchen(cx, top);
+        this.drawKitchen(cx, cy);
         continue;
       }
       const sk = this.sim.config.skill!;
@@ -531,52 +586,53 @@ export class BattleScene implements Scene {
       const frac = total > 0 ? this.sim.skillCooldown / total : 0;
       const ready = frac <= 0 && this.phase === 'play';
       const ie = app.assets.image('icon.storm');
-      d.image('icon.storm', Math.round(cx - ie.w / 2) + sh, Math.round(top + 20 - ie.h / 2) - 4, { alpha: ready ? 1 : 0.55 });
+      d.image('icon.storm', Math.round(cx - ie.w / 2) + sh, Math.round(cy - ie.h / 2) - (ready ? 0 : 4), { alpha: ready ? 1 : 0.5 });
       if (!ready) {
-        // Cooldown: a dark curtain that lifts as the charge returns.
-        const ch = Math.round(22 * frac);
-        d.rect(cx - 11 + sh, top + 20 - 15, 22, ch, '#1e1526', 0.55);
-        d.text(String(Math.ceil(this.sim.skillCooldown / this.sim.config.tickRate)), cx + sh, top + 22, { align: 'center', color: '#e8dcc8' });
-      } else {
-        const pulse = 0.4 + 0.4 * Math.sin(app.time * 6);
-        for (let a = 0; a < 24; a++) {
-          const th = (a / 24) * Math.PI * 2;
-          d.rect(Math.round(cx + Math.cos(th) * 14) + sh, Math.round(top + 16 + Math.sin(th) * 14), 1, 1, '#9fe8ff', pulse);
+        // Cooldown: the rim fills clockwise as the charge returns.
+        for (const r of [11, 12]) {
+          this.ring(cx + sh, cy, r, '#9fe8ff', 1, 0, 1 - frac);
+          this.ring(cx + sh, cy, r, '#1e1526', 1, 1 - frac, 1);
         }
-        d.text('STORM', cx, top + 34, { align: 'center', color: '#bfe8ff' });
+        d.text(String(Math.ceil(this.sim.skillCooldown / this.sim.config.tickRate)), cx + sh, cy + 2, { font: 'big', align: 'center', color: '#e8dcc8' });
+      } else {
+        this.ring(cx + sh, cy, 12, '#9fe8ff', 0.5 + 0.4 * Math.sin(app.time * 6));
+        this.ring(cx + sh, cy, 15, '#9fe8ff', 0.25 + 0.25 * Math.sin(app.time * 6));
       }
-      if (this.phase === 'play' && !this.paused) app.input.region({ id: 'skill', x: cx - 14, y: top + 2, w: 28, h: 36, onTap: () => this.cast(), onDown: true });
+      if (this.phase === 'play' && !this.paused) app.input.region({ id: 'skill', x: cx - 15, y: cy - 15, w: 30, h: 32, onTap: () => this.cast(), onDown: true });
     }
 
-    // Food and rate, lower left.
+    // Food and rate, lower left, in a recess cut into the wall.
     const fx = 5;
-    const fy = h - BOTTOM_BAR + 1;
+    const fy = barTop + 1;
     const fw = 48;
-    d.nine('ui.small_plaque', fx, fy, fw, 45);
+    d.nine(`ui.food_${age}`, fx, fy, fw, 45);
     const f = food(this.sim);
     const bump = this.foodBump > 0 ? -1 : 0;
-    d.image('icon.food', fx + Math.round(fw / 2 - 6), fy + 3 + bump);
+    d.image('icon.food', fx + Math.round(fw / 2 - 6), fy + 4 + bump);
     d.text(fmt(f), fx + fw / 2, fy + 17 + bump, { font: 'big', align: 'center', color: '#fff8ec', shadow: true });
-    // Progress to the next Food.
     const frac = (this.sim.foodMilli % 1000) / 1000;
-    d.rect(fx + 6, fy + 29, fw - 12, 3, '#120c18');
-    d.rect(fx + 6, fy + 29, Math.round((fw - 12) * frac), 3, '#e8a020');
-    d.rect(fx + 6, fy + 29, Math.round((fw - 12) * frac), 1, '#ffd03c');
+    d.rect(fx + 6, fy + 28, fw - 12, 3, '#120c18');
+    d.rect(fx + 6, fy + 28, Math.round((fw - 12) * frac), 3, '#e8a020');
+    d.rect(fx + 6, fy + 28, Math.round((fw - 12) * frac), 1, '#ffd03c');
     const rate = foodRate(this.sim) / 1000;
     d.text(`+${rate % 1 ? rate.toFixed(1) : rate}/S`, fx + fw / 2, fy + 35, { align: 'center', color: '#a8e070' });
+    // Kitchen bought: the rate gain pops out of the Food recess.
+    if (this.kitchenPop > 0) {
+      const p = 1 - this.kitchenPop / 0.9;
+      d.text('+20%', fx + fw / 2, Math.round(fy - 6 - p * 14), { font: 'big', align: 'center', color: '#a8e070', shadow: true, alpha: Math.min(1, this.kitchenPop * 3) });
+    }
 
-    // Troop cards, lower right.
+    // Troop cards, lower right, seated in the wall: dark until affordable, then the well lights up.
     const cw = 38;
     const gap = 3;
     const x0 = w - 5 - (3 * cw + 2 * gap) - 2;
-    // Cards stand up out of the bar.
-    const cy = h - BOTTOM_BAR - 8;
+    const cardY = barTop - 8;
     for (let i = 0; i < 3; i++) {
       const x = x0 + i * (cw + gap);
       const id = this.troops[i];
       if (!id) {
-        d.image('ui.card_locked', x, cy);
-        d.image('icon.lock', x + 16, cy + 13);
+        d.image('ui.card_locked', x, cardY);
+        d.image('icon.lock', x + 16, cardY + 13);
         continue;
       }
       const t = this.sim.config.playerTroops[i];
@@ -584,45 +640,49 @@ export class BattleScene implements Scene {
       const regionId = 'card' + i;
       const pressed = app.input.isPressed(regionId);
       const sh = this.cardShake[i] > 0 ? Math.round(Math.sin(this.cardShake[i] * 80) * 2) : 0;
-      const yy = cy + (pressed ? 1 : 0) - (ready && Math.floor(app.time * 2.5) % 2 === 0 ? 0 : 0);
+      const yy = cardY + (pressed ? 1 : 0);
       const xx = x + sh;
-      d.image('ui.card', xx, yy);
-      d.image(`portrait.${id}`, xx + 4, yy + 4);
+      d.image(ready ? `ui.card_${age}_lit` : `ui.card_${age}`, xx, yy);
+      d.image(`portrait.${id}`, xx + 4, yy + 4, { alpha: ready ? 1 : 0.55 });
       if (!ready) {
-        const missing = Math.max(0, Math.min(1, 1 - (this.sim.foodMilli / 1000) / t.cost));
-        const oh = Math.round(28 * missing);
-        d.rect(xx + 4, yy + 4, 32, 28, '#1e1526', 0.35);
-        d.rect(xx + 4, yy + 4, 32, oh, '#1e1526', 0.45);
+        // How close the card is: a bar along the bottom of the well.
+        const have = Math.max(0, Math.min(1, this.sim.foodMilli / 1000 / t.cost));
+        d.rect(xx + 4, yy + 29, 32, 2, '#120c18');
+        d.rect(xx + 4, yy + 29, Math.round(32 * have), 2, '#e8a020');
       } else {
-        const pulse = 0.35 + 0.35 * Math.sin(app.time * 6);
+        const pulse = 0.5 + 0.4 * Math.sin(app.time * 6);
         d.rect(xx + 1, yy + 1, 38, 1, '#ffe68a', pulse);
         d.rect(xx + 1, yy + 46, 38, 1, '#ffe68a', pulse);
         d.rect(xx + 1, yy + 1, 1, 46, '#ffe68a', pulse);
         d.rect(xx + 38, yy + 1, 1, 46, '#ffe68a', pulse);
       }
       d.image('icon.food', xx + 5, yy + 35);
-      d.text(String(t.cost), xx + 34, yy + 36, { font: 'big', align: 'right', color: ready ? '#fff8ec' : '#b8a8b0' });
-      if (this.phase === 'play' && !this.paused) app.input.region({ id: regionId, x: x, y: cy, w: cw + 2, h: 48, onTap: () => this.deploy(i), onDown: true });
+      d.text(String(t.cost), xx + 34, yy + 36, { font: 'big', align: 'right', color: ready ? '#fff8ec' : '#ff6a5a' });
+      if (this.phase === 'play' && !this.paused) app.input.region({ id: regionId, x: x, y: cardY, w: cw + 2, h: 48, onTap: () => this.deploy(i), onDown: true });
     }
 
-    // First battle: show where to tap.
+    // First battle: a bobbing arrow over the first card shows where to tap.
     if (!this.deployedOnce && this.phase === 'play' && this.introT > 1.2) {
       const bob = Math.round(Math.sin(app.time * 8) * 2);
       const ax = x0 + 20;
-      const ay = cy - 12 + bob;
-      d.text('TAP!', ax, ay - 9, { font: 'big', align: 'center', color: '#ffd03c', shadow: true });
-      for (let i = 0; i < 4; i++) d.rect(ax - 3 + i, ay + i, 7 - i * 2, 1, '#ffd03c');
+      const ay = cardY - 12 + bob;
+      for (let i = 0; i < 5; i++) {
+        d.rect(ax - 5 + i, ay + i, 11 - i * 2, 1, '#1e1526');
+        if (i < 4) d.rect(ax - 4 + i, ay + i, 9 - i * 2, 1, '#ffd03c');
+      }
+      d.rect(ax - 2, ay - 6, 5, 6, '#1e1526');
+      d.rect(ax - 1, ay - 6, 3, 6, '#ffd03c');
     }
   }
 
   private drawCoins(): void {
     const d = this.app.draw;
+    const tx = 10;
+    const ty = this.app.safeTop + 9;
     for (const c of this.coins) {
       if (c.t < c.delay) continue;
       const p = Math.min(1, (c.t - c.delay) / 0.65);
       const e = p * p;
-      const tx = 14;
-      const ty = 12;
       const x = c.sx + (tx - c.sx) * e + Math.sin(p * Math.PI) * 6;
       const y = c.sy + (ty - c.sy) * e - Math.sin(p * Math.PI) * 26;
       d.strip('fx.coin', Math.floor(c.t * 14), x, y);
@@ -634,31 +694,39 @@ export class BattleScene implements Scene {
     const d = app.draw;
     dim(app);
     blocker(app, 'pause-block');
-    const pw = 140;
+    const pw = 150;
     const ph = 132;
     const x = Math.round(app.w / 2 - pw / 2);
     const y = Math.round(app.h / 2 - ph / 2);
-    d.nine('ui.panel', x, y, pw, ph);
+    d.nine(`ui.food_${this.hudAge}`, x, y, pw, ph);
+    if (this.confirmRetreat) {
+      d.text('RETREAT?', app.w / 2, y + 14, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
+      d.text('GOLD EARNED SO FAR IS KEPT', app.w / 2, y + 32, { align: 'center', color: '#cfe0a0' });
+      button(app, 'retreat-yes', x + 12, y + 52, pw - 24, 28, 'RETREAT', () => {
+        this.paused = false;
+        this.confirmRetreat = false;
+        this.pending.push({ type: 'retreat' });
+        const ev = stepBattle(this.sim, this.pending.splice(0));
+        for (const e of ev) if (e.type === 'end') this.startEnding(e.result);
+      }, { style: 'red', icon: 'flag' });
+      button(app, 'retreat-no', x + 12, y + 90, pw - 24, 28, 'KEEP FIGHTING', () => (this.confirmRetreat = false), { style: 'green', font: 'small' });
+      return;
+    }
     d.text('PAUSED', app.w / 2, y + 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-    button(app, 'resume', x + 14, y + 26, pw - 28, 26, 'RESUME', () => (this.paused = false), { style: 'green', icon: 'play' });
-    button(app, 'retreat', x + 14, y + 56, pw - 28, 24, 'RETREAT', () => {
-      this.paused = false;
-      this.pending.push({ type: 'retreat' });
-      const ev = stepBattle(this.sim, this.pending.splice(0));
-      for (const e of ev) if (e.type === 'end') this.startEnding(e.result);
-    }, { style: 'red', icon: 'flag', font: 'small' });
+    button(app, 'resume', x + 12, y + 26, pw - 24, 30, 'RESUME', () => (this.paused = false), { style: 'green', icon: 'play' });
     const s = app.save.settings;
-    button(app, 'snd', x + 14, y + 86, 53, 22, s.sound ? 'ON' : 'OFF', () => {
+    button(app, 'snd', x + 12, y + 64, 61, 24, s.sound ? 'SOUND' : 'MUTED', () => {
       s.sound = !s.sound;
       app.audio.muted = !s.sound;
       app.persist();
     }, { style: 'wood', icon: s.sound ? 'sound' : 'mute', font: 'small' });
-    button(app, 'motion', x + 73, y + 86, 53, 22, s.reducedMotion ? 'CALM' : 'SHAKE', () => {
+    button(app, 'motion', x + pw - 73, y + 64, 61, 24, s.reducedMotion ? 'CALM' : 'SHAKE', () => {
       s.reducedMotion = !s.reducedMotion;
       this.view.shake.enabled = !s.reducedMotion;
       app.persist();
     }, { style: 'wood', font: 'small' });
-    d.text('GOLD IS KEPT', app.w / 2, y + ph - 16, { align: 'center', color: '#3a2a30', outline: null });
+    // Retreat: smaller, set apart, and it asks first.
+    button(app, 'retreat', x + 36, y + ph - 32, pw - 72, 22, 'RETREAT', () => (this.confirmRetreat = true), { style: 'wood', icon: 'flag', font: 'small', textColor: '#ffb08c' });
   }
 
   private drawResult(): void {
@@ -668,51 +736,61 @@ export class BattleScene implements Scene {
     const s = this.sim;
     dim(app, Math.min(0.6, this.resultT * 2));
     blocker(app, 'result-block');
-    const pw = 156;
-    const ph = s.config.boss ? 170 : 150;
+    const win = o.result === 'victory';
+    // Only rows that earned something.
+    const rows: [string, string, number][] = (
+      [
+        ['skull', `KILLS X${s.kills - s.tankKills}`, s.gold.kills],
+        ['shield', `TANKS X${s.tankKills}`, s.gold.tanks],
+        ['hp', 'FORTRESS', s.gold.base],
+        ...(s.config.boss ? [['star', 'BOSS', s.gold.boss]] : []),
+      ] as [string, string, number][]
+    ).filter(([, , g]) => g > 0);
+    const pw = 160;
+    const ph = 92 + rows.length * 19;
     const x = Math.round(app.w / 2 - pw / 2);
     const slide = Math.max(0, 1 - this.resultT / 0.25);
     const y = Math.round(app.h / 2 - ph / 2 + 10 + slide * 40);
-    d.nine('ui.panel', x, y, pw, ph);
-    const win = o.result === 'victory';
+    d.nine(`ui.food_${this.hudAge}`, x, y, pw, ph);
     const title = win ? 'VICTORY!' : o.result === 'defeat' ? 'DEFEAT' : 'RETREAT';
     const rw = d.measure(title, 'big') + 40;
     d.nine(win ? 'ui.ribbon_gold' : 'ui.ribbon_grey', Math.round(app.w / 2 - rw / 2), y - 12, rw, 24);
     d.text(title, app.w / 2, y - 4, { font: 'big', align: 'center', color: win ? '#fff8ec' : '#f0ece6', shadow: true });
 
-    const rows: [string, string, number][] = [
-      ['skull', `KILLS x${s.kills - s.tankKills}`, s.gold.kills],
-      ['skull', `TANKS x${s.tankKills}`, s.gold.tanks],
-      ['hp', 'FORTRESS DAMAGE', s.gold.base],
-    ];
-    if (s.config.boss) rows.push(['skull', 'BOSS DAMAGE', s.gold.boss]);
-    let ry = y + 22;
+    let ry = y + 20;
     rows.forEach(([icon, label, g], i) => {
       const a = Math.min(1, Math.max(0, (this.resultT - 0.25 - i * 0.15) / 0.15));
       if (a <= 0) return;
-      d.nine('ui.inset', x + 10, ry, pw - 20, 16, a);
-      d.image('icon.' + icon, x + 13, ry + 3, { alpha: a });
-      d.text(label, x + 26, ry + 5, { alpha: a });
-      d.text('+' + g, x + pw - 24, ry + 5, { align: 'right', color: '#ffe68a', alpha: a });
-      d.image('icon.gold', x + pw - 22, ry + 3, { alpha: a });
+      d.image('icon.' + icon, x + 10, ry + 3, { alpha: a });
+      d.text(label, x + 23, ry + 5, { alpha: a });
+      d.text('+' + fmt(g), x + pw - 22, ry + 5, { align: 'right', color: '#ffe68a', alpha: a });
+      d.image('icon.gold', x + pw - 19, ry + 3, { alpha: a });
       ry += 19;
     });
     const total = totalGold(s);
     const ta = Math.min(1, Math.max(0, (this.resultT - 0.75) / 0.2));
     const shown = Math.round(total * Math.min(1, Math.max(0, (this.resultT - 0.75) / 0.6)));
     if (ta > 0) {
-      d.text('TOTAL', x + 14, ry + 6, { font: 'big', color: '#fff1c0', shadow: true, alpha: ta });
-      d.text('+' + fmt(shown), x + pw - 26, ry + 6, { font: 'big', align: 'right', color: '#ffd03c', shadow: true, alpha: ta });
-      d.image('icon.gold', x + pw - 23, ry + 5, { alpha: ta });
+      d.rect(x + 8, ry + 1, pw - 16, 1, '#4a3a48', ta);
+      d.text('TOTAL', x + 10, ry + 6, { font: 'big', color: '#fff1c0', shadow: true, alpha: ta });
+      d.text('+' + fmt(shown), x + pw - 22, ry + 6, { font: 'big', align: 'right', color: '#ffd03c', shadow: true, alpha: ta });
+      d.image('icon.gold', x + pw - 19, ry + 5, { alpha: ta });
     }
     let note = '';
     const sv = app.save;
-    if (win && isBossStage(this.stage) && this.enemyAge === sv.armyAge && evolveUnlocked(sv)) note = `EVOLVE FOR ${fmt(evolveCost(sv) ?? 0)} GOLD`;
+    if (win && isBossStage(this.stage) && this.enemyAge === sv.armyAge && evolveUnlocked(sv)) note = `EVOLVE: ${fmt(evolveCost(sv) ?? 0)} GOLD`;
     else if (win && isBossStage(this.stage) && this.enemyAge === BALANCE.ages.length - 1 && sv.armyAge === this.enemyAge) note = 'NEW TIMELINE UNLOCKED!';
-    else if (win && this.replay) note = 'REPLAY: GOLD EARNED';
-    else if (win) note = `NEXT: BATTLE ${battleNumber(selected(sv))}`;
-    else note = 'UPGRADE, OR REPLAY FOR GOLD';
-    if (note && this.resultT > 1.1) d.text(note, app.w / 2, ry + 22, { align: 'center', color: '#3a2a30', outline: null });
-    if (this.resultT > 0.9) button(app, 'continue', x + 20, y + ph - 32, pw - 40, 26, 'CONTINUE', () => app.go('menu'), { style: 'green' });
+    else if (win && !this.replay) note = `NEXT: BATTLE ${battleNumber(selected(sv))}`;
+    if (note && this.resultT > 1.1) d.text(note, app.w / 2, ry + 22, { align: 'center', color: '#cfe0a0' });
+    if (this.resultT > 0.9) {
+      const by = y + ph - 34;
+      if (win) button(app, 'continue', x + 14, by, pw - 28, 28, 'CONTINUE', () => app.go('menu'), { style: 'green' });
+      else {
+        // A loss routes straight to what fixes it.
+        const half = Math.floor((pw - 34) / 2);
+        button(app, 'upgrades', x + 12, by, half, 28, 'UPGRADE', () => app.go('menu', 'upgrades'), { style: 'gold', font: 'small' });
+        button(app, 'continue', x + pw - 12 - half, by, half, 28, 'HOME', () => app.go('menu'), { style: 'wood', font: 'small' });
+      }
+    }
   }
 }

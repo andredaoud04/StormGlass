@@ -57,7 +57,8 @@ async function setSave(page, patch) {
 }
 
 const SCENARIOS = [
-  ['home-new', async () => {}],
+  ['first-launch', async (p) => { await fastForward(p, 2.2, false); }],
+  ['home-new', async (p) => { await p.evaluate(() => window.__sg.app.go('menu')); }],
   ['battle-start', async (p) => { await p.evaluate(() => window.__sg.app.go('battle')); await fastForward(p, 2.2, false); }],
   ['battle-mid', async (p) => {
     await setSave(p, { slots: ['ranged', 'tank'] });
@@ -125,7 +126,7 @@ const SCENARIOS = [
   ['dungeons', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'dungeons')); }],
   ['cards', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'cards')); }],
   ['shop', async (p) => { await p.evaluate(() => window.__sg.app.go('menu', 'shop')); }],
-  ['settings', async (p) => { await p.evaluate(() => { const s = window.__sg.app.scene; s.settings = true; }); }],
+  ['settings', async (p) => { await p.evaluate(() => { window.__sg.app.go('menu'); const s = window.__sg.app.scene; s.settings = true; }); }],
 ];
 
 // Later Ages: a home screen, an early crowd and a late fight (fortress damage) per Age.

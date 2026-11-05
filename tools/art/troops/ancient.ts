@@ -1,6 +1,6 @@
 /** Ancient Age troops: bronze, linen and crested helmets. */
 import { Img, type Palette } from '../img';
-import { BRONZE, HAIR, INK, LEATHER, LINEN, MOUTH, ROSE, SKIN, STEEL, WHITE, WOOD, BONE, type Ramp } from '../palette';
+import { BRONZE, HAIR, INK, LEATHER, LINEN, MOUTH, ROSE, SKIN, STEEL, WHITE, WOOD, BONE, teamTint, type Ramp } from '../palette';
 import type { RigParts } from '../rig';
 
 function pal(team: Ramp): Palette {
@@ -104,7 +104,9 @@ export function spearmanRig(team: Ramp): RigParts {
 }
 
 export function archerRig(team: Ramp): RigParts {
-  const p = pal(team);
+  // The archer's leather cap and quiver are dyed in the team colour (D39).
+  const cap = teamTint(LEATHER, team, 0.55);
+  const p = { ...pal(team), L: cap.base, l: cap.shade, M: cap.hl };
   const dk = dark(p);
   const head = [
     '.....lL.......',

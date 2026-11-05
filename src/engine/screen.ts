@@ -55,8 +55,19 @@ export class Screen {
   cssTop = 0;
   cssScale = 1;
   onResize: (() => void) | null = null;
+  /**
+   * iPhone safe areas (status bar / Dynamic Island, home indicator) in art pixels, measured over the
+   * visible canvas. Scenes keep text and taps out of them and let wall art fill them (D39).
+   * `?safe=47,34` fakes them (CSS px) for screenshots on desktop.
+   */
+  insetTop = 0;
+  insetBottom = 0;
+  private probe: HTMLDivElement;
 
   constructor(host: HTMLElement) {
+    this.probe = document.createElement('div');
+    this.probe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+    document.body.appendChild(this.probe);
     this.view = document.createElement('canvas');
     this.view.style.position = 'absolute';
     this.view.style.imageRendering = 'pixelated';
@@ -102,7 +113,21 @@ export class Screen {
     this.view.style.left = `${this.cssLeft}px`;
     this.view.style.top = `${this.cssTop}px`;
     this.viewCtx.imageSmoothingEnabled = false;
-    if (changed) this.onResize?.();
+    const [safeTop, safeBottom] = this.safeCss();
+    const insetTop = Math.ceil(Math.max(0, safeTop - this.cssTop) / this.cssScale);
+    const insetBottom = Math.ceil(Math.max(0, safeBottom - (cssH - this.cssTop - cssViewH)) / this.cssScale);
+    const insetChanged = insetTop !== this.insetTop || insetBottom !== this.insetBottom;
+    this.insetTop = insetTop;
+    this.insetBottom = insetBottom;
+    if (changed || insetChanged) this.onResize?.();
+  }
+
+  /** Safe-area insets in CSS px (env() values, or the ?safe= override). */
+  private safeCss(): [number, number] {
+    const q = /[?&]safe=(\d+),(\d+)/.exec(window.location.search);
+    if (q) return [Number(q[1]), Number(q[2])];
+    const cs = getComputedStyle(this.probe);
+    return [parseFloat(cs.paddingTop) || 0, parseFloat(cs.paddingBottom) || 0];
   }
 
   /** Copy the low-res frame to the visible canvas. */

@@ -1970,7 +1970,7 @@
    "h": 240,
    "anchor": [
     0,
-    232
+    280
    ]
   },
   "env.stone.far": {
@@ -1980,7 +1980,7 @@
    "h": 168,
    "anchor": [
     0,
-    162
+    210
    ]
   },
   "env.stone.mid": {
@@ -1990,7 +1990,7 @@
    "h": 68,
    "anchor": [
     0,
-    64
+    112
    ]
   },
   "env.stone.ground": {
@@ -2052,7 +2052,7 @@
    "h": 240,
    "anchor": [
     0,
-    232
+    280
    ]
   },
   "env.ancient.far": {
@@ -2062,7 +2062,7 @@
    "h": 150,
    "anchor": [
     0,
-    160
+    208
    ]
   },
   "env.ancient.mid": {
@@ -2072,7 +2072,7 @@
    "h": 64,
    "anchor": [
     0,
-    60
+    108
    ]
   },
   "env.ancient.ground": {
@@ -2122,7 +2122,7 @@
    "h": 240,
    "anchor": [
     0,
-    232
+    280
    ]
   },
   "env.crusader.far": {
@@ -2132,7 +2132,7 @@
    "h": 150,
    "anchor": [
     0,
-    160
+    208
    ]
   },
   "env.crusader.mid": {
@@ -2142,7 +2142,7 @@
    "h": 66,
    "anchor": [
     0,
-    62
+    110
    ]
   },
   "env.crusader.ground": {
@@ -2198,7 +2198,7 @@
    "h": 240,
    "anchor": [
     0,
-    232
+    280
    ]
   },
   "env.gunpowder.far": {
@@ -2208,7 +2208,7 @@
    "h": 130,
    "anchor": [
     0,
-    138
+    186
    ]
   },
   "env.gunpowder.mid": {
@@ -2218,7 +2218,7 @@
    "h": 64,
    "anchor": [
     0,
-    60
+    108
    ]
   },
   "env.gunpowder.ground": {
@@ -2274,7 +2274,7 @@
    "h": 240,
    "anchor": [
     0,
-    232
+    280
    ]
   },
   "env.industrial.far": {
@@ -2284,7 +2284,7 @@
    "h": 120,
    "anchor": [
     0,
-    126
+    174
    ]
   },
   "env.industrial.mid": {
@@ -2294,7 +2294,7 @@
    "h": 62,
    "anchor": [
     0,
-    58
+    106
    ]
   },
   "env.industrial.ground": {
@@ -2356,7 +2356,7 @@
    "h": 240,
    "anchor": [
     0,
-    232
+    280
    ]
   },
   "env.future.far": {
@@ -2366,7 +2366,7 @@
    "h": 140,
    "anchor": [
     0,
-    146
+    194
    ]
   },
   "env.future.mid": {
@@ -2376,7 +2376,7 @@
    "h": 64,
    "anchor": [
     0,
-    60
+    108
    ]
   },
   "env.future.ground": {
@@ -3456,13 +3456,25 @@
    "kind": "image",
    "file": "ui/tab.png",
    "w": 40,
-   "h": 32
+   "h": 32,
+   "slice": [
+    6,
+    6,
+    6,
+    5
+   ]
   },
   "ui.tab_on": {
    "kind": "image",
    "file": "ui/tab_on.png",
    "w": 40,
-   "h": 38
+   "h": 38,
+   "slice": [
+    6,
+    6,
+    6,
+    5
+   ]
   },
   "ui.tabbar": {
    "kind": "image",
@@ -3486,6 +3498,82 @@
     6
    ]
   },
+  "ui.beam_stone": {
+   "kind": "image",
+   "file": "ui/beam_stone.png",
+   "w": 256,
+   "h": 83,
+   "anchor": [
+    128,
+    83
+   ]
+  },
+  "ui.backdrop_stone": {
+   "kind": "image",
+   "file": "ui/backdrop_stone.png",
+   "w": 256,
+   "h": 368,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "ui.card_stone": {
+   "kind": "image",
+   "file": "ui/card_stone.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_stone_lit": {
+   "kind": "image",
+   "file": "ui/card_stone_lit.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.socket_stone": {
+   "kind": "image",
+   "file": "ui/socket_stone.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.niche_stone": {
+   "kind": "image",
+   "file": "ui/niche_stone.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_niche_stone": {
+   "kind": "image",
+   "file": "ui/hero_niche_stone.png",
+   "w": 36,
+   "h": 39,
+   "anchor": [
+    18,
+    18
+   ]
+  },
+  "ui.food_stone": {
+   "kind": "image",
+   "file": "ui/food_stone.png",
+   "w": 18,
+   "h": 18,
+   "slice": [
+    5,
+    5,
+    5,
+    5
+   ]
+  },
   "ui.wall_ancient": {
    "kind": "image",
    "file": "ui/wall_ancient.png",
@@ -3494,6 +3582,82 @@
    "anchor": [
     128,
     6
+   ]
+  },
+  "ui.beam_ancient": {
+   "kind": "image",
+   "file": "ui/beam_ancient.png",
+   "w": 256,
+   "h": 83,
+   "anchor": [
+    128,
+    83
+   ]
+  },
+  "ui.backdrop_ancient": {
+   "kind": "image",
+   "file": "ui/backdrop_ancient.png",
+   "w": 256,
+   "h": 368,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "ui.card_ancient": {
+   "kind": "image",
+   "file": "ui/card_ancient.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_ancient_lit": {
+   "kind": "image",
+   "file": "ui/card_ancient_lit.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.socket_ancient": {
+   "kind": "image",
+   "file": "ui/socket_ancient.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.niche_ancient": {
+   "kind": "image",
+   "file": "ui/niche_ancient.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_niche_ancient": {
+   "kind": "image",
+   "file": "ui/hero_niche_ancient.png",
+   "w": 36,
+   "h": 39,
+   "anchor": [
+    18,
+    18
+   ]
+  },
+  "ui.food_ancient": {
+   "kind": "image",
+   "file": "ui/food_ancient.png",
+   "w": 18,
+   "h": 18,
+   "slice": [
+    5,
+    5,
+    5,
+    5
    ]
   },
   "ui.wall_crusader": {
@@ -3506,6 +3670,82 @@
     6
    ]
   },
+  "ui.beam_crusader": {
+   "kind": "image",
+   "file": "ui/beam_crusader.png",
+   "w": 256,
+   "h": 83,
+   "anchor": [
+    128,
+    83
+   ]
+  },
+  "ui.backdrop_crusader": {
+   "kind": "image",
+   "file": "ui/backdrop_crusader.png",
+   "w": 256,
+   "h": 368,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "ui.card_crusader": {
+   "kind": "image",
+   "file": "ui/card_crusader.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_crusader_lit": {
+   "kind": "image",
+   "file": "ui/card_crusader_lit.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.socket_crusader": {
+   "kind": "image",
+   "file": "ui/socket_crusader.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.niche_crusader": {
+   "kind": "image",
+   "file": "ui/niche_crusader.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_niche_crusader": {
+   "kind": "image",
+   "file": "ui/hero_niche_crusader.png",
+   "w": 36,
+   "h": 39,
+   "anchor": [
+    18,
+    18
+   ]
+  },
+  "ui.food_crusader": {
+   "kind": "image",
+   "file": "ui/food_crusader.png",
+   "w": 18,
+   "h": 18,
+   "slice": [
+    5,
+    5,
+    5,
+    5
+   ]
+  },
   "ui.wall_gunpowder": {
    "kind": "image",
    "file": "ui/wall_gunpowder.png",
@@ -3514,6 +3754,82 @@
    "anchor": [
     128,
     6
+   ]
+  },
+  "ui.beam_gunpowder": {
+   "kind": "image",
+   "file": "ui/beam_gunpowder.png",
+   "w": 256,
+   "h": 83,
+   "anchor": [
+    128,
+    83
+   ]
+  },
+  "ui.backdrop_gunpowder": {
+   "kind": "image",
+   "file": "ui/backdrop_gunpowder.png",
+   "w": 256,
+   "h": 368,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "ui.card_gunpowder": {
+   "kind": "image",
+   "file": "ui/card_gunpowder.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_gunpowder_lit": {
+   "kind": "image",
+   "file": "ui/card_gunpowder_lit.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.socket_gunpowder": {
+   "kind": "image",
+   "file": "ui/socket_gunpowder.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.niche_gunpowder": {
+   "kind": "image",
+   "file": "ui/niche_gunpowder.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_niche_gunpowder": {
+   "kind": "image",
+   "file": "ui/hero_niche_gunpowder.png",
+   "w": 36,
+   "h": 39,
+   "anchor": [
+    18,
+    18
+   ]
+  },
+  "ui.food_gunpowder": {
+   "kind": "image",
+   "file": "ui/food_gunpowder.png",
+   "w": 18,
+   "h": 18,
+   "slice": [
+    5,
+    5,
+    5,
+    5
    ]
   },
   "ui.wall_industrial": {
@@ -3526,6 +3842,82 @@
     6
    ]
   },
+  "ui.beam_industrial": {
+   "kind": "image",
+   "file": "ui/beam_industrial.png",
+   "w": 256,
+   "h": 83,
+   "anchor": [
+    128,
+    83
+   ]
+  },
+  "ui.backdrop_industrial": {
+   "kind": "image",
+   "file": "ui/backdrop_industrial.png",
+   "w": 256,
+   "h": 368,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "ui.card_industrial": {
+   "kind": "image",
+   "file": "ui/card_industrial.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_industrial_lit": {
+   "kind": "image",
+   "file": "ui/card_industrial_lit.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.socket_industrial": {
+   "kind": "image",
+   "file": "ui/socket_industrial.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.niche_industrial": {
+   "kind": "image",
+   "file": "ui/niche_industrial.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_niche_industrial": {
+   "kind": "image",
+   "file": "ui/hero_niche_industrial.png",
+   "w": 36,
+   "h": 39,
+   "anchor": [
+    18,
+    18
+   ]
+  },
+  "ui.food_industrial": {
+   "kind": "image",
+   "file": "ui/food_industrial.png",
+   "w": 18,
+   "h": 18,
+   "slice": [
+    5,
+    5,
+    5,
+    5
+   ]
+  },
   "ui.wall_future": {
    "kind": "image",
    "file": "ui/wall_future.png",
@@ -3534,6 +3926,82 @@
    "anchor": [
     128,
     6
+   ]
+  },
+  "ui.beam_future": {
+   "kind": "image",
+   "file": "ui/beam_future.png",
+   "w": 256,
+   "h": 83,
+   "anchor": [
+    128,
+    83
+   ]
+  },
+  "ui.backdrop_future": {
+   "kind": "image",
+   "file": "ui/backdrop_future.png",
+   "w": 256,
+   "h": 368,
+   "slice": [
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "ui.card_future": {
+   "kind": "image",
+   "file": "ui/card_future.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.card_future_lit": {
+   "kind": "image",
+   "file": "ui/card_future_lit.png",
+   "w": 40,
+   "h": 48
+  },
+  "ui.socket_future": {
+   "kind": "image",
+   "file": "ui/socket_future.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.niche_future": {
+   "kind": "image",
+   "file": "ui/niche_future.png",
+   "w": 30,
+   "h": 33,
+   "anchor": [
+    15,
+    15
+   ]
+  },
+  "ui.hero_niche_future": {
+   "kind": "image",
+   "file": "ui/hero_niche_future.png",
+   "w": 36,
+   "h": 39,
+   "anchor": [
+    18,
+    18
+   ]
+  },
+  "ui.food_future": {
+   "kind": "image",
+   "file": "ui/food_future.png",
+   "w": 18,
+   "h": 18,
+   "slice": [
+    5,
+    5,
+    5,
+    5
    ]
   },
   "ui.ribbon_gold": {
@@ -3998,32 +4466,38 @@
   },
   "env.stone": {
    "skyTop": "#2f6cc4",
+   "shadow": "#5f453c",
    "clouds": 6,
    "volcanoX": 156,
    "volcanoY": 64
   },
   "env.ancient": {
    "skyTop": "#3a86d0",
+   "shadow": "#6c5a4d",
    "clouds": 4
   },
   "env.crusader": {
    "skyTop": "#3468b8",
+   "shadow": "#523e3b",
    "clouds": 5
   },
   "env.gunpowder": {
    "skyTop": "#40639a",
+   "shadow": "#55433d",
    "clouds": 5,
    "volcanoX": 192,
    "volcanoY": 96
   },
   "env.industrial": {
    "skyTop": "#3c4466",
+   "shadow": "#321d22",
    "clouds": 6,
    "volcanoX": 134,
    "volcanoY": 42
   },
   "env.future": {
    "skyTop": "#1c1840",
+   "shadow": "#423f56",
    "clouds": 4
   },
   "base.stone": {

@@ -5,7 +5,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { AnimEntry, AssetEntry, Manifest } from '../../src/engine/manifest';
-import { A, B, G, Img, R } from './img';
+import { A, B, G, Img, R, mix } from './img';
 import { INK, TEAM_BLUE, TEAM_RED, MOSS, GOLD, WOOD, STONE } from './palette';
 import { packSheet } from './rig';
 import { ALL_TROOPS } from './troops/catalog';
@@ -22,6 +22,7 @@ import { industrialEnv } from './env/industrial';
 import { industrialFortress } from './bases/industrial';
 import { futureEnv } from './env/future';
 import { futureFortress } from './bases/future';
+import * as ageKit from './ui/ageKit';
 import * as walls from './ui/walls';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
@@ -246,13 +247,23 @@ export function buildAll(): void {
   const envs: [string, string, EnvArt][] = [['stone', 'Stone', stoneEnv()], ['ancient', 'Ancient', ancientEnv()], ['crusader', 'Crusader', crusaderEnv()], ['gunpowder', 'Gunpowder', gunpowderEnv()], ['industrial', 'Industrial', industrialEnv()], ['future', 'Future', futureEnv()]];
   for (const [age, label, env] of envs) {
     env.layers.ground = widenLane(env.layers.ground.img, env.layers.ground.groundY);
+    // The wider road raised the ground layer's top edge by half the added rows; lift the scenery
+    // behind it by the same amount so the far and mid layers (trees, temples, factories) still show
+    // above the back verge, as they did before the road was widened (D39).
+    for (const name of ['sky', 'far', 'mid'] as const) {
+      const l = env.layers[name];
+      if (l) l.groundY += LANE_EXTRA / 2;
+    }
     for (const [name, layer] of Object.entries(env.layers)) {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
     }
     const g = env.layers.ground.img;
     reg.image(`env.${age}.field`, `env/${age}/field.png`, fieldTile(g), `${label} Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.`);
     env.clouds.forEach((c, i) => reg.image(`env.${age}.cloud${i}`, `env/${age}/cloud${i}.png`, c, 'Drifting cloud.'));
-    reg.manifest.meta[`env.${age}`] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, ...(env.volcano ? { volcanoX: env.volcano[0], volcanoY: env.volcano[1] } : {}) };
+    // Contact-shadow colour: the road's centre tone pushed most of the way to ink (opaque, D39).
+    const road = g.get(128, env.layers.ground.groundY);
+    const shadow = mix(road, INK, 0.62);
+    reg.manifest.meta[`env.${age}`] = { skyTop: '#' + (env.skyTop >>> 8).toString(16).padStart(6, '0'), shadow: '#' + (shadow >>> 8).toString(16).padStart(6, '0'), clouds: env.clouds.length, ...(env.volcano ? { volcanoX: env.volcano[0], volcanoY: env.volcano[1] } : {}) };
   }
 
   // Fortresses
@@ -308,12 +319,27 @@ export function buildAll(): void {
   put('ui.tab', ui.tabButton(false));
   put('ui.tab_on', ui.tabButton(true));
   put('ui.tabbar', ui.tabBar());
-  put('ui.wall_stone', ui.stoneWall(ui.STONE_WALL));
-  put('ui.wall_ancient', ui.stoneWall(ui.SAND_WALL));
-  put('ui.wall_crusader', walls.crusaderWall());
-  put('ui.wall_gunpowder', walls.gunpowderWall());
-  put('ui.wall_industrial', walls.industrialWall());
-  put('ui.wall_future', walls.futureWall());
+  const ageWalls: Record<string, ui.UiPiece> = {
+    stone: ui.stoneWall(ui.STONE_WALL),
+    ancient: ui.stoneWall(ui.SAND_WALL),
+    crusader: walls.crusaderWall(),
+    gunpowder: walls.gunpowderWall(),
+    industrial: walls.industrialWall(),
+    future: walls.futureWall(),
+  };
+  // Per-Age HUD kit (D39): every control is cut from that Age's wall material.
+  for (const [age, wall] of Object.entries(ageWalls)) {
+    const kit = ageKit.AGE_KITS[age];
+    put(`ui.wall_${age}`, wall);
+    put(`ui.beam_${age}`, ageKit.ageBeam(wall.img));
+    put(`ui.backdrop_${age}`, ageKit.ageBackdrop(wall.img));
+    put(`ui.card_${age}`, ageKit.ageCard(kit, false));
+    put(`ui.card_${age}_lit`, ageKit.ageCard(kit, true));
+    put(`ui.socket_${age}`, ageKit.ageSocket(kit, 28, false));
+    put(`ui.niche_${age}`, ageKit.ageSocket(kit, 28, true));
+    put(`ui.hero_niche_${age}`, ageKit.ageSocket(kit, 34, true));
+    put(`ui.food_${age}`, ageKit.ageNiche(kit));
+  }
   put('ui.ribbon_gold', ui.ribbon(GOLD));
   put('ui.ribbon_grey', ui.ribbon({ hl: STONE.hl, base: STONE.base, shade: STONE.shade, deep: STONE.deep }));
 

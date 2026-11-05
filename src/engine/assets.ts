@@ -55,12 +55,13 @@ export class Assets {
     return i;
   }
 
-  /** White silhouette of an image, for hit flashes. */
-  white(key: string): HTMLCanvasElement {
-    let c = this.whites.get(key);
+  /** White silhouette of an image, for hit flashes (or any solid colour, for status tints). */
+  white(key: string, color = '#ffffff'): HTMLCanvasElement {
+    const ck = color === '#ffffff' ? key : `${key}|${color}`;
+    let c = this.whites.get(ck);
     if (!c) {
-      c = tinted(this.img(key), '#ffffff');
-      this.whites.set(key, c);
+      c = tinted(this.img(key), color);
+      this.whites.set(ck, c);
     }
     return c;
   }

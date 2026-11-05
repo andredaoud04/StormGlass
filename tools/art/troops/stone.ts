@@ -1,12 +1,14 @@
 import { Img, type Palette } from '../img';
-import { BONE, FUR, HAIR, HAIR_RED, INK, LEATHER, MOUTH, ROSE, SKIN, STONE, WHITE, WOOD, type Ramp } from '../palette';
+import { BONE, FUR, HAIR, HAIR_RED, INK, LEATHER, MOUTH, ROSE, SKIN, STONE, WHITE, WOOD, teamTint, type Ramp } from '../palette';
 import type { RigParts } from '../rig';
 
 function basePal(team: Ramp): Palette {
+  // Hides are dyed in the team colour so the two tribes read apart in a crowd (D39).
+  const fur = teamTint(FUR, team, 0.42);
   return {
     h: HAIR.base, H: HAIR.hl, j: HAIR.shade, J: HAIR.deep,
     s: SKIN.base, S: SKIN.hl, k: SKIN.shade, K: SKIN.deep,
-    F: FUR.base, G: FUR.hl, f: FUR.shade, d: FUR.deep,
+    F: fur.base, G: fur.hl, f: fur.shade, d: fur.deep,
     T: team.base, U: team.hl, t: team.shade, Y: team.deep,
     B: WOOD.base, C: WOOD.hl, b: WOOD.shade, D: WOOD.deep,
     L: LEATHER.base, l: LEATHER.shade, M: LEATHER.hl,
@@ -21,7 +23,7 @@ function shadePal(p: Palette): Palette {
   return {
     ...p,
     s: SKIN.shade, S: SKIN.base, k: SKIN.deep,
-    F: FUR.shade, G: FUR.base, f: FUR.deep,
+    F: p.f, G: p.F, f: p.d,
     B: WOOD.shade, C: WOOD.base, b: WOOD.deep,
     T: p.t, U: p.T,
   };
@@ -98,7 +100,8 @@ export function clubberRig(team: Ramp): RigParts {
 }
 
 export function slingerRig(team: Ramp): RigParts {
-  const pal = { ...basePal(team), h: HAIR_RED.base, H: HAIR_RED.hl, j: HAIR_RED.shade, J: HAIR_RED.deep };
+  const tunic = teamTint(LEATHER, team, 0.5);
+  const pal = { ...basePal(team), h: HAIR_RED.base, H: HAIR_RED.hl, j: HAIR_RED.shade, J: HAIR_RED.deep, L: tunic.base, l: tunic.shade, M: tunic.hl };
   const dark = shadePal(pal);
   const head = [
     '......Ut......',

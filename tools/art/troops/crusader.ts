@@ -14,7 +14,7 @@ export function footmanRig(team: Ramp): RigParts {
     '..qgqggggpp...',
     '..qggggggggp..',
     'qqgggggggggppP',
-    '.PPPPPPPPPPPP.',
+    '.YTTUTTTTTTtY.',
     'gpgkSSSSSSSSs.',
     'gpgkSssssswess',
     'pgpksssssseess',

@@ -35,11 +35,11 @@ export class Draw {
   }
 
   /** One frame of an animation sheet. */
-  frame(key: string, anim: string, index: number, x: number, y: number, opts: { flip?: boolean; alpha?: number; white?: boolean } = {}): void {
+  frame(key: string, anim: string, index: number, x: number, y: number, opts: { flip?: boolean; alpha?: number; white?: boolean; tint?: string } = {}): void {
     const e = this.assets.sheet(key);
     const a = e.anims[anim];
     const i = Math.max(0, Math.min(a.frames - 1, index));
-    const src = opts.white ? this.assets.white(key) : this.assets.img(key);
+    const src = opts.tint ? this.assets.white(key, opts.tint) : opts.white ? this.assets.white(key) : this.assets.img(key);
     this.blit(src, i * e.frameW, a.row * e.frameH, e.frameW, e.frameH, x, y, e.anchor[0], e.anchor[1], opts.flip, opts.alpha);
   }
 

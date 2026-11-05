@@ -78,6 +78,15 @@ export function counter(app: App, x: number, y: number, w: number, icon: string,
   d.text(value, x + w - 4, y + 4, { color, align: 'right' });
 }
 
+/** Currency counter with the number in the big font (We Are Warriors-sized numerals). */
+export function counterBig(app: App, x: number, y: number, w: number, icon: string, value: string, color = '#fff8ec'): void {
+  const d = app.draw;
+  d.nine('ui.small_plaque', x, y, w, 17);
+  const ie = app.assets.image('icon.' + icon);
+  d.image('icon.' + icon, x - 3, y + Math.round((17 - ie.h) / 2));
+  d.text(value, x + 11, y + 5, { font: 'big', color, shadow: true });
+}
+
 /** Header plaque with a centred title (and optional small subtitle). */
 export function plaque(app: App, cx: number, y: number, title: string, sub?: string): void {
   const d = app.draw;

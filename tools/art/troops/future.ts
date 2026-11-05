@@ -1,14 +1,15 @@
 /** Future Age troops: alloy plate over dark suits, team-glow energy weapons, and a battle Mech. */
 import { hex, type Img } from '../img';
-import { ALLOY, PLASMA, SUIT, WHITE, type Ramp } from '../palette';
+import { ALLOY, PLASMA, SUIT, WHITE, teamTint, type Ramp } from '../palette';
 import type { RigParts } from '../rig';
 import { darkOf, grid, groups, hurtHead, palOf } from './kit';
 import { bipedAnims, type BipedRig } from './machines';
 
-const over = { metal: ALLOY, extra: SUIT, extra2: PLASMA };
+/** Undersuits dyed in the team colour so the two armies read apart on the pale floor (D39). */
+const overOf = (team: Ramp) => ({ metal: ALLOY, extra: teamTint(SUIT, team, 0.5), extra2: PLASMA });
 
 function trooper(team: Ramp, head: string[], hurt: string[], weapon: { rows: string[]; pivot: [number, number] }, back?: { rows: string[]; pivot: [number, number] }): RigParts {
-  const gs = groups(team, over);
+  const gs = groups(team, overOf(team));
   const p = palOf(gs);
   const dk = darkOf(gs);
   const torso = ['..qggpp..', '.GUTTTtG.', 'GFUTiTtGf', 'GGTTTttGf', '.ppPiPpP.', '.GGFGGGf.', '.GFGGfGf.', '.g.p.g.p.'];
@@ -79,7 +80,7 @@ export function lancerRig(team: Ramp): RigParts {
 // ---------- Mech ----------
 
 function mechBody(team: Ramp, hurt: boolean): Img {
-  const p = palOf(groups(team, over));
+  const p = palOf(groups(team, overOf(team)));
   const v = hurt ? 'r' : 'i';
   const rows = [
     '.....qqqqq........',
@@ -101,7 +102,7 @@ function mechBody(team: Ramp, hurt: boolean): Img {
 }
 
 export function mechRig(team: Ramp): BipedRig {
-  const p = palOf(groups(team, over));
+  const p = palOf(groups(team, overOf(team)));
   const cannon = ['.qgp..', 'qgggp.', 'qgTgp.', 'qgggp.', '.FGf..', 'qgggpP', 'qgggpP', 'qgggpP', 'qgggpP', '.PPPP.', '.iIi..'];
   const pod = ['qggp', 'qTTp', 'qIIp', 'PPPP'];
   const foot = ['..qgp..', '.qgggp.', 'qggggpq', 'PPPPPPP'];
