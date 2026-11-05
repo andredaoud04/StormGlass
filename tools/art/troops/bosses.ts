@@ -4,7 +4,8 @@
  * and the frames stay real rig frames), then gets its own regalia: crowns, horns, capes, hats
  * and darker metal so it reads as a boss at a glance.
  */
-import { Img, scale2x, type Color, type Palette } from '../img';
+import { Img, bayer, mix, scale2x, type Color, type Palette } from '../img';
+import * as PAL from '../palette';
 import { BONE, BRONZE, FELT, FUR, GOLD, IRON, MAIL, STEEL, SUIT, ALLOY, TEAM_RED, WOOD, INK, PLASMA, type Ramp } from '../palette';
 import type { Limb, RigParts } from '../rig';
 import { humanoidAnims } from './anims';
@@ -19,10 +20,51 @@ import type { TroopArt } from './catalog';
 
 const X2 = (v: [number, number]): [number, number] => [v[0] * 2, v[1] * 2];
 
+/** Every ramp in the master palette, so a colour can step one shade lighter or darker. */
+const STEPS = (() => {
+  const m = new Map<Color, { up: Color; down: Color }>();
+  for (const v of Object.values(PAL)) {
+    if (!v || typeof v !== 'object' || !('base' in v)) continue;
+    const r = v as { hl: Color; base: Color; shade: Color; deep: Color };
+    const seq = [r.hl, r.base, r.shade, r.deep];
+    seq.forEach((c, i) => {
+      if (!m.has(c)) m.set(c, { up: seq[Math.max(0, i - 1)], down: seq[Math.min(3, i + 1)] });
+    });
+  }
+  return m;
+})();
+const lighter = (c: Color) => STEPS.get(c)?.up ?? mix(c, 0xfff8ecff, 0.25);
+const darker = (c: Color) => STEPS.get(c)?.down ?? mix(c, 0x1e1526ff, 0.3);
+
+/**
+ * Re-detail an upscaled part at the native pixel size (D39 "one pixel"): a one-pixel rim light on
+ * top-left edges, one-pixel shade on bottom-right edges, single-pixel texture in flat areas and
+ * single-pixel seams between colours, so the doubled pixels no longer read as a zoomed-in troop.
+ */
+function redetail(src: Img): Img {
+  const out = src.clone();
+  const at = (x: number, y: number) => (x < 0 || y < 0 || x >= src.w || y >= src.h ? 0 : src.get(x, y));
+  for (let y = 0; y < src.h; y++) {
+    for (let x = 0; x < src.w; x++) {
+      const c = src.get(x, y);
+      if (!c || c === INK) continue;
+      const l = at(x - 1, y), u = at(x, y - 1), r = at(x + 1, y), d = at(x, y + 1);
+      const edge = (v: Color) => !v || v === INK;
+      if (edge(u) || edge(l)) out.set(x, y, lighter(c));
+      else if (edge(d) || edge(r)) out.set(x, y, darker(c));
+      else if ((r && r !== c && r !== INK) || (d && d !== c && d !== INK)) {
+        // A seam between two materials: darken this side by one step, one pixel wide.
+        if (at(x + 1, y + 1) !== c) out.set(x, y, darker(c));
+      } else if (bayer(x, y) < 0.035 && (x + y) % 3 === 0) out.set(x, y, darker(c));
+    }
+  }
+  return out;
+}
+
 function bigLimb(l: Limb, recolor?: (c: Color) => Color): Limb {
   const img = scale2x(l.img);
   if (recolor) img.map((c) => (c ? recolor(c) : c));
-  return { img, pivot: X2(l.pivot), ...(l.tip ? { tip: X2(l.tip) } : {}) };
+  return { img: redetail(img), pivot: X2(l.pivot), ...(l.tip ? { tip: X2(l.tip) } : {}) };
 }
 
 /** Map every colour of one ramp onto another (e.g. bright mail to blackened iron). */
@@ -184,7 +226,8 @@ export function admiralRig(team: Ramp): RigParts {
     '.ffffffffffffffffffffffff.',
     '..YYYYYYYYYYYYYYYYYYYYYY..',
   ], { ...P(['FGff', FELT], ['YZzz', GOLD]), W: STEEL.hl, w: STEEL.base }, [-2, -6]);
-  cape(r, CAPE_ROWS(24, 34), P(['ABCD', SUIT]), [21, 0]);
+  // Enemy-red greatcoat cape (navy read as the player's colour).
+  cape(r, CAPE_ROWS(24, 34), P(['ABCD', { hl: TEAM_RED.shade, base: TEAM_RED.deep, shade: 0x4a1226ff, deep: 0x2e0c1aff }]), [21, 0]);
   return r;
 }
 
@@ -193,7 +236,7 @@ function bigBiped(r: BipedRig, recolor?: (c: Color) => Color): BipedRig {
   const S = (img: Img) => {
     const o = scale2x(img);
     if (recolor) o.map((c) => (c ? recolor(c) : c));
-    return o;
+    return redetail(o);
   };
   const sw = (ramp: BipedRig['legRamp']) => (recolor ? { hl: recolor(ramp.hl), base: recolor(ramp.base), shade: recolor(ramp.shade), deep: recolor(ramp.deep) } : ramp);
   return {

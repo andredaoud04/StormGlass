@@ -602,7 +602,7 @@ boss_stone: boss at twice the troop scale, enemy team. Faces right; mirrored in 
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (31): #1e1526 #fbf4e0 #b3a486 #7d705c #e2d6b6 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #e64d4d #7c2e30 #6f322a #ab513f #dd7e58 #f9c591 #ae2a40 #ffb08c #52291b #7f4428 #94503f #f4d494 #d6a160 #ad6a3c ...
+- Colors (43): #1e1526 #fbf4e0 #b3a486 #e2d6b6 #7d705c #6e3e24 #4a2618 #2e1610 #cc7a58 #94503f #ffd6ac #f2a97a #e64d4d #ae2a40 #7c2e30 #60272d #93645b #c07b6a #dd7e58 #f9c591 #ab513f #813f38 #b79071 #a45f49 ...
 
 ## troop.boss_ancient.red
 
@@ -618,7 +618,7 @@ boss_ancient: boss at twice the troop scale, enemy team. Faces right; mirrored i
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (23): #1e1526 #fbf4e0 #e2d6b6 #b3a486 #ae2a40 #e64d4d #ffb08c #fff2a6 #e6b84a #b07a2c #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #6a1a33 #c98a52
+- Colors (29): #1e1526 #fbf4e0 #e2d6b6 #b3a486 #e64d4d #ffb08c #fff2a6 #e6b84a #6a1a33 #ae2a40 #b07a2c #6a3f1c #94503f #ffd6ac #f2a97a #cc7a58 #fff8ec #bcb4b1 #f07a7a #b15c61 #7c2e30 #60272d #f2f6fa #b8c2cc ...
 
 ## troop.boss_crusader.red
 
@@ -634,7 +634,7 @@ boss_crusader: boss at twice the troop scale, enemy team. Faces right; mirrored 
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (22): #1e1526 #fff3a8 #ffd03c #e64d4d #a35f16 #ae2a40 #ffb08c #9aa2ae #4a505e #6a7280 #30343f #e6b84a #fff2a6 #fffaf0 #b07a2c #9a5c34 #6e3a22 #6a5a6e #312838 #45384c #221c28 #c98a52
+- Colors (26): #1e1526 #fff3a8 #ffd03c #e64d4d #a35f16 #6a1a33 #ae2a40 #ffb08c #9aa2ae #6a7280 #4a505e #30343f #fff2a6 #e6b84a #b07a2c #fffaf0 #ece2cc #6a3f1c #9a5c34 #6e3a22 #472214 #6a5a6e #312838 #45384c ...
 
 ## troop.boss_gunpowder.red
 
@@ -650,7 +650,7 @@ boss_gunpowder: boss at twice the troop scale, enemy team. Faces right; mirrored
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (42): #1e1526 #f2f6fa #b8c2cc #6a5a6e #45384c #a35f16 #ffd03c #fff3a8 #221c28 #b5857d #70293c #96434d #fff2a6 #e6b84a #6a3f1c #6e3e24 #cc7a58 #ffd6ac #f2a97a #4a2618 #ece2cc #d6dce2 #6e7884 #f07a7a ...
+- Colors (54): #1e1526 #f2f6fa #b8c2cc #6a5a6e #45384c #a35f16 #ffd03c #fff3a8 #221c28 #c8a299 #945d68 #886363 #70293c #b07075 #b5857d #96434d #723541 #572335 #fff2a6 #e6b84a #b07a2c #6a3f1c #9a6238 #6e3e24 ...
 
 ## troop.boss_industrial.red
 
@@ -666,7 +666,7 @@ boss_industrial: boss at twice the troop scale, enemy team. Faces right; mirrore
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (30): #1e1526 #462a3a #c0a7a1 #99646d #704253 #a8b294 #7c866a #5a624e #fff3a8 #fff8ec #f2a97a #cc7a58 #e64d4d #ae2a40 #e09a1e #ffb08c #a35f16 #9aa2ae #30343f #4a505e #6a7280 #52291b #8f7b7c #744c58 ...
+- Colors (47): #1e1526 #745e67 #3a2434 #462a3a #d0bbb4 #99646d #744c58 #704253 #8f7b7c #573546 #b3898d #a8b294 #7c866a #5a624e #3c4236 #fff3a8 #ffd03c #fff8ec #bcb4b1 #cc7a58 #f2a97a #94503f #c0a7a1 #e64d4d ...
 
 ## troop.boss_future.red
 
@@ -682,4 +682,4 @@ boss_future: boss at twice the troop scale, enemy team. Faces right; mirrored in
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (26): #1e1526 #404668 #2c304e #e64d4d #5e6688 #ffffff #1e2038 #c4fbff #ffb08c #6d2d47 #934a5b #af8b8a #ae2a40 #52291b #a35f16 #e09a1e #ffd03c #4b4e6b #363754 #282842 #1e1d33 #2a9cf0 #5ce6ff #fff8ec ...
+- Colors (32): #1e1526 #5e6688 #404668 #2c304e #1e2038 #e64d4d #ae2a40 #ffffff #c4fbff #5ce6ff #ffb08c #55263d #703a4b #c3a6a3 #84686c #6a1a33 #ae767f #934a5b #6d2d47 #52291b #a35f16 #e09a1e #ffd03c #4b4e6b ...

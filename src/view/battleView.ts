@@ -643,65 +643,78 @@ export class BattleView {
     d.strip(torch, Math.floor(this.t * this.app.assets.strip(torch).fps + side), flip ? x - tx : x + tx, y + ty, { flip });
   }
 
-  /** Red ground marker under a telegraphed boss strike, filling as it charges. */
+  /**
+   * Ground marker under a telegraphed boss strike: an opaque dotted ring painted on the path (the
+   * whole band inside it gets hit), with cracks that spread as the strike charges. No translucent box.
+   */
   private drawMarks(sx: number, sy: number): void {
     const d = this.app.draw;
     const G = this.layout.groundY;
     for (const m of this.marks) {
-      const cx = this.laneToPx(m.x);
-      const half = Math.max(6, Math.round(this.laneToPx(m.x + m.r) - cx));
+      const cx = Math.round(this.laneToPx(m.x) + sx);
+      const rx = Math.max(6, Math.round(this.laneToPx(m.x + m.r) - this.laneToPx(m.x)));
+      const ry = this.layout.bandHalf + 2;
+      const cy = G + sy;
       const p = Math.min(1, m.t / Math.max(0.05, m.dur));
-      const blink = Math.floor(m.t * 12) % 2 ? 0.55 : 0.85;
-      // A box across the whole width of the path: everyone inside it will be hit.
-      const top = G - this.layout.bandHalf - 2 + sy;
-      const bot = G + this.layout.bandHalf + 3 + sy;
-      d.rect(Math.round(cx - half + sx), top, half * 2, bot - top, '#ff5a4f', 0.08 + 0.16 * p);
-      d.rect(Math.round(cx - half + sx), bot, half * 2, 1, '#ff5a4f', blink);
-      d.rect(Math.round(cx - half * p + sx), bot + 1, Math.round(half * 2 * p), 2, '#ff5a4f', 0.35 + 0.4 * p);
-      d.rect(Math.round(cx - half + sx), top, 1, bot - top, '#ff9a7a', blink);
-      d.rect(Math.round(cx + half - 1 + sx), top, 1, bot - top, '#ff9a7a', blink);
+      const hot = Math.floor(m.t * 12) % 2 === 0;
+      const rim = hot ? '#ff5a4f' : '#ffb08c';
+      // Dotted ring; the dots fill in as the charge builds.
+      const n = Math.round((rx + ry) * 1.6);
+      for (let i = 0; i < n; i++) {
+        const f = i / n;
+        if (i % 2 && f > p) continue;
+        const th = f * Math.PI * 2;
+        d.rect(Math.round(cx + Math.cos(th) * rx), Math.round(cy + Math.sin(th) * ry), 1, 1, f <= p ? rim : '#7a2a30');
+      }
+      // Cracks running out from the impact point.
+      for (let k = 0; k < 6; k++) {
+        const th = (k / 6) * Math.PI * 2 + 0.4;
+        const len = Math.round(p * 0.85 * Math.hypot(Math.cos(th) * rx, Math.sin(th) * ry));
+        for (let j = 0; j < len; j += 1) {
+          const t = j / Math.max(1, Math.hypot(Math.cos(th) * rx, Math.sin(th) * ry));
+          const jag = (j >> 2) % 2 ? 1 : 0;
+          d.rect(Math.round(cx + Math.cos(th) * rx * t) + jag, Math.round(cy + Math.sin(th) * ry * t), 1, 1, '#3a1a22');
+        }
+      }
+      d.rect(cx - 1, cy - 1, 3, 3, '#3a1a22');
+      if (hot) d.rect(cx, cy, 1, 1, '#ff5a4f');
       if (m.move === 'barrage') {
         // A falling shell over the mark.
         const y = G - 70 + 70 * p * p;
-        d.rect(Math.round(cx - 1 + sx), Math.round(y + sy), 3, 3, '#2a1f2e');
-        d.rect(Math.round(cx + sx), Math.round(y + sy), 1, 1, '#ffd03c');
+        d.rect(cx - 1, Math.round(y + sy), 3, 3, '#2a1f2e');
+        d.rect(cx, Math.round(y + sy), 1, 1, '#ffd03c');
       }
     }
   }
 
-  /** A shimmering dome over the enemy fortress while its boss lives. */
+  /**
+   * A shimmering dome over the visible front of the enemy fortress while its boss lives: a one-pixel
+   * rim with a moving glint and sparse hex dashes inside, all opaque pixels on the art grid.
+   */
   private drawWard(sx: number, sy: number): void {
     const d = this.app.draw;
     const G = this.layout.groundY;
     const e = this.app.assets.image(`base.${this.baseAge(1)}.blue.0`);
-    const rh = (e.anchor?.[1] ?? 70) + 10;
-    const rw = Math.round(rh * 0.62);
-    const cx = this.layout.laneR + Math.round(rw * 0.55);
+    const rh = (e.anchor?.[1] ?? 70) + 8;
+    const rw = Math.round(rh * 0.5);
+    const cx = this.layout.laneR + Math.round(rw * 0.35);
     const broke = this.wardBroken > 0 && !this.sim.wardUp;
-    const pulse = 0.5 + 0.5 * Math.sin(this.t * 3);
-    const alpha = broke ? this.wardBroken / 1.2 : 0.75 + 0.2 * pulse;
     const col = this.wardFlash > 0 ? '#ffffff' : '#7fd0ff';
-    // Hex-cell fill: rows of short dashes inside the dome, drifting slowly upward.
     const drift = Math.floor(this.t * 6) % 6;
     for (let y = G - rh + 3; y < G; y++) {
+      if ((y + drift) % 6 !== 0) continue;
+      if (broke && Math.floor(this.wardBroken * 20) % 2) continue;
       const k = Math.sqrt(Math.max(0, 1 - Math.pow((G - y) / rh, 2)));
       const half = Math.round(rw * k);
-      if (half < 2) continue;
-      if ((y + drift) % 6 === 0) {
-        for (let x = -half + ((y >> 1) % 2) * 3; x < half - 1; x += 6) d.rect(cx + x + sx, y + sy, 3, 1, '#bfe8ff', 0.22 * alpha);
-      }
-      // Faint inner glow near the rim.
-      d.rect(cx - half + sx, y + sy, 2, 1, '#9fdcff', 0.35 * alpha);
-      d.rect(cx + half - 2 + sx, y + sy, 2, 1, '#9fdcff', 0.35 * alpha);
+      for (let x = -half + 2 + ((y >> 1) % 2) * 3; x < half - 3; x += 7) d.rect(cx + x + sx, y + sy, 2, 1, '#bfe8ff');
     }
-    // Two-pixel rim.
-    for (let a = 0; a <= 96; a++) {
-      if (broke && a % 4 < 2) continue;
-      const th = Math.PI * (a / 96);
+    for (let a = 0; a <= 120; a++) {
+      if (broke && (a % 5 < 2 || Math.floor(this.wardBroken * 20) % 2)) continue;
+      const th = Math.PI * (a / 120);
       const x = Math.round(cx - Math.cos(th) * rw + sx);
       const y = Math.round(G - Math.sin(th) * rh + sy);
-      d.rect(x, y, 2, 2, col, Math.min(1, alpha + this.wardFlash * 3));
-      if ((a + Math.floor(this.t * 14)) % 16 === 0) d.rect(x, y, 2, 2, '#ffffff', Math.min(1, alpha));
+      const glint = (a + Math.floor(this.t * 30)) % 40 < 3;
+      d.rect(x, y, 1, 1, glint ? '#ffffff' : col);
     }
   }
 
