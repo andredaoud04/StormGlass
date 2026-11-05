@@ -64,6 +64,17 @@ export interface Pose {
   /** Extra image drawn last at a frame position (smears, projectiles in hand). */
   overlay?: { img: Img; at: [number, number] };
   offhand?: number;
+  /** Leg swing around the hip (negative = forward for a right-facing troop). */
+  frontLegAngle?: number;
+  backLegAngle?: number;
+  /** Bend a leg: the shin shortens by this many pixels and the foot trails back (passing pose). */
+  frontLegLift?: number;
+  backLegLift?: number;
+  /**
+   * Lean the whole body around the feet (negative falls backward). Every part is rotated and
+   * outlined on its own, so the outline stays crisp (no rotation of a finished frame).
+   */
+  tilt?: number;
 }
 
 const rad = (d: number) => (d * Math.PI) / 180;
@@ -96,40 +107,73 @@ function handPos(arm: Limb, shoulder: [number, number], deg: number): [number, n
   return [shoulder[0] + dx, shoulder[1] + dy];
 }
 
+/** A bent copy of a leg: drop `lift` shin rows and pull the foot back, for the passing pose. */
+const bentCache = new WeakMap<Img, Map<number, Img>>();
+function bentLeg(l: Limb, lift: number): Limb {
+  if (!lift) return l;
+  let m = bentCache.get(l.img);
+  if (!m) bentCache.set(l.img, (m = new Map()));
+  let img = m.get(lift);
+  if (!img) {
+    const src = l.img;
+    const h = Math.max(2, src.h - lift);
+    img = new Img(src.w + lift, h);
+    // Thigh rows stay; the shin loses `lift` rows above the foot; the foot shifts back.
+    const keep = h - 1;
+    for (let y = 0; y < keep; y++) {
+      const sy = y < keep - 1 ? y : src.h - 2;
+      for (let x = 0; x < src.w; x++) img.set(x + lift, y, src.get(x, sy));
+    }
+    for (let x = 0; x < src.w; x++) img.set(x, h - 1, src.get(x, src.h - 1));
+    m.set(lift, img);
+  }
+  return { ...l, img, pivot: [l.pivot[0] + lift, l.pivot[1]] };
+}
+
 export function buildFrame(r: RigParts, pose0: Pose): Img {
   const ink = r.outline ?? INK;
   const k = r.poseScale ?? 1;
   const sc = (v?: [number, number]): [number, number] | undefined => (v ? [v[0] * k, v[1] * k] : v);
-  const pose: Pose = k === 1 ? pose0 : { ...pose0, body: sc(pose0.body), head: sc(pose0.head), frontLeg: sc(pose0.frontLeg), backLeg: sc(pose0.backLeg) };
+  const lift = (v?: number) => (v ? v * k : v);
+  const pose: Pose = k === 1 ? pose0 : { ...pose0, body: sc(pose0.body), head: sc(pose0.head), frontLeg: sc(pose0.frontLeg), backLeg: sc(pose0.backLeg), frontLegLift: lift(pose0.frontLegLift), backLegLift: lift(pose0.backLegLift) };
   const f = new Img(r.frameW, r.frameH);
   const [bx, by] = pose.body ?? [0, 0];
   const hip: [number, number] = [r.hip[0] + bx, r.hip[1] + by];
   const at = (o: [number, number], extra: [number, number] = [0, 0]): [number, number] => [hip[0] + o[0] + extra[0], hip[1] + o[1] + extra[1]];
   // Legs stay planted relative to the ground, not the body bob.
-  const legHip = (o: [number, number], d: [number, number] = [0, 0]): [number, number] => [r.hip[0] + bx + o[0] + d[0], r.hip[1] + o[1] + d[1]];
+  const legHip0 = (o: [number, number], d: [number, number] = [0, 0]): [number, number] => [r.hip[0] + bx + o[0] + d[0], r.hip[1] + o[1] + d[1]];
+  // Whole-body lean around the feet (death falls): rotate every attach point, add the lean to every part.
+  const tilt = pose.tilt ?? 0;
+  const feet: [number, number] = [r.hip[0] - 2, r.frameH - 4];
+  const T = (p: [number, number]): [number, number] => {
+    if (!tilt) return p;
+    const [dx, dy] = rotPoint(p[0] - feet[0], p[1] - feet[1], tilt);
+    return [feet[0] + dx, feet[1] + dy];
+  };
+  const legHip = (o: [number, number], d?: [number, number]) => T(legHip0(o, d));
 
-  const fs = at(r.frontShoulder);
-  const bs = at(r.backShoulder);
-  const fa = pose.frontArm ?? 0;
-  const ba = pose.backArm ?? 0;
+  const fs = T(at(r.frontShoulder));
+  const bs = T(at(r.backShoulder));
+  const fa = (pose.frontArm ?? 0) + tilt;
+  const ba = (pose.backArm ?? 0) + tilt;
   const drawWeapon = () => {
     const w = pose.weaponAlt && r.weaponAlt ? r.weaponAlt : r.weapon;
-    if (w && pose.weapon !== undefined) place(f, w, pose.weapon, handPos(r.frontArm, fs, fa), ink);
+    if (w && pose.weapon !== undefined) place(f, w, pose.weapon + tilt, handPos(r.frontArm, fs, fa), ink);
   };
 
-  if (r.back) place(f, r.back, 0, at(r.neck), ink);
+  if (r.back) place(f, r.back, tilt, T(at(r.neck)), ink);
   if (pose.weaponBehind) drawWeapon();
   place(f, r.backArm, ba, bs, ink);
   const drawOffhand = () => {
-    if (r.offhand && pose.offhand !== undefined) place(f, r.offhand, pose.offhand, handPos(r.backArm, bs, ba), ink);
+    if (r.offhand && pose.offhand !== undefined) place(f, r.offhand, pose.offhand + tilt, handPos(r.backArm, bs, ba), ink);
   };
   if (!r.offhandInFront) drawOffhand();
-  place(f, r.backLeg, 0, legHip(r.backHip, pose.backLeg), ink);
-  place(f, r.frontLeg, 0, legHip(r.frontHip, pose.frontLeg), ink);
-  place(f, r.torso, 0, hip, ink);
+  place(f, bentLeg(r.backLeg, pose.backLegLift ?? 0), (pose.backLegAngle ?? 0) + tilt, legHip(r.backHip, pose.backLeg), ink);
+  place(f, bentLeg(r.frontLeg, pose.frontLegLift ?? 0), (pose.frontLegAngle ?? 0) + tilt, legHip(r.frontHip, pose.frontLeg), ink);
+  place(f, r.torso, tilt, T(hip), ink);
   if (r.offhandInFront) drawOffhand();
   const head = r.heads[pose.headVariant ?? 'normal'] ?? r.heads.normal;
-  place(f, head, 0, at(r.neck, pose.head), ink);
+  place(f, head, tilt, T(at(r.neck, pose.head)), ink);
   if (!pose.weaponBehind) drawWeapon();
   place(f, r.frontArm, fa, fs, ink);
   if (pose.overlay) f.blit(pose.overlay.img, pose.overlay.at[0], pose.overlay.at[1]);

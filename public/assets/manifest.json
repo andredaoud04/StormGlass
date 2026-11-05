@@ -2009,6 +2009,12 @@
    "w": 64,
    "h": 64
   },
+  "env.stone.props": {
+   "kind": "image",
+   "file": "env/stone/props.png",
+   "w": 256,
+   "h": 44
+  },
   "env.stone.cloud0": {
    "kind": "image",
    "file": "env/stone/cloud0.png",
@@ -2091,6 +2097,12 @@
    "w": 64,
    "h": 64
   },
+  "env.ancient.props": {
+   "kind": "image",
+   "file": "env/ancient/props.png",
+   "w": 256,
+   "h": 44
+  },
   "env.ancient.cloud0": {
    "kind": "image",
    "file": "env/ancient/cloud0.png",
@@ -2160,6 +2172,12 @@
    "file": "env/crusader/field.png",
    "w": 64,
    "h": 64
+  },
+  "env.crusader.props": {
+   "kind": "image",
+   "file": "env/crusader/props.png",
+   "w": 256,
+   "h": 44
   },
   "env.crusader.cloud0": {
    "kind": "image",
@@ -2237,6 +2255,12 @@
    "w": 64,
    "h": 64
   },
+  "env.gunpowder.props": {
+   "kind": "image",
+   "file": "env/gunpowder/props.png",
+   "w": 256,
+   "h": 44
+  },
   "env.gunpowder.cloud0": {
    "kind": "image",
    "file": "env/gunpowder/cloud0.png",
@@ -2312,6 +2336,12 @@
    "file": "env/industrial/field.png",
    "w": 64,
    "h": 64
+  },
+  "env.industrial.props": {
+   "kind": "image",
+   "file": "env/industrial/props.png",
+   "w": 256,
+   "h": 44
   },
   "env.industrial.cloud0": {
    "kind": "image",
@@ -2394,6 +2424,12 @@
    "file": "env/future/field.png",
    "w": 64,
    "h": 64
+  },
+  "env.future.props": {
+   "kind": "image",
+   "file": "env/future/props.png",
+   "w": 256,
+   "h": 44
   },
   "env.future.cloud0": {
    "kind": "image",
@@ -4325,13 +4361,25 @@
   "fx.lightning": {
    "kind": "strip",
    "file": "fx/lightning.png",
-   "frameW": 40,
-   "frameH": 128,
-   "frames": 6,
-   "fps": 14,
+   "frameW": 64,
+   "frameH": 230,
+   "frames": 7,
+   "fps": 16,
    "anchor": [
-    20,
-    125
+    32,
+    227
+   ]
+  },
+  "fx.scorch": {
+   "kind": "strip",
+   "file": "fx/scorch.png",
+   "frameW": 36,
+   "frameH": 9,
+   "frames": 4,
+   "fps": 1.2,
+   "anchor": [
+    18,
+    4
    ]
   }
  },

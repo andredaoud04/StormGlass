@@ -1,5 +1,5 @@
 import { Img } from '../img';
-import { buildFrame, rotateFrame, type AnimSpec, type Pose, type RigParts } from '../rig';
+import { buildFrame, type AnimSpec, type Pose, type RigParts } from '../rig';
 
 export type AttackStyle = 'swing' | 'sling' | 'throw' | 'shoot' | 'thrust' | 'bow';
 
@@ -15,11 +15,13 @@ export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pos
     P({ body: [0, 1], frontArm: restArm + 4, weapon: restWeapon + 3 }),
     P({ body: [0, 1], frontArm: restArm + 4, weapon: restWeapon + 3 }),
   ];
+  // Walk: contact, passing (body up, trailing leg bent and lifted), contact on the other foot,
+  // passing. Legs swing from the hip instead of sliding, so the feet plant and lift (D39).
   const walk: Pose[] = [
-    P({ frontLeg: [2, 0], backLeg: [-2, 0], backArm: -20, frontArm: restArm + 10 }),
-    P({ body: [0, -1], frontLeg: [0, -1], backLeg: [0, 0], backArm: 0, frontArm: restArm }),
-    P({ frontLeg: [-2, 0], backLeg: [2, 0], backArm: 25, frontArm: restArm - 10 }),
-    P({ body: [0, -1], frontLeg: [0, 0], backLeg: [0, -1], backArm: 0, frontArm: restArm }),
+    P({ frontLegAngle: -20, backLegAngle: 20, backArm: -20, frontArm: restArm + 10 }),
+    P({ body: [0, -1], frontLegAngle: 0, backLegAngle: -6, backLegLift: 1, backArm: 0, frontArm: restArm }),
+    P({ frontLegAngle: 20, backLegAngle: -20, backArm: 25, frontArm: restArm - 10 }),
+    P({ body: [0, -1], backLegAngle: 0, frontLegAngle: -6, frontLegLift: 1, backArm: 0, frontArm: restArm }),
   ];
 
   let attack: Pose[];
@@ -92,20 +94,24 @@ export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pos
 
   const hit = [P({ body: [-2, 0], head: [-1, 0], headVariant: 'hurt', frontArm: restArm + 25, weapon: restWeapon + 25, backArm: 35 })];
 
-  const fallBase = buildFrame(r, P({ body: [-1, 0], headVariant: 'hurt', frontArm: -120, weapon: -80, backArm: -140, frontLeg: [1, 0] }));
-  const feet: [number, number] = [r.hip[0] - 2, r.frameH - 4];
+  // Death: recoil, buckle at the knees, fall, lie. Each part is leaned and outlined on its own
+  // (pose.tilt), on a padded canvas so the fallen body is never clipped by the frame edge.
+  const PAD = 20;
+  const wideRig: RigParts = { ...r, frameW: r.frameW + PAD, hip: [r.hip[0] + PAD, r.hip[1]] };
   const ground = r.hip[1] + 4;
-  // roomyDeath (later Ages): rotate on a padded canvas so the fallen body is never clipped by the frame edge.
-  const fall = (deg: number) => {
-    if (!opts.roomyDeath) return toGround(rotateFrame(fallBase, deg, feet[0], feet[1]), ground);
-    const P = 20;
-    const wide = new Img(r.frameW + P, r.frameH);
-    wide.blit(fallBase, P, 0);
-    const g = toGround(rotateFrame(wide, deg, feet[0] + P, feet[1]), ground);
+  const fallen = (p: Pose) => {
+    const g = toGround(buildFrame(wideRig, P(p)), ground);
     const b = g.bounds();
-    return g.crop(Math.min(P, b.x - 1), 0, r.frameW, r.frameH);
+    return g.crop(Math.min(PAD, Math.max(0, b.x - 1)), 0, r.frameW, r.frameH);
   };
-  const death = [buildFrame(r, hit[0]), fall(-25), fall(-60), fall(-90)];
+  const slump = { headVariant: 'hurt', frontArm: -120, weapon: -80, backArm: -140 };
+  const death = [
+    buildFrame(r, hit[0]),
+    fallen({ ...slump, tilt: -18, body: [-1, 1], frontLegLift: 1, backLegLift: 1, frontLegAngle: -15 }),
+    fallen({ ...slump, tilt: -55, frontLegAngle: -20, backLegAngle: 10 }),
+    fallen({ ...slump, tilt: -88, frontArm: -160, backArm: -170, frontLegAngle: -10, backLegAngle: 5 }),
+  ];
+  void opts;
 
   return [
     { name: 'idle', frames: idle.map((p) => buildFrame(r, p)), fps: 5, loop: true },

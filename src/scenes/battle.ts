@@ -69,6 +69,7 @@ export class BattleScene implements Scene {
   /** The battle's Age: every HUD piece is cut from its wall material (D39). */
   private hudAge = 'stone';
   private kitchenPop = 0;
+  private stormPop = 0;
   private confirmRetreat = false;
 
   constructor(private app: App) {
@@ -266,6 +267,7 @@ export class BattleScene implements Scene {
     for (let i = 0; i < 3; i++) this.cardShake[i] = Math.max(0, this.cardShake[i] - dt);
     this.skillShake = Math.max(0, this.skillShake - dt);
     this.kitchenPop = Math.max(0, this.kitchenPop - dt);
+    this.stormPop = Math.max(0, this.stormPop - dt);
     if (this.phase === 'result') this.resultT += dt;
     if (this.paused) return;
 
@@ -297,6 +299,7 @@ export class BattleScene implements Scene {
             if (e.n >= 2) this.app.sfx('fight', { vol: 0.35, jitter: 0 });
           }
           if (e.type === 'kitchen') this.kitchenPop = 0.9;
+          if (e.type === 'skill') this.stormPop = 0.5;
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
             if (!this.app.reducedMotion) this.slowmo = 0.6;
@@ -597,6 +600,12 @@ export class BattleScene implements Scene {
       } else {
         this.ring(cx + sh, cy, 12, '#9fe8ff', 0.5 + 0.4 * Math.sin(app.time * 6));
         this.ring(cx + sh, cy, 15, '#9fe8ff', 0.25 + 0.25 * Math.sin(app.time * 6));
+      }
+      // Just cast: the socket flares as the bolt leaves it.
+      if (this.stormPop > 0) {
+        const p = 1 - this.stormPop / 0.5;
+        this.ring(cx, cy, 14 + p * 26, '#c4fbff', 1);
+        this.ring(cx, cy, 10 + p * 18, '#5ce6ff', 1);
       }
       if (this.phase === 'play' && !this.paused) app.input.region({ id: 'skill', x: cx - 15, y: cy - 15, w: 30, h: 32, onTap: () => this.cast(), onDown: true });
     }

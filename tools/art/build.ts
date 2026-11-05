@@ -23,6 +23,7 @@ import { industrialFortress } from './bases/industrial';
 import { futureEnv } from './env/future';
 import { futureFortress } from './bases/future';
 import * as ageKit from './ui/ageKit';
+import { propLayer } from './env/props';
 import * as walls from './ui/walls';
 import { bigFont, smallFont } from './ui/font';
 import { icons } from './ui/icons';
@@ -258,7 +259,9 @@ export function buildAll(): void {
       reg.image(`env.${age}.${name}`, `env/${age}/${name}.png`, layer.img, `${label} Age battlefield layer "${name}". Row ${layer.groundY} lines up with the ground line.`, { anchor: [0, layer.groundY] });
     }
     const g = env.layers.ground.img;
-    reg.image(`env.${age}.field`, `env/${age}/field.png`, fieldTile(g), `${label} Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.`);
+    const field = fieldTile(g);
+    reg.image(`env.${age}.field`, `env/${age}/field.png`, field, `${label} Age meadow tile: repeats under the ground layer down to the HUD. Colours taken from the ground layer's bottom rows.`);
+    reg.image(`env.${age}.props`, `env/${age}/props.png`, propLayer(age, mix(g.get(3, g.h - 1), INK, 0.45)), `${label} Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.`);
     env.clouds.forEach((c, i) => reg.image(`env.${age}.cloud${i}`, `env/${age}/cloud${i}.png`, c, 'Drifting cloud.'));
     // Contact-shadow colour: the road's centre tone pushed most of the way to ink (opaque, D39).
     const road = g.get(128, env.layers.ground.groundY);
@@ -376,6 +379,7 @@ export function buildAll(): void {
   reg.strip('fx.beacon', 'fx/beacon.png', fx.beacon());
   reg.strip('fx.zap', 'fx/zap.png', fx.plasmaFlash());
   reg.strip('fx.lightning', 'fx/lightning.png', fx.lightning());
+  reg.strip('fx.scorch', 'fx/scorch.png', fx.scorch());
 
   reg.writeAll();
   void INK;

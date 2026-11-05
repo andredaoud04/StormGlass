@@ -365,54 +365,83 @@ export function plasmaFlash(): Strip {
   return { frames, fps: 24, anchor: [0, 3], desc: 'Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.' };
 }
 
-/** Stormcall: a jagged lightning bolt from the sky to the ground, white core with a cyan rim. */
+/**
+ * Stormcall: a heavy forked bolt from the top of the sky to the ground. Three-pixel white core,
+ * cyan rim, a blue glow on the first frames, four forks, and a wide ground flash (D39: the
+ * signature skill should feel like the biggest hit in the game).
+ */
 export function lightning(): Strip {
-  const W = 40;
-  const H = 128;
+  const W = 64;
+  const H = 230;
   const r = rand(77);
-  // One bolt path shared by every frame, with two short forks.
   const path: [number, number][] = [];
   let x = W / 2;
-  for (let y = 0; y <= H - 4; y += 6) {
+  for (let y = 0; y <= H - 4; y += 7) {
     path.push([Math.round(x), y]);
-    x = Math.max(8, Math.min(W - 8, x + (r() - 0.5) * 10));
+    x = Math.max(12, Math.min(W - 12, x + (r() - 0.5) * 14));
   }
   path.push([W / 2, H - 4]);
-  const forks = [8, 13].map((i) => {
-    const [fx, fy] = path[i];
-    const dir = r() < 0.5 ? -1 : 1;
-    return [[fx, fy], [fx + dir * 6, fy + 7], [fx + dir * 9, fy + 15]] as [number, number][];
+  const forks = [6, 12, 19, 25].map((i, n) => {
+    const [fx, fy] = path[Math.min(i, path.length - 2)];
+    const dir = n % 2 ? 1 : -1;
+    const len = n < 2 ? 1 : 1.4;
+    return [[fx, fy], [fx + dir * 7 * len, fy + 8], [fx + dir * 10 * len, fy + 17], [fx + dir * 14 * len, fy + 22]] as [number, number][];
   });
   const CORE = WHITE;
   const RIM = hex('#9fe8ff');
   const GLOW = hex('#3a8cf0');
-  const stroke = (img: Img, pts: [number, number][], core: number, rim: number, wide: boolean) => {
+  const stroke = (img: Img, pts: [number, number][], core: number, rim: number, width: number, glow: boolean) => {
     for (let i = 0; i < pts.length - 1; i++) {
       const [x0, y0] = pts[i];
       const [x1, y1] = pts[i + 1];
-      const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+      const steps = Math.max(1, Math.abs(x1 - x0), Math.abs(y1 - y0));
       for (let k = 0; k <= steps; k++) {
         const px = Math.round(x0 + ((x1 - x0) * k) / steps);
         const py = Math.round(y0 + ((y1 - y0) * k) / steps);
-        if (wide) for (const [dx, dy] of [[-2, 0], [2, 0], [-1, -1], [1, 1]]) if (!img.get(px + dx, py + dy)) img.set(px + dx, py + dy, withAlpha(GLOW, 160));
-        for (const dx of [-1, 1]) if (img.get(px + dx, py) !== core) img.set(px + dx, py, rim);
-        img.set(px, py, core);
+        const half = Math.floor(width / 2);
+        if (glow) for (let dx = -half - 3; dx <= half + 3; dx++) if (!img.get(px + dx, py) && bayerish(px + dx, py)) img.set(px + dx, py, GLOW);
+        for (const dx of [-half - 1, half + 1]) if (img.get(px + dx, py) !== core) img.set(px + dx, py, rim);
+        for (let dx = -half; dx <= half; dx++) img.set(px + dx, py, core);
       }
     }
   };
   const frames: Img[] = [];
-  for (let f = 0; f < 6; f++) {
+  for (let f = 0; f < 7; f++) {
     const img = new Img(W, H);
-    if (f < 4) {
-      const core = f === 3 ? RIM : CORE;
-      const rim = f === 3 ? GLOW : RIM;
-      stroke(img, path, core, rim, f < 2);
-      if (f !== 1) for (const fk of forks) stroke(img, fk, core, rim, false);
+    if (f < 5) {
+      const core = f >= 3 ? RIM : CORE;
+      const rim = f >= 3 ? GLOW : RIM;
+      const width = f === 0 ? 3 : f < 3 ? 3 : 1;
+      stroke(img, path, core, rim, width, f < 2);
+      if (f !== 2) for (const fk of forks) stroke(img, fk, core, rim, 1, false);
     }
-    // Ground splash.
-    const sr = [5, 9, 12, 13, 11, 7][f];
-    img.ellipse(W / 2, H - 3, sr, 2.5, (_x, _y, nx) => (f < 3 ? (Math.abs(nx) < 0.4 ? CORE : RIM) : f < 5 ? withAlpha(RIM, 180) : withAlpha(GLOW, 120)));
+    // Ground flash: a bright splash that widens and cools.
+    const sr = [8, 16, 22, 24, 22, 16, 9][f];
+    img.ellipse(W / 2, H - 3, sr, 3.5, (_x, _y, nx) => (f < 3 ? (Math.abs(nx) < 0.45 ? CORE : RIM) : f < 5 ? RIM : GLOW));
     frames.push(img);
   }
-  return { frames, fps: 14, anchor: [W / 2, H - 3], desc: 'Stormcall lightning strike, 6 frames; anchor at the ground under the bolt.' };
+  return { frames, fps: 16, anchor: [W / 2, H - 3], desc: 'Stormcall lightning strike, 7 frames; anchor at the ground under the bolt.' };
+}
+
+/** Sparse 2x2 checker used for the bolt's glow (opaque pixels, no alpha). */
+function bayerish(x: number, y: number): boolean {
+  return (x + y) % 2 === 0;
+}
+
+/** Scorch mark left by Stormcall: a dark burnt oval with embers, 4 frames from fresh to cold. */
+export function scorch(): Strip {
+  const frames: Img[] = [];
+  const W = 36, H = 9;
+  for (let f = 0; f < 4; f++) {
+    const img = new Img(W, H);
+    const rx = 16 - f, ry = 3.6 - f * 0.3;
+    img.ellipse(W / 2, H / 2, rx, ry, (px, py, nx, ny) => {
+      const d = nx * nx + ny * ny;
+      if (d > 0.8 && (px + py + f) % 2) return 0;
+      return d < 0.3 ? hex('#1e1526') : hex('#3a2a2e');
+    });
+    if (f < 2) for (const [ex, ey] of [[10, 4], [18, 3], [25, 5], [14, 6]]) img.set(ex, ey, f === 0 ? hex('#ffd03c') : hex('#e8702a'));
+    frames.push(img);
+  }
+  return { frames, fps: 1.2, anchor: [W / 2, Math.floor(H / 2)], desc: 'Stormcall scorch mark on the ground, 4 frames from glowing to cold.' };
 }

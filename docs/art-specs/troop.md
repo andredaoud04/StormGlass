@@ -112,7 +112,7 @@ ancient_spearman (blue team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (20): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #7f4428 #9a5c34 #ad6a3c #94503f #d99a5c #c98a52
+- Colors (20): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #7f4428 #9a5c34 #ad6a3c #d99a5c #c98a52 #94503f
 
 ## troop.ancient_spearman.red
 
@@ -128,7 +128,7 @@ ancient_spearman (red team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (20): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #7f4428 #9a5c34 #ad6a3c #94503f #d99a5c #c98a52
+- Colors (20): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #7f4428 #9a5c34 #ad6a3c #d99a5c #c98a52 #94503f
 
 ## troop.ancient_archer.blue
 
@@ -145,7 +145,7 @@ ancient_archer (blue team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (22): #1e1526 #4a537a #6e8599 #b6bab1 #4aa6ec #a6e2ff #2d68c2 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #fff8ec #b3a486 #ad6a3c #7c2e30 #fffaf0 #ece2cc #7f4428 #94503f #c4b494 #f07a7a
+- Colors (22): #1e1526 #4a537a #6e8599 #b6bab1 #4aa6ec #a6e2ff #2d68c2 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #fff8ec #b3a486 #ad6a3c #7c2e30 #fffaf0 #ece2cc #7f4428 #c4b494 #94503f #f07a7a
 
 ## troop.ancient_archer.red
 
@@ -162,7 +162,7 @@ ancient_archer (red team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (22): #1e1526 #913133 #c45442 #e79f72 #e64d4d #ffb08c #ae2a40 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #fff8ec #b3a486 #ad6a3c #7c2e30 #fffaf0 #ece2cc #7f4428 #94503f #c4b494 #f07a7a
+- Colors (22): #1e1526 #913133 #c45442 #e79f72 #e64d4d #ffb08c #ae2a40 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #fff8ec #b3a486 #ad6a3c #7c2e30 #fffaf0 #ece2cc #7f4428 #c4b494 #94503f #f07a7a
 
 ## troop.ancient_guard.blue
 
@@ -178,7 +178,7 @@ ancient_guard (blue team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (20): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #94503f #c98a52
+- Colors (19): #1e1526 #2d68c2 #4aa6ec #a6e2ff #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #c98a52
 
 ## troop.ancient_guard.red
 
@@ -194,7 +194,7 @@ ancient_guard (red team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (20): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #94503f #c98a52
+- Colors (19): #1e1526 #ae2a40 #e64d4d #ffb08c #b07a2c #fff2a6 #e6b84a #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #c98a52
 
 ## troop.crusader_footman.blue
 
@@ -618,7 +618,7 @@ boss_ancient: boss at twice the troop scale, enemy team. Faces right; mirrored i
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (24): #1e1526 #fbf4e0 #e2d6b6 #b3a486 #ae2a40 #e64d4d #ffb08c #fff2a6 #e6b84a #b07a2c #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #6a1a33 #94503f #c98a52
+- Colors (23): #1e1526 #fbf4e0 #e2d6b6 #b3a486 #ae2a40 #e64d4d #ffb08c #fff2a6 #e6b84a #b07a2c #6a3f1c #cc7a58 #ffd6ac #f2a97a #fff8ec #f07a7a #7c2e30 #f2f6fa #b8c2cc #7e8a96 #9a5c34 #6a1a33 #c98a52
 
 ## troop.boss_crusader.red
 

@@ -10,6 +10,8 @@ interface Cloud {
 }
 
 export const ENV_W = 256;
+/** Rows from the lane centre to the top of the meadow prop layer (just under the road's verge). */
+const PROPS_BELOW_ROAD = 62;
 
 export class EnvView {
   private clouds: Cloud[] = [];
@@ -112,6 +114,9 @@ export class EnvView {
       const f = this.app.assets.image(fk);
       for (let y = fieldTop; y < this.app.h; y += f.h) for (let x = (x0 % f.w) - f.w; x < this.app.w; x += f.w) d.image(fk, x, y);
     }
+    // Foreground props in the meadow strip (bushes, rocks, Age objects).
+    // They start just below the road's lower verge, in the open meadow above the skill sockets.
+    if (this.app.assets.has(`env.${this.age}.props`)) this.layer('props', x0, groundY + oy + PROPS_BELOW_ROAD);
   }
 
   /** A 256-wide layer, mirrored at both edges so wider screens never show a gap. */

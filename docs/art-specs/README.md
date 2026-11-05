@@ -12,9 +12,9 @@ Scale: 1 art pixel = 2 CSS pixels on a 390-wide phone (integer scaled on every d
 
 - [troop](troop.md): 42 assets
 - [portrait](portrait.md): 18 assets
-- [env](env.md): 60 assets
+- [env](env.md): 66 assets
 - [base](base.md): 48 assets
-- [fx](fx.md): 20 assets
+- [fx](fx.md): 21 assets
 - [font](font.md): 2 assets
 - [icon](icon.md): 31 assets
 - [ui](ui.md): 81 assets

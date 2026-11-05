@@ -192,10 +192,20 @@ Energy weapon discharge, 3 fast frames; anchor at the emitter, faces right.
 
 ## fx.lightning
 
-Stormcall lightning strike, 6 frames; anchor at the ground under the bolt.
+Stormcall lightning strike, 7 frames; anchor at the ground under the bolt.
 
 - File: `public/assets/fx/lightning.png`
-- Frames: 6 x (40 x 128) in one row @ 14 fps
-- Anchor: (20, 125)
+- Frames: 7 x (64 x 230) in one row @ 16 fps
+- Anchor: (32, 227)
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (4): #3a8cf0 #9fe8ff #fff8ec #81cdfb
+- Colors (3): #3a8cf0 #9fe8ff #fff8ec
+
+## fx.scorch
+
+Stormcall scorch mark on the ground, 4 frames from glowing to cold.
+
+- File: `public/assets/fx/scorch.png`
+- Frames: 4 x (36 x 9) in one row @ 1.2 fps
+- Anchor: (18, 4)
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (4): #3a2a2e #1e1526 #ffd03c #e8702a

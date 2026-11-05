@@ -313,11 +313,14 @@ export class BattleView {
         }
         case 'skill': {
           const cx = this.laneToPx(e.x);
+          this.fx.add('fx.scorch', cx, G + 1, { behind: true });
           this.fx.add('fx.lightning', cx, G + 2);
           this.fx.add('fx.ring', cx, G - 2);
+          this.fx.add('fx.ring', cx - 12, G + 6, { fps: 18 });
+          this.fx.add('fx.ring', cx + 12, G - 6, { fps: 18 });
           for (let k = 0; k < 6; k++) this.fx.add('fx.debris', cx, G - 2, { vx: (Math.random() - 0.5) * 90, vy: -40 - Math.random() * 60, gravity: 300, life: 0.7, fps: 14 });
-          this.flash = 0.18;
-          this.shake.add(5, 0.35);
+          this.flash = 0.22;
+          this.shake.add(6, 0.4);
           this.hooks.onImpact?.(true, true);
           this.app.sfx('thunder', { vol: 1 });
           break;

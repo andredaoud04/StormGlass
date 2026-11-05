@@ -49,6 +49,15 @@ Stone Age meadow tile: repeats under the ground layer down to the HUD. Colours t
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (2): #3b6c38 #5e9a40
 
+## env.stone.props
+
+Stone Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.
+
+- File: `public/assets/env/stone/props.png`
+- Size: 256 x 44
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (21): #2d412f #3b333b #cfe27a #dcd6c8 #7e7770 #3b6c38 #aaa396 #5e9a40 #381f21 #93c252 #d99a5c #e2d6b6 #52291b #575050 #ad6a3c #7f4428 #2e4530 #4e4341 #fbf4e0 #b3a486 #7d705c
+
 ## env.stone.cloud0
 
 Drifting cloud.
@@ -152,6 +161,15 @@ Ancient Age meadow tile: repeats under the ground layer down to the HUD. Colours
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #827a40 #a24e30 #c4683e
 
+## env.ancient.props
+
+Ancient Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.
+
+- File: `public/assets/env/ancient/props.png`
+- Size: 256 x 44
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #34312b #c8c27a #9a9a52 #6e7040 #4a4c30 #564a45 #fffaf0 #ece2cc #c4b494 #8e7e64 #564032 #fbe8b8 #c49a5e #e8c88a #554d34 #8e6a3e #7f4428
+
 ## env.ancient.cloud0
 
 Drifting cloud.
@@ -236,6 +254,15 @@ Crusader Age meadow tile: repeats under the ground layer down to the HUD. Colour
 - Size: 64 x 64
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #4a823e #52291b #ad6a3c
+
+## env.crusader.props
+
+Crusader Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.
+
+- File: `public/assets/env/crusader/props.png`
+- Size: 256 x 44
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #2d412f #cfe27a #93c252 #381f21 #d99a5c #5e9a40 #ad6a3c #7f4428 #3b6c38 #52291b #365133 #3b333b #dcd6c8 #aaa396 #7e7770 #e09a1e #575050
 
 ## env.crusader.cloud0
 
@@ -331,6 +358,15 @@ Gunpowder Age meadow tile: repeats under the ground layer down to the HUD. Colou
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #5a763e #4a505e #6a7280
 
+## env.gunpowder.props
+
+Gunpowder Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.
+
+- File: `public/assets/env/gunpowder/props.png`
+- Size: 256 x 44
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (21): #2d412f #cfe27a #93c252 #5e9a40 #3b6c38 #7f4428 #52291b #381f21 #ad6a3c #d99a5c #3f4a33 #4a505e #3b333b #dcd6c8 #7e7770 #aaa396 #272533 #9aa2ae #6a7280 #575050 #30343f
+
 ## env.gunpowder.cloud0
 
 Drifting cloud.
@@ -424,6 +460,15 @@ Industrial Age meadow tile: repeats under the ground layer down to the HUD. Colo
 - Size: 64 x 64
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (3): #58563c #30343f #706c48
+
+## env.industrial.props
+
+Industrial Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.
+
+- File: `public/assets/env/industrial/props.png`
+- Size: 256 x 44
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (17): #2d2c2e #7f4428 #52291b #381f21 #d99a5c #ad6a3c #3e3932 #9aa2ae #3a342d #d6cc96 #aea46c #807a4c #a8b294 #7c866a #555234 #5a624e #3c4236
 
 ## env.industrial.cloud0
 
@@ -527,6 +572,15 @@ Future Age meadow tile: repeats under the ground layer down to the HUD. Colours 
 - Size: 64 x 64
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (2): #3c4278 #4c5490
+
+## env.future.props
+
+Future Age foreground props (bushes, rocks, Age objects) for the meadow strip; row 0 sits at the bottom of the ground layer.
+
+- File: `public/assets/env/future/props.png`
+- Size: 256 x 44
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (13): #3c3e53 #5ce6ff #ffffff #f2f6fb #c6d0dc #8e9aae #c4fbff #5a6680 #2f2e53 #2c2d43 #3a4460 #a8b4cc #7e8aa6
 
 ## env.future.cloud0
 
