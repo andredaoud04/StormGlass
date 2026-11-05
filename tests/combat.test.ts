@@ -91,14 +91,26 @@ describe('escalating waves', () => {
         const w = stageWave(age, st);
         const starts = w.waveStarts!;
         expect(starts.length).toBeGreaterThanOrEqual(3);
-        const size = (i: number) => (i + 1 < starts.length ? starts[i + 1] : w.spawns.length) - starts[i];
-        expect(size(starts.length - 1)).toBeGreaterThanOrEqual(size(1));
+        expect(starts.length).toBeGreaterThanOrEqual(10);
       }
     }
   });
 
   it('later Ages field bigger enemy armies', () => {
-    expect(stageWave(5, 1).spawns.length).toBeGreaterThan(stageWave(0, 1).spawns.length * 2);
+    const inFirst = (w: ReturnType<typeof stageWave>, sec: number) => w.spawns.filter(([t]) => t <= sec).length;
+    expect(inFirst(stageWave(5, 1), 80)).toBeGreaterThan(inFirst(stageWave(0, 1), 80) * 2);
+  });
+
+  it('the enemy is on the lane from the first second, and every wave is at least as big as the last', () => {
+    for (let age = 0; age < 6; age++) {
+      for (let st = 0; st < 5; st++) {
+        const w = stageWave(age, st);
+        expect(w.spawns[0][0]).toBeLessThanOrEqual(1);
+        const starts = w.waveStarts!;
+        const size = (i: number) => w.spawns.slice(starts[i], i + 1 < starts.length ? starts[i + 1] : w.spawns.length).length;
+        for (let i = 2; i < starts.length; i++) expect(size(i)).toBeGreaterThanOrEqual(size(i - 1));
+      }
+    }
   });
 
   it('wave numbers keep counting after the tail starts repeating', () => {

@@ -34,7 +34,7 @@ export function measure(age: number, stage: number, level: number, label: string
   s0.armyAge = age;
   s0.slots = ['ranged', 'tank'];
   s0.upgrades = { food: level, fortress: level };
-  const cfg = buildBattleConfig({ seed: 99, loadout: loadout(s0), enemyAge: age, stage, armyAge: age, timeline: 1, foodRateMilli: foodRateMilli(s0), fortressMul: fortressMul(s0), campaign: true, stormcall: true });
+  const cfg = buildBattleConfig({ seed: 99, loadout: loadout(s0), enemyAge: age, stage, armyAge: age, timeline: 1, foodRateMilli: foodRateMilli(s0), fortressMul: fortressMul(s0), campaign: true, stormcall: true, kitchen: true });
   const s = createBattle(cfg);
   const policy = smartPolicy();
   let unitTicks = 0;

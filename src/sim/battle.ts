@@ -31,7 +31,7 @@ export function createBattle(config: BattleConfig): BattleState {
     config,
     rng: createRng(config.seed),
     tick: 0,
-    foodMilli: 0,
+    foodMilli: config.startFoodMilli ?? 0,
     foodRemainder: 0,
     foodSpentMilli: 0,
     playerBaseHp: config.playerBaseHp,
@@ -48,6 +48,7 @@ export function createBattle(config: BattleConfig): BattleState {
     bossMilestonesPaid: 0,
     skillCooldown: config.skill?.firstTicks ?? 0,
     skillsUsed: 0,
+    kitchenLevel: 0,
     baseMilestonesPaid: 0,
     kills: 0,
     tankKills: 0,
@@ -152,6 +153,10 @@ function applyCommand(s: BattleState, cmd: Command): void {
     castStormcall(s);
     return;
   }
+  if (cmd.type === 'kitchen') {
+    buyKitchen(s);
+    return;
+  }
   const def = s.config.playerTroops[cmd.slot];
   if (!def) {
     s.events.push({ type: 'deployFail', slot: cmd.slot, reason: 'slot' });
@@ -170,6 +175,28 @@ function applyCommand(s: BattleState, cmd: Command): void {
   s.foodSpentMilli += costMilli;
   s.deployed++;
   spawnUnit(s, 0, def);
+}
+
+/** Cost of the next Kitchen level in milli-Food, or null when maxed or locked. */
+export function kitchenCost(s: BattleState): number | null {
+  const k = s.config.kitchen;
+  if (!k || s.kitchenLevel >= k.maxLevel) return null;
+  return Math.round(k.baseCostMilli * Math.pow(k.growth, s.kitchenLevel));
+}
+
+/** Current Food income in milli-Food per second, including Kitchen levels. */
+export function foodRate(s: BattleState): number {
+  const k = s.config.kitchen;
+  return Math.round(s.config.foodRateMilli * (1 + (k ? k.perLevel * s.kitchenLevel : 0)));
+}
+
+function buyKitchen(s: BattleState): void {
+  const c = kitchenCost(s);
+  if (c === null || s.foodMilli < c) return;
+  s.foodMilli -= c;
+  s.foodSpentMilli += c;
+  s.kitchenLevel++;
+  s.events.push({ type: 'kitchen', level: s.kitchenLevel });
 }
 
 /** Lightning on the enemy closest to your fortress; everything within the radius is hit. */
@@ -477,7 +504,7 @@ function stepEnemySpawns(s: BattleState): void {
 }
 
 function stepFood(s: BattleState): void {
-  const total = s.config.foodRateMilli + s.foodRemainder;
+  const total = foodRate(s) + s.foodRemainder;
   const gain = Math.floor(total / s.config.tickRate);
   s.foodRemainder = total - gain * s.config.tickRate;
   s.foodMilli += gain;

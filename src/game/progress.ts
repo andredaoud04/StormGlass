@@ -150,3 +150,8 @@ export function stormcallUnlocked(s: SaveData): boolean {
 export function speedUnlocked(s: SaveData): boolean {
   return s.timeline > 1 || s.enemyAge > 0 || s.stage >= BALANCE.skills.speedUnlockStage - 1;
 }
+
+/** The in-battle Food upgrade (Kitchen) unlocks on Stone stage 2 and stays unlocked. */
+export function kitchenUnlocked(s: SaveData): boolean {
+  return s.timeline > 1 || s.enemyAge > 0 || s.stage >= BALANCE.skills.kitchen.unlockStage - 1;
+}

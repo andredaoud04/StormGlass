@@ -17,12 +17,14 @@ describe('pacing (headless simulator, We Are Warriors format)', () => {
     for (let i = 1; i < r.evolutionsMin.length; i++) expect(r.evolutionsMin[i]!).toBeGreaterThan(r.evolutionsMin[i - 1]!);
   });
 
-  it('a slow climb: Ages after Stone take 60 to 130 minutes each; first Prestige 5 to 10 hours', () => {
+  it('We Are Warriors shape: a quick Stone Age, a short Ancient Age, then 80 to 130 minutes per Age; first Prestige 5 to 10 hours', () => {
     const e = r.evolutionsMin as number[];
-    expect(e[0]).toBeGreaterThan(25);
-    for (let i = 1; i < e.length; i++) {
+    expect(e[0]).toBeLessThan(20);
+    expect(e[1] - e[0]).toBeGreaterThan(25);
+    expect(e[1] - e[0]).toBeLessThan(70);
+    for (let i = 2; i < e.length; i++) {
       const span = e[i] - e[i - 1];
-      expect(span).toBeGreaterThan(60);
+      expect(span).toBeGreaterThan(80);
       expect(span).toBeLessThan(130);
     }
     expect(r.prestigeMin!).toBeGreaterThan(300);

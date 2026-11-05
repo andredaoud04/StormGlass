@@ -2,9 +2,9 @@
 import type { App, Scene } from '../app';
 import { BALANCE, ageDef } from '../game/balance';
 import { buildBattleConfig, isBossStage } from '../game/battleSetup';
-import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
+import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, kitchenUnlocked, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
 import { foodRateMilli, fortressMul } from '../game/upgrades';
-import { createBattle, food, stepBattle, totalGold, waveComposition } from '../sim/battle';
+import { createBattle, food, foodRate, kitchenCost, stepBattle, totalGold, waveComposition } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
 import { blocker, button, counter, dim, fmt, iconButton } from '../ui/widgets';
 import { BattleView } from '../view/battleView';
@@ -86,6 +86,7 @@ export class BattleScene implements Scene {
       fortressMul: fortressMul(s),
       campaign: true,
       stormcall: stormcallUnlocked(s),
+      kitchen: kitchenUnlocked(s),
     });
     this.sim = createBattle(config);
     this.wallKey = app.assets.has(`ui.wall_${ageDef(this.enemyAge).id}`) ? `ui.wall_${ageDef(this.enemyAge).id}` : 'ui.wall_stone';
@@ -128,6 +129,7 @@ export class BattleScene implements Scene {
   key(k: string): void {
     if (k === '1' || k === '2' || k === '3') this.deploy(Number(k) - 1);
     if (k === '4' || k === 'q') this.cast();
+    if (k === '5' || k === 'w') this.buyKitchen();
     if (k === 'Escape' || k === 'p') this.paused = !this.paused;
     if (k === 'blur' && this.phase === 'play') this.paused = true;
   }
@@ -150,6 +152,41 @@ export class BattleScene implements Scene {
   }
 
   private skillShake = 0;
+
+  /** Kitchen: spend Food now to earn more Food for the rest of the battle (the WAW meat button). */
+  private buyKitchen(): void {
+    if (this.phase !== 'play' || this.paused) return;
+    const c = kitchenCost(this.sim);
+    if (c === null) return;
+    if (this.sim.foodMilli < c) {
+      this.app.sfx('nope', { vol: 0.5 });
+      return;
+    }
+    if (!this.pending.some((p) => p.type === 'kitchen')) this.pending.push({ type: 'kitchen' });
+  }
+
+  private drawKitchen(cx: number, top: number): void {
+    const app = this.app;
+    const d = app.draw;
+    const c = kitchenCost(this.sim);
+    const ok = c !== null && this.sim.foodMilli >= c && this.phase === 'play';
+    const fi = app.assets.image('icon.food');
+    d.image('icon.food', Math.round(cx - fi.w / 2) - 2, top + 6, { alpha: ok || c === null ? 1 : 0.6 });
+    d.image('icon.up', cx + 2, top + 11, { alpha: ok ? 1 : 0.6 });
+    // Price (in Food) inside the circle, and level pips along its lower rim.
+    if (c === null) d.text('MAX', cx, top + 20, { align: 'center', color: '#ffe68a' });
+    else d.text(String(Math.ceil(c / 1000)), cx, top + 20, { align: 'center', color: ok ? '#fff8ec' : '#ff8a8a' });
+    const max = this.sim.config.kitchen!.maxLevel;
+    for (let k = 0; k < max; k++) d.rect(cx - max * 2 + k * 4, top + 29, 3, 2, k < this.sim.kitchenLevel ? '#ffd03c' : '#3a2a30');
+    if (ok) {
+      const pulse = 0.35 + 0.35 * Math.sin(app.time * 6);
+      for (let a = 0; a < 20; a++) {
+        const th = (a / 20) * Math.PI * 2;
+        d.rect(Math.round(cx + Math.cos(th) * 14), Math.round(top + 16 + Math.sin(th) * 14), 1, 1, '#ffd03c', pulse);
+      }
+    }
+    if (this.phase === 'play' && !this.paused) app.input.region({ id: 'kitchen', x: cx - 14, y: top + 2, w: 28, h: 40, onTap: () => this.buyKitchen(), onDown: true });
+  }
 
   /** Stormcall: queue the cast; the sim decides if it fires (ready, a target in reach). */
   private cast(): void {
@@ -230,11 +267,11 @@ export class BattleScene implements Scene {
         const events = stepBattle(this.sim, this.pending.splice(0));
         this.view.onEvents(events);
         for (const e of events) {
-          if (e.type === 'wave' && e.n >= 2) {
+          if (e.type === 'wave') {
             const c = waveComposition(this.sim.config, this.sim.waveIndex);
             const parts = [c.melee ? `${c.melee} MELEE` : '', c.ranged ? `${c.ranged} RANGED` : '', c.tank ? `${c.tank} TANK${c.tank > 1 ? 'S' : ''}` : ''].filter(Boolean);
             this.wave = { n: e.n, t: 0, text: parts.join('  ') };
-            this.app.sfx('ready', { vol: 0.5 });
+            if (e.n >= 2) this.app.sfx('fight', { vol: 0.35, jitter: 0 });
           }
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
@@ -271,7 +308,7 @@ export class BattleScene implements Scene {
     this.lastFood = f;
     this.sim.config.playerTroops.forEach((t, i) => {
       const ready = f >= t.cost;
-      if (ready && !this.cardReady[i] && this.phase === 'play') this.app.sfx('ready', { vol: 0.35, minGapMs: 120 });
+      if (ready && !this.cardReady[i] && this.phase === 'play' && t.cost >= 12) this.app.sfx('ready', { vol: 0.3, minGapMs: 1500 });
       this.cardReady[i] = ready;
     });
 
@@ -297,7 +334,7 @@ export class BattleScene implements Scene {
     this.drawHud();
     this.drawCoins();
     this.drawBossBar();
-    if (this.phase === 'play' && this.wave.t < 2.2) this.drawWave();
+    if (this.phase === 'play' && this.wave.n > 0) this.drawWave();
     if (this.phase === 'play' && this.introT < 1.3) this.drawIntro();
     if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.4) this.drawBossIntro();
     if (this.phase === 'result') this.drawResult();
@@ -318,19 +355,32 @@ export class BattleScene implements Scene {
   }
 
   /** WAVE pill under the top bar, with what the wave brings (pick troops that counter it). */
+  /**
+   * Persistent WAVE pill under the top bar (as in We Are Warriors), with a bar counting down to the
+   * next wave. When a wave arrives the pill pops and names what it brings for a moment.
+   */
   private drawWave(): void {
     const app = this.app;
     const d = app.draw;
     const t = this.wave.t;
-    const a = t < 0.15 ? t / 0.15 : t > 1.8 ? (2.2 - t) / 0.4 : 1;
+    const fresh = t < 2.2;
+    const pop = t < 0.2 ? Math.round((0.2 - t) * -20) : 0;
     const label = `WAVE ${this.wave.n}`;
-    const pw = Math.max(d.measure(label, 'big'), d.measure(this.wave.text)) + 20;
+    const pw = Math.max(d.measure(label, 'big') + 20, fresh ? d.measure(this.wave.text) + 16 : 0, 60);
+    const ph = fresh ? 28 : 20;
     const x = Math.round(app.w / 2 - pw / 2);
-    const y = TOP_BAR + (this.sim.bossSpawned ? 44 : 22) + (t < 0.15 ? Math.round((0.15 - t) * -40) : 0);
-    d.rect(x, y, pw, 26, '#1e1526', 0.75 * a);
-    d.rect(x + 1, y + 1, pw - 2, 1, '#4a3a58', a);
-    d.text(label, app.w / 2, y + 4, { font: 'big', align: 'center', color: '#ffd03c', shadow: true, alpha: a });
-    d.text(this.wave.text, app.w / 2, y + 17, { align: 'center', color: '#fff8ec', alpha: a });
+    const y = TOP_BAR + (this.sim.bossSpawned ? 44 : 22) + pop;
+    d.rect(x, y, pw, ph, '#1e1526', 0.8);
+    d.rect(x + 1, y + 1, pw - 2, 1, fresh ? '#ffd03c' : '#4a3a58');
+    d.text(label, app.w / 2, y + 4, { font: 'big', align: 'center', color: fresh ? '#ffd03c' : '#fff8ec', shadow: true });
+    if (fresh) d.text(this.wave.text, app.w / 2, y + 18, { align: 'center', color: '#fff8ec', alpha: Math.min(1, (2.2 - t) / 0.4) });
+    // Countdown to the next wave.
+    const period = BALANCE.waves.stream.period;
+    const p = Math.min(1, (this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt) / period) % 1;
+    const frac = ((this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt) % period) / period;
+    void p;
+    d.rect(x + 3, y + ph - 3, pw - 6, 1, '#3a2a48');
+    d.rect(x + 3, y + ph - 3, Math.round((pw - 6) * frac), 1, frac > 0.8 ? '#ff7a5a' : '#cfe0a0');
   }
 
   /** Banner when the boss walks out. */
@@ -458,17 +508,22 @@ export class BattleScene implements Scene {
 
     // Hero medallion, raised on the left (locked until the first Prestige).
     const heroUnlocked = app.save.prestige > 0;
-    d.image('ui.hero_socket', 24, top + 4);
-    d.image('icon.lock', 20, top + 1, { alpha: heroUnlocked ? 0 : 0.75 });
+    d.image('ui.hero_socket', 24, top + 4, { alpha: heroUnlocked ? 1 : 0.35 });
 
     // Three Skill sockets in a row on the right; the first (leftmost) holds Stormcall once unlocked.
     for (let i = 0; i < 3; i++) {
       const cx = w - 18 - i * 30;
       const storm = i === 2 && !!this.sim.config.skill;
+      const kitchen = i === 1 && !!this.sim.config.kitchen;
       const sh = storm && this.skillShake > 0 ? Math.round(Math.sin(this.skillShake * 80) * 2) : 0;
+      // Sockets that hold nothing yet stay dim and quiet (no padlocks cluttering the field).
+      if (!storm && !kitchen) {
+        d.image('ui.skill_socket', cx, top + 20, { alpha: 0.35 });
+        continue;
+      }
       d.image('ui.skill_socket', cx + sh, top + 20);
-      if (!storm) {
-        d.image('icon.lock', cx - 4, top + 17, { alpha: 0.55 });
+      if (kitchen) {
+        this.drawKitchen(cx, top);
         continue;
       }
       const sk = this.sim.config.skill!;
@@ -507,7 +562,7 @@ export class BattleScene implements Scene {
     d.rect(fx + 6, fy + 29, fw - 12, 3, '#120c18');
     d.rect(fx + 6, fy + 29, Math.round((fw - 12) * frac), 3, '#e8a020');
     d.rect(fx + 6, fy + 29, Math.round((fw - 12) * frac), 1, '#ffd03c');
-    const rate = this.sim.config.foodRateMilli / 1000;
+    const rate = foodRate(this.sim) / 1000;
     d.text(`+${rate % 1 ? rate.toFixed(1) : rate}/S`, fx + fw / 2, fy + 35, { align: 'center', color: '#a8e070' });
 
     // Troop cards, lower right.

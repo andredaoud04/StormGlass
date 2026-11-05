@@ -21,7 +21,7 @@ export function minLevels(timeline = 1): number[][] {
         s.timeline = timeline;
         s.slots = ['ranged', 'tank'];
         s.upgrades = { food: lv, fortress: lv };
-        const cfg = buildBattleConfig({ seed: 11 + stage, loadout: loadout(s), enemyAge: age, stage, armyAge: age, timeline, foodRateMilli: foodRateMilli(s), fortressMul: fortressMul(s), campaign: true, stormcall: true });
+        const cfg = buildBattleConfig({ seed: 11 + stage, loadout: loadout(s), enemyAge: age, stage, armyAge: age, timeline, foodRateMilli: foodRateMilli(s), fortressMul: fortressMul(s), campaign: true, stormcall: true, kitchen: true });
         if (runBattle(cfg, smartPolicy(), 300).result === 'victory') {
           need = lv;
           break;

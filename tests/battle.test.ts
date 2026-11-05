@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createBattle, food, stateHash, stepBattle, totalGold, waveSpawnTime } from '../src/sim/battle';
+import { createBattle, food, foodRate, kitchenCost, stateHash, stepBattle, totalGold, waveSpawnTime } from '../src/sim/battle';
 import type { BattleConfig, BattleState, Command } from '../src/sim/types';
 import { buildBattleConfig } from '../src/game/battleSetup';
 import { BALANCE } from '../src/game/balance';
@@ -7,8 +7,9 @@ import { cyclePolicy, runBattle } from '../src/game/bots';
 
 const STONE = ['stone_clubber', 'stone_slinger', 'stone_brute'];
 
+/** Starts with no Food so the Food arithmetic below is exact (real battles start with one cheap troop's worth). */
 function config(over: Partial<BattleConfig> = {}): BattleConfig {
-  return { ...buildBattleConfig({ seed: 7, loadout: STONE, enemyAge: 0, armyAge: 0, timeline: 1 }), ...over };
+  return { ...buildBattleConfig({ seed: 7, loadout: STONE, enemyAge: 0, armyAge: 0, timeline: 1 }), startFoodMilli: 0, ...over };
 }
 
 function stepN(s: BattleState, n: number, cmds: Command[] = []): void {
@@ -16,6 +17,31 @@ function stepN(s: BattleState, n: number, cmds: Command[] = []): void {
 }
 
 describe('food', () => {
+  it('a real battle starts with enough Food for one cheapest troop, so the first tap works', () => {
+    const c = buildBattleConfig({ seed: 7, loadout: STONE, enemyAge: 0, armyAge: 0, timeline: 1 });
+    const s = createBattle(c);
+    expect(food(s)).toBe(5);
+    stepBattle(s, [{ type: 'deploy', slot: 0 }]);
+    expect(s.units.filter((u) => u.side === 0)).toHaveLength(1);
+  });
+
+  it('the Kitchen trades Food now for a higher Food rate, with rising prices and a cap', () => {
+    const c = buildBattleConfig({ seed: 7, loadout: STONE, enemyAge: 0, armyAge: 0, timeline: 1, kitchen: true });
+    const s = createBattle({ ...c, startFoodMilli: 1_000_000 });
+    const before = foodRate(s);
+    const c0 = kitchenCost(s)!;
+    stepBattle(s, [{ type: 'kitchen' }]);
+    expect(s.kitchenLevel).toBe(1);
+    expect(foodRate(s)).toBeGreaterThan(before);
+    expect(kitchenCost(s)!).toBeGreaterThan(c0);
+    for (let i = 0; i < 10; i++) stepBattle(s, [{ type: 'kitchen' }]);
+    expect(s.kitchenLevel).toBe(c.kitchen!.maxLevel);
+    expect(kitchenCost(s)).toBeNull();
+    const locked = createBattle({ ...buildBattleConfig({ seed: 7, loadout: STONE, enemyAge: 0, armyAge: 0, timeline: 1 }), startFoodMilli: 1_000_000 });
+    stepBattle(locked, [{ type: 'kitchen' }]);
+    expect(locked.kitchenLevel).toBe(0);
+  });
+
   it('starts at 0 and rises exactly 1 per second in the Stone Age', () => {
     const s = createBattle(config());
     expect(food(s)).toBe(0);
@@ -26,7 +52,7 @@ describe('food', () => {
   });
 
   it('handles rates that do not divide the tick rate without drift', () => {
-    const s = createBattle(config({ foodRateMilli: 1333 }));
+    const s = createBattle(config({ foodRateMilli: 1333, playerBaseHp: 1e9 }));
     stepN(s, 20 * 30);
     expect(s.foodMilli).toBe(1333 * 30);
   });
@@ -152,7 +178,8 @@ describe('waves', () => {
       stepBattle(s);
       for (const e of s.events) if (e.type === 'spawn' && e.side === 1) spawnTicks.push(s.tick);
     }
-    const expected = c.wave.spawns.filter(([t]) => t <= 50).map(([t]) => Math.round(t * 20));
+    // A spawn happens on the first tick at or after its time.
+    const expected = c.wave.spawns.filter(([t]) => t <= 50).map(([t]) => Math.ceil(t * 20 - 1e-9));
     expect(spawnTicks.slice(0, expected.length)).toEqual(expected);
   });
 });

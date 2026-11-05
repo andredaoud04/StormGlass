@@ -218,11 +218,8 @@ export class BattleView {
           const hx = v.px + dir * 3;
           const hy = G + v.depth + Math.round(v.top * 0.45);
           this.fx.add('fx.spark', hx + (Math.random() * 4 - 2), hy + (Math.random() * 4 - 2));
-          if (e.heavy && !e.area) {
-            this.fx.add('fx.ring', v.px, G + v.depth - 2);
-            this.shake.add(2, 0.18);
-            this.hooks.onImpact?.(true, false);
-          }
+          // Routine heavy hits get a ring, not a shake or a freeze: the big effects are kept for big moments.
+          if (e.heavy && !e.area) this.fx.add('fx.ring', v.px, G + v.depth - 2);
           if (e.area === 'cleave') this.fx.add('fx.smear', v.px - dir * 4, hy, { flip: v.side === 0 });
           if (e.area === 'pierce') this.fx.add('fx.spark', v.px - dir * 2, hy - 2);
           // A killing blow from a heavy, area or piercing hit throws the body.
@@ -248,9 +245,8 @@ export class BattleView {
           this.fx.add('fx.boom', cx, G + 6);
           for (let k = -1; k <= 1; k++) this.fx.add('fx.dust', cx + k * half * 0.7, G + this.layout.bandHalf * k * 0.6, { behind: true, vx: k * 14 });
           for (let k = 0; k < 4; k++) this.fx.add('fx.debris', cx, G, { vx: (Math.random() - 0.5) * 90, vy: -50 - Math.random() * 50, gravity: 300, life: 0.7, fps: 14 });
-          this.shake.add(2.5, 0.2);
-          this.hooks.onImpact?.(true, false);
-          this.app.sfx('boom', { vol: 0.55, minGapMs: 120 });
+          this.shake.add(1.2, 0.15);
+          this.app.sfx('boom', { vol: 0.45, minGapMs: 150 });
           break;
         }
         case 'dot': {
@@ -273,8 +269,10 @@ export class BattleView {
           v.deathT = 0;
           v.anim = 'death';
           v.hpShow = 0;
-          this.hooks.onImpact?.(e.tank, true);
-          if (e.tank) this.shake.add(3, 0.25);
+          if (e.id === this.sim.bossId) {
+            this.hooks.onImpact?.(true, true);
+            this.shake.add(6, 0.5);
+          }
           this.app.sfx(e.side === 1 ? 'death' : 'death_ally', { vol: 0.6, minGapMs: 60 });
           break;
         }
@@ -283,7 +281,8 @@ export class BattleView {
           const v = [...this.units.values()].find((q) => q.dying && q.side === 1 && Math.abs(q.px - this.laneToPx(e.x)) < 1.5) ?? null;
           const x = v ? v.px : this.laneToPx(e.x);
           const y = G + (v?.top ?? -24);
-          this.fx.text(`+${e.amount}`, x, y - 6, { color: '#ffd03c', font: e.amount >= 5 ? 'big' : 'small', life: 0.9, vy: -22 });
+          // Kill coins fly to the Coins counter; only boss Gold gets a number.
+          if (e.reason === 'boss') this.fx.text(`+${e.amount}`, x, y - 6, { color: '#ffd03c', font: 'big', life: 0.9, vy: -22 });
           this.hooks.onCoin?.(x, y, e.amount);
           break;
         }
@@ -560,7 +559,8 @@ export class BattleView {
       if (v.dying && v.deathT > 0.75) alpha = 0;
       d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, alpha });
       if (v.flash > 0) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.85 });
-      if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0 });
+      // Poisoned, burning or chilled: a soft pulse so status effects are visible.
+      if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.18 + 0.12 * Math.sin(this.t * 20) });
       // HP bar when hurt (the boss has its own bar in the HUD).
       if (v.hpShow > 0 && !v.dying && v.hp < v.maxHp && v.id !== this.sim.bossId) {
         const bw = v.kind === 'tank' ? 16 : 12;
@@ -598,6 +598,8 @@ export class BattleView {
       } else d.strip(p.key, Math.floor(p.t * 12), cur + sx, y + sy);
     }
     this.fx.drawFront(d, sx, sy);
+    // Stormcall: the whole field flashes white for a moment.
+    if (this.flash > 0 && !this.app.reducedMotion) d.rect(0, 0, this.app.w, this.app.h, '#eaf6ff', Math.min(0.55, this.flash * 3));
   }
 
   private drawBase(side: 0 | 1, sx: number, sy: number): void {

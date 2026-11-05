@@ -1,52 +1,39 @@
-import type { BattleConfig, SkillConfig, TroopKind, TroopStats, WaveScript } from '../sim/types';
+import type { BattleConfig, KitchenConfig, SkillConfig, TroopKind, TroopStats, WaveScript } from '../sim/types';
 import { BALANCE, ageDef, troopDef, type TroopDef } from './balance';
 
 const KIND: Record<string, TroopKind> = { m: 'melee', r: 'ranged', t: 'tank' };
 
-/** Repeat a group's pattern (e.g. "mr") out to `count` units: "mrmrm". */
-function grow(units: string, count: number): string {
-  let out = '';
-  for (let i = 0; i < count; i++) out += units[i % units.length];
-  return out;
-}
-
 /**
- * Expand a stage's hand-made groups into the sim's spawn list. Later Ages field bigger enemy
- * armies (waves.density), and every repeat of the tail is a new, larger wave (waves.escalation)
- * until the last expanded wave, which then repeats.
+ * The enemy's spawn list for a stage, We Are Warriors style: an enemy on the lane from the first
+ * second, a numbered wave every `period` seconds released as one clump (each bigger than the
+ * last), and a trickle of single units between waves. Wave contents cycle through the stage's
+ * hand-made recipe letters, so every stage keeps its own mix. Deterministic.
  */
 export function stageWave(enemyAge: number, stage: number): WaveScript {
   const W = BALANCE.waves;
-  const w = W[ageDef(enemyAge).id][stage];
+  const S = W.stream;
+  const recipe = W[ageDef(enemyAge).id][stage].groups
+    .trim()
+    .split(/\s+/)
+    .map((g) => g.split(':')[1])
+    .join('');
   const density = W.density[enemyAge] ?? 1;
-  const esc = W.escalation;
-  const groups = w.groups.trim().split(/\s+/).map((g) => {
-    const [t, units] = g.split(':');
-    return { t: Number(t), units };
-  });
   const out: { t: number; k: TroopKind; wave: boolean }[] = [];
-  const emit = (t: number, units: string, count: number, first: boolean) => {
-    // Bigger groups walk out faster so a group never runs into the next one.
-    const gap = Math.min(W.groupGap, 7 / Math.max(1, count));
-    const pattern = grow(units, count);
-    [...pattern].forEach((u, k) => out.push({ t: Math.round((t + k * gap) * 100) / 100, k: KIND[u], wave: first && k === 0 }));
-  };
-  groups.forEach((g, gi) => emit(g.t, g.units, Math.max(1, Math.round(g.units.length * density)), gi === 0));
-  const tail = groups.slice(w.loopFrom);
-  let lastStart = 0;
-  for (let c = 1; c <= esc.expandWaves; c++) {
-    const extra = Math.min(esc.maxExtra, Math.round(esc.perWave * c * density));
-    tail.forEach((g, gi) => {
-      const t = g.t + c * w.loopPeriod;
-      if (gi === 0) lastStart = t;
-      emit(t, g.units, Math.max(1, Math.round(g.units.length * density)) + extra, gi === 0);
-    });
+  let cursor = 0;
+  const next = () => KIND[recipe[cursor++ % recipe.length]];
+  for (let n = 0; n < S.waves; n++) {
+    const t0 = S.firstAt + n * S.period;
+    const size = Math.min(S.maxWave, Math.max(1, Math.round(S.baseSize * density * S.stageSize[stage] * Math.pow(S.growth, n))));
+    for (let k = 0; k < size; k++) out.push({ t: Math.round((t0 + k * S.clumpGap) * 100) / 100, k: next(), wave: k === 0 });
+    // Single units between waves keep the lane busy (melee first: they are the cheap pressure).
+    for (let j = 1; j <= S.trickle; j++) out.push({ t: Math.round((t0 + (j * S.period) / (S.trickle + 1)) * 100) / 100, k: j % 2 ? 'melee' : next(), wave: false });
   }
   out.sort((a, b) => a.t - b.t);
+  const lastStart = S.firstAt + (S.waves - 1) * S.period;
   const loopFrom = out.findIndex((o) => o.t >= lastStart);
   const waveStarts: number[] = [];
   out.forEach((o, i) => o.wave && waveStarts.push(i));
-  return { spawns: out.map((o) => [o.t, o.k]), loopFrom, loopPeriod: w.loopPeriod, waveStarts };
+  return { spawns: out.map((o) => [o.t, o.k]), loopFrom, loopPeriod: S.period, waveStarts };
 }
 
 export function isBossStage(stage: number): boolean {
@@ -95,6 +82,8 @@ export interface BattleSetupInput {
   campaign?: boolean;
   /** Stormcall is unlocked for this player. */
   stormcall?: boolean;
+  /** The in-battle Food upgrade is unlocked. */
+  kitchen?: boolean;
 }
 
 export function troopStats(d: TroopDef, hpMul = 1, dmgMul = 1): TroopStats {
@@ -115,6 +104,12 @@ export function troopStats(d: TroopDef, hpMul = 1, dmgMul = 1): TroopStats {
     speed: d.speed,
     tank: d.kind === 'tank',
   };
+}
+
+export function kitchenConfig(loadout: string[]): KitchenConfig {
+  const k = BALANCE.skills.kitchen;
+  const cheapest = Math.min(...loadout.slice(0, 3).map((id) => troopDef(id).cost));
+  return { baseCostMilli: Math.round(cheapest * k.costMul * 1000), growth: k.growth, perLevel: k.perLevel, maxLevel: k.maxLevel };
 }
 
 export function stormcallConfig(armyAge: number, mul: number): SkillConfig {
@@ -157,8 +152,10 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     wave: stageWave(input.enemyAge, stage),
     waveSpeed: (1 + b.timeline.spawnSpeedPerTimeline * tl) * c.stagePace[stage],
     goldEnabled: input.campaign ?? true,
-    goldPerKill: b.economy.goldPerKill,
-    goldPerTankKill: b.economy.goldPerTankKill,
+    goldPerKill: Math.round(b.economy.killGold[input.enemyAge] * goldMul),
+    goldPerTankKill: Math.round(b.economy.killGold[input.enemyAge] * b.economy.tankKillMul * goldMul),
+    startFoodMilli: Math.min(...input.loadout.slice(0, 3).map((id) => troopDef(id).cost)) * b.economy.startFood * 1000,
+    kitchen: input.kitchen ? kitchenConfig(input.loadout) : undefined,
     baseGoldTotal: Math.round(enemy.baseGold * goldMul),
     baseGoldSteps: b.economy.baseGoldSteps,
     status: b.status,

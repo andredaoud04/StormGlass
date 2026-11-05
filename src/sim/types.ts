@@ -156,6 +156,19 @@ export interface BattleConfig {
   boss?: TroopStats;
   /** Stormcall, once unlocked: a lightning strike on the enemy nearest your fortress. */
   skill?: SkillConfig;
+  /** Food you start the battle with (milli-Food). */
+  startFoodMilli?: number;
+  /** In-battle Food upgrade, once unlocked. */
+  kitchen?: KitchenConfig;
+}
+
+/** The in-battle Food upgrade: spend Food to raise Food income for the rest of the battle. */
+export interface KitchenConfig {
+  baseCostMilli: number;
+  growth: number;
+  /** Income added per level, as a fraction of the starting rate. */
+  perLevel: number;
+  maxLevel: number;
 }
 
 export interface SkillConfig {
@@ -221,6 +234,7 @@ export type BattleResult = 'victory' | 'defeat' | 'retreat' | null;
 export type Command =
   | { type: 'deploy'; slot: number }
   | { type: 'skill' }
+  | { type: 'kitchen' }
   | { type: 'retreat' };
 
 export type SimEvent =
@@ -243,6 +257,7 @@ export type SimEvent =
   | { type: 'bossDash'; id: number }
   | { type: 'bossBlink'; id: number; from: number; to: number }
   | { type: 'skill'; x: number; radius: number }
+  | { type: 'kitchen'; level: number }
   | { type: 'skillFail'; reason: 'locked' | 'cooldown' | 'target' }
   | { type: 'wardHit'; dmg: number }
   | { type: 'wardBreak' }
@@ -273,6 +288,8 @@ export interface BattleState {
   bossMilestonesPaid: number;
   /** Ticks until Stormcall is ready. */
   skillCooldown: number;
+  /** In-battle Food upgrade level bought this battle. */
+  kitchenLevel: number;
   skillsUsed: number;
   baseMilestonesPaid: number;
   kills: number;
