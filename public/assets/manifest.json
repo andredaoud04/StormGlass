@@ -1708,10 +1708,10 @@
   "troop.boss_stone.red": {
    "kind": "sheet",
    "file": "troops/boss_stone_red.png",
-   "frameW": 112,
-   "frameH": 92,
+   "frameW": 104,
+   "frameH": 78,
    "anchor": [
-    52,
+    50,
     74
    ],
    "anims": {
@@ -1751,10 +1751,10 @@
   "troop.boss_ancient.red": {
    "kind": "sheet",
    "file": "troops/boss_ancient_red.png",
-   "frameW": 112,
-   "frameH": 92,
+   "frameW": 104,
+   "frameH": 78,
    "anchor": [
-    52,
+    50,
     74
    ],
    "anims": {
@@ -1794,10 +1794,10 @@
   "troop.boss_crusader.red": {
    "kind": "sheet",
    "file": "troops/boss_crusader_red.png",
-   "frameW": 112,
-   "frameH": 92,
+   "frameW": 104,
+   "frameH": 78,
    "anchor": [
-    52,
+    50,
     74
    ],
    "anims": {
@@ -1837,11 +1837,11 @@
   "troop.boss_gunpowder.red": {
    "kind": "sheet",
    "file": "troops/boss_gunpowder_red.png",
-   "frameW": 88,
-   "frameH": 72,
+   "frameW": 104,
+   "frameH": 78,
    "anchor": [
-    40,
-    56
+    50,
+    74
    ],
    "anims": {
     "idle": {
@@ -4492,20 +4492,20 @@
    "sfx": "zap_heavy"
   },
   "troop.boss_stone": {
-   "top": -55
+   "top": -74
   },
   "troop.boss_ancient": {
-   "top": -55
+   "top": -70
   },
   "troop.boss_crusader": {
-   "top": -54
+   "top": -70
   },
   "troop.boss_gunpowder": {
-   "top": -49,
+   "top": -70,
    "sfx": "cannon"
   },
   "troop.boss_industrial": {
-   "top": -59,
+   "top": -61,
    "sfx": "steam"
   },
   "troop.boss_future": {

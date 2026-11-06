@@ -98,7 +98,7 @@ export function humanoidAnims(r: RigParts, style: AttackStyle, rest: Partial<Pos
   // (pose.tilt), on a padded canvas so the fallen body is never clipped by the frame edge.
   const PAD = 20;
   const wideRig: RigParts = { ...r, frameW: r.frameW + PAD, hip: [r.hip[0] + PAD, r.hip[1]] };
-  const ground = r.hip[1] + 4;
+  const ground = r.hip[1] + (r.footY ?? 4);
   const fallen = (p: Pose) => {
     const g = toGround(buildFrame(wideRig, P(p)), ground);
     const b = g.bounds();

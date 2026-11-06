@@ -227,7 +227,7 @@ export function buildAll(): void {
       const r = t.rig(team);
       const anims = t.anims(r);
       const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
-      const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
+      const anchor: [number, number] = [r.hip[0], r.hip[1] + (r.footY ?? 4)];
       reg.sheet(`troop.${t.id}.${teamName}`, `troops/${t.id}_${teamName}.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id} (${teamName} team). Chibi troop, bold outline, lit from the top-left.`, t.muzzle);
       if (teamName === 'blue') reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.projectile ? { projectile: t.projectile } : {}), ...(t.muzzleFx ? { muzzleFx: t.muzzleFx } : {}), ...(t.sfx ? { sfx: t.sfx } : {}) };
       if (teamName === 'blue') reg.image(`portrait.${t.id}`, `portraits/${t.id}.png`, t.portraitAt ? anims[0].frames[0].crop(t.portraitAt[0], t.portraitAt[1], 32, 28) : portrait(anims[0].frames[0], 32, 28), `${t.id} card portrait (head and shoulders), fits the card window.`);
@@ -239,7 +239,7 @@ export function buildAll(): void {
     const r = t.rig(TEAM_RED);
     const anims = t.anims(r);
     const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
-    const anchor: [number, number] = [r.hip[0], r.hip[1] + 4];
+    const anchor: [number, number] = [r.hip[0], r.hip[1] + (r.footY ?? 4)];
     reg.sheet(`troop.${t.id}.red`, `troops/${t.id}_red.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id}: boss at twice the troop scale, enemy team. Faces right; mirrored in game.`, t.muzzle);
     reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.sfx ? { sfx: t.sfx } : {}) };
   }

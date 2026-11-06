@@ -46,6 +46,8 @@ export interface RigParts {
   outline?: Color;
   /** Multiplies pose offsets (body, head, legs) for rigs drawn at a larger pixel scale (bosses). */
   poseScale?: number;
+  /** Rows from the hip down to the soles (the sheet anchor). Default 4, the troop leg length. */
+  footY?: number;
 }
 
 export interface Pose {
@@ -144,7 +146,7 @@ export function buildFrame(r: RigParts, pose0: Pose): Img {
   const legHip0 = (o: [number, number], d: [number, number] = [0, 0]): [number, number] => [r.hip[0] + bx + o[0] + d[0], r.hip[1] + o[1] + d[1]];
   // Whole-body lean around the feet (death falls): rotate every attach point, add the lean to every part.
   const tilt = pose.tilt ?? 0;
-  const feet: [number, number] = [r.hip[0] - 2, r.frameH - 4];
+  const feet: [number, number] = [r.hip[0] - 2, r.hip[1] + (r.footY ?? 4)];
   const T = (p: [number, number]): [number, number] => {
     if (!tilt) return p;
     const [dx, dy] = rotPoint(p[0] - feet[0], p[1] - feet[1], tilt);
@@ -218,5 +220,5 @@ export function weaponTip(r: RigParts, pose: Pose): [number, number] {
   if (!w) return [hand[0] - r.hip[0], hand[1] - r.hip[1] - 4];
   const tip = w.tip ?? [w.pivot[0], 0];
   const [dx, dy] = rotPoint(tip[0] - w.pivot[0], tip[1] - w.pivot[1], pose.weapon ?? 0);
-  return [Math.round(hand[0] + dx - r.hip[0]), Math.round(hand[1] + dy - (r.hip[1] + 4))];
+  return [Math.round(hand[0] + dx - r.hip[0]), Math.round(hand[1] + dy - (r.hip[1] + (r.footY ?? 4)))];
 }
