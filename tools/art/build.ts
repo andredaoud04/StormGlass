@@ -150,23 +150,42 @@ function portrait(frame: Img, w: number, h: number): Img {
 const LANE_EXTRA = 96;
 
 /**
- * Widen the road: insert LANE_EXTRA rows of the road's own interior texture at its centre line,
- * sampled from shifted columns so the added stretch doesn't visibly repeat. Rows and shifts are
- * multiples of 4 so the ordered dither lines up. The anchor moves to the new road centre.
+ * Widen the road by LANE_EXTRA rows at its centre line. The added stretch is calm (D39): the road's
+ * own base tone with a light dither of its second tone and the odd pebble, so units read clearly on
+ * it and the original road texture (ruts, planks, stones) appears once, not stamped in a grid.
+ * The anchor moves to the new road centre.
  */
 function widenLane(src: Img, gy: number): { img: Img; groundY: number } {
   const out = new Img(src.w, src.h + LANE_EXTRA);
   const band0 = gy - 8;
-  const band = 16;
+  const counts = new Map<number, number>();
+  for (let y = band0; y < band0 + 16; y++) for (let x = 0; x < src.w; x++) counts.set(src.get(x, y), (counts.get(src.get(x, y)) ?? 0) + 1);
+  const ranked = [...counts.entries()].sort((p, q) => q[1] - p[1]).map(([c]) => c);
+  const base = ranked[0];
+  const lum = (c: number) => R(c) * 0.3 + G(c) * 0.59 + B(c) * 0.11;
+  const tone = ranked.slice(1).sort((p, q) => Math.abs(lum(p) - lum(base)) - Math.abs(lum(q) - lum(base)))[0] ?? base;
+  const pebble = ranked.slice(1).sort((p, q) => lum(q) - lum(p))[0] ?? tone;
+  let seed = 4242;
+  const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
   for (let x = 0; x < src.w; x++) {
     for (let y = 0; y <= gy; y++) out.set(x, y, src.get(x, y));
     for (let k = 0; k < LANE_EXTRA; k++) {
-      const rep = Math.floor(k / band);
-      const sx = (x + 36 + rep * 52) % src.w;
-      out.set(x, gy + 1 + k, src.get(sx, band0 + ((gy + 1 + k - band0) % band)));
+      const y = gy + 1 + k;
+      const d = (x * 7 + y * 3) % 11;
+      out.set(x, y, d === 0 && (x + y) % 2 === 0 ? tone : base);
     }
     for (let y = gy + 1; y < src.h; y++) out.set(x, y + LANE_EXTRA, src.get(x, y));
   }
+  // Sparse pebbles, two pixels each, lit on top.
+  for (let i = 0; i < 26; i++) {
+    const x = Math.floor(rnd() * (src.w - 2));
+    const y = gy + 2 + Math.floor(rnd() * (LANE_EXTRA - 4));
+    out.set(x, y, pebble);
+    out.set(x + 1, y, pebble);
+    out.set(x, y + 1, tone);
+    out.set(x + 1, y + 1, tone);
+  }
+  void A;
   return { img: out, groundY: gy + LANE_EXTRA / 2 };
 }
 

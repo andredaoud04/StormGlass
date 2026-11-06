@@ -1,10 +1,11 @@
 /** Crusader Age troops: mail, team tabards with a pale cross, kite shields, great helms. */
-import { LINEN, type Ramp } from '../palette';
+import { LINEN, MAIL, teamTint, type Ramp } from '../palette';
 import type { RigParts } from '../rig';
 import { darkOf, grid, groups, hurtHead, kiteShield, palOf } from './kit';
 
 export function footmanRig(team: Ramp): RigParts {
-  const gs = groups(team);
+  // Mail and kettle hat lightly washed in the team colour (D39 team readability).
+  const gs = groups(team, { metal: teamTint(MAIL, team, 0.32) });
   const p = palOf(gs);
   const dk = darkOf(gs);
   // Kettle hat over a mail coif.

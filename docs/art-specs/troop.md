@@ -210,7 +210,7 @@ crusader_footman (blue team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (23): #1e1526 #d6dce2 #9ea8b2 #6e7884 #474e5a #1f3f80 #4aa6ec #a6e2ff #2d68c2 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #fffaf0 #b07a2c #e6b84a #c98a52 #6e3a22 #9a5c34 #472214
+- Colors (23): #1e1526 #c7deeb #83a7c5 #597398 #3a4966 #1f3f80 #4aa6ec #a6e2ff #2d68c2 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #fffaf0 #b07a2c #e6b84a #c98a52 #6e3a22 #9a5c34 #472214
 
 ## troop.crusader_footman.red
 
@@ -226,7 +226,7 @@ crusader_footman (red team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (23): #1e1526 #d6dce2 #9ea8b2 #6e7884 #474e5a #6a1a33 #e64d4d #ffb08c #ae2a40 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #fffaf0 #b07a2c #e6b84a #c98a52 #6e3a22 #9a5c34 #472214
+- Colors (23): #1e1526 #e3cec6 #b58b92 #825f6e #523d4e #6a1a33 #e64d4d #ffb08c #ae2a40 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #fffaf0 #b07a2c #e6b84a #c98a52 #6e3a22 #9a5c34 #472214
 
 ## troop.crusader_crossbow.blue
 
@@ -308,7 +308,7 @@ gunpowder_pikeman (blue team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (24): #1e1526 #a6e2ff #d6dce2 #6e7884 #4aa6ec #9ea8b2 #2d68c2 #474e5a #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #212e54 #2f487d #8e7e64 #d99a5c #7c2e30
+- Colors (24): #1e1526 #a6e2ff #c7deeb #597398 #4aa6ec #83a7c5 #2d68c2 #3a4966 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #212e54 #2f487d #8e7e64 #d99a5c #7c2e30
 
 ## troop.gunpowder_pikeman.red
 
@@ -324,7 +324,7 @@ gunpowder_pikeman (red team). Chibi troop, bold outline, lit from the top-left.
   - row 3 `hit`: 1 frames @ 8 fps
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (24): #1e1526 #ffb08c #d6dce2 #6e7884 #e64d4d #9ea8b2 #ae2a40 #474e5a #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #461b2e #70293c #8e7e64 #d99a5c #7c2e30
+- Colors (24): #1e1526 #ffb08c #e3cec6 #825f6e #e64d4d #b58b92 #ae2a40 #523d4e #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #461b2e #70293c #8e7e64 #d99a5c #7c2e30
 
 ## troop.gunpowder_musketeer.blue
 

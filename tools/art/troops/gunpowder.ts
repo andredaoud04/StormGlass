@@ -1,6 +1,6 @@
 /** Gunpowder Age troops: morions and pikes, tricornes and muskets, and a crewed field cannon. */
 import { Img, hex, mix, rotSprite } from '../img';
-import { BRONZE, FELT, FIRE, INK, IRON, WHITE, WOOD, teamTint, type Ramp } from '../palette';
+import { BRONZE, FELT, FIRE, INK, IRON, MAIL, WHITE, WOOD, teamTint, type Ramp } from '../palette';
 import { buildFrame, rotateFrame, type AnimSpec, type Pose, type RigParts } from '../rig';
 import { darkOf, grid, groups, hurtHead, palOf } from './kit';
 import { toGround } from './anims';
@@ -9,7 +9,8 @@ import { toGround } from './anims';
 const overOf = (team: Ramp) => ({ extra: teamTint(FELT, team, 0.5) });
 
 export function pikemanRig(team: Ramp): RigParts {
-  const gs = groups(team, overOf(team));
+  // Morion and breastplate lightly washed in the team colour (D39 team readability).
+  const gs = groups(team, { ...overOf(team), metal: teamTint(MAIL, team, 0.32) });
   const p = palOf(gs);
   const dk = darkOf(gs);
   // Steel morion with a comb, cavalier moustache.

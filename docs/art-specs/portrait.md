@@ -61,7 +61,7 @@ crusader_footman card portrait (head and shoulders), fits the card window.
 - File: `public/assets/portraits/crusader_footman.png`
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (21): #1e1526 #d6dce2 #9ea8b2 #6e7884 #474e5a #1f3f80 #4aa6ec #a6e2ff #2d68c2 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #fffaf0 #b07a2c #c98a52 #6e3a22 #9a5c34
+- Colors (21): #1e1526 #c7deeb #83a7c5 #597398 #3a4966 #1f3f80 #4aa6ec #a6e2ff #2d68c2 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #7c2e30 #fff2a6 #fffaf0 #b07a2c #c98a52 #6e3a22 #9a5c34
 
 ## portrait.crusader_crossbow
 
@@ -88,7 +88,7 @@ gunpowder_pikeman card portrait (head and shoulders), fits the card window.
 - File: `public/assets/portraits/gunpowder_pikeman.png`
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
-- Colors (21): #1e1526 #a6e2ff #d6dce2 #6e7884 #4aa6ec #9ea8b2 #2d68c2 #474e5a #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #212e54 #2f487d
+- Colors (21): #1e1526 #a6e2ff #c7deeb #597398 #4aa6ec #83a7c5 #2d68c2 #3a4966 #4a2618 #6e3e24 #cc7a58 #ffd6ac #f2a97a #ece2cc #f07a7a #c4b494 #fffaf0 #ad6a3c #7f4428 #212e54 #2f487d
 
 ## portrait.gunpowder_musketeer
 
