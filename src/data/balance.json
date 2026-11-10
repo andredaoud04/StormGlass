@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "notes": "All numbers are MODEL unless docs/WAW_PARITY.md says otherwise. Change numbers here, never in code. Bump version when a change breaks old tuning.",
   "sim": {
     "tickRate": 20,
@@ -20,7 +20,7 @@
   "economy": {
     "startingGold": 18,
     "baseGoldSteps": 10,
-    "playerBaseHpMul": 0.75,
+    "playerBaseHpMul": 3,
     "slotUnlock": {
       "ranged": 30,
       "tank": 70
@@ -34,7 +34,20 @@
       13
     ],
     "startFood": 1,
-    "tankKillMul": 5
+    "tankKillMul": 5,
+    "tower": {
+      "notes": "Guard tower on each fortress: shoots the nearest attacker within range. Damage = that side's melee troop damage x dmgMul (yours also grows with the Base upgrade). The enemy tower is enemyMul as strong, so a siege is slowed, not stopped.",
+      "dmgMul": 1.0,
+      "range": 170,
+      "intervalSec": 1.0,
+      "enemyMul": 0.5
+    },
+    "redeploy": {
+      "notes": "Seconds before a card can be sent again, by kind. Stops one card being spammed; the heavy is the long one.",
+      "melee": 0.3,
+      "ranged": 2,
+      "tank": 6
+    }
   },
   "status": {
     "poison": {
@@ -101,10 +114,10 @@
       "enemyPower": 0.85,
       "stagePower": [
         0.8,
-        0.766,
-        0.765,
-        0.802,
-        1.128
+        0.749,
+        0.659,
+        0.749,
+        1.238
       ]
     },
     {
@@ -154,7 +167,6 @@
           "range": 110,
           "speed": 50,
           "traits": {
-            "armor": 0.7,
             "cleave": 2
           }
         }
@@ -162,11 +174,11 @@
       "foodRate": 1.4,
       "enemyPower": 0.85,
       "stagePower": [
-        0.751,
-        0.819,
-        0.892,
-        0.838,
-        0.892
+        0.759,
+        0.82,
+        0.809,
+        0.779,
+        1.164
       ]
     },
     {
@@ -211,7 +223,6 @@
           "range": 115,
           "speed": 55,
           "traits": {
-            "armor": 0.7,
             "cleave": 3
           }
         }
@@ -219,11 +230,11 @@
       "foodRate": 1.9,
       "enemyPower": 0.9,
       "stagePower": [
-        0.629,
-        0.763,
-        0.69,
-        0.62,
-        0.912
+        0.617,
+        0.784,
+        0.597,
+        0.683,
+        1.128
       ]
     },
     {
@@ -278,11 +289,11 @@
       "foodRate": 2.5,
       "enemyPower": 0.92,
       "stagePower": [
-        0.72,
-        0.768,
-        0.583,
-        0.695,
-        0.905
+        0.804,
+        0.647,
+        0.571,
+        0.779,
+        1.164
       ]
     },
     {
@@ -340,11 +351,11 @@
       "foodRate": 3.2,
       "enemyPower": 0.98,
       "stagePower": [
-        0.694,
-        0.47,
-        0.526,
-        0.694,
-        1.015
+        0.744,
+        0.556,
+        0.607,
+        0.809,
+        1.083
       ]
     },
     {
@@ -405,16 +416,16 @@
       "foodRate": 4.0,
       "enemyPower": 1.0,
       "stagePower": [
-        0.671,
-        0.461,
-        0.524,
-        0.581,
-        0.723
+        0.642,
+        0.536,
+        0.632,
+        0.693,
+        0.921
       ]
     }
   ],
   "waves": {
-    "notes": "We Are Warriors-style pressure: the enemy is on the lane from the first second. Every `period` seconds a numbered WAVE arrives as one clump (units `clumpGap` apart) built from the stage's hand-made recipe letters; each wave is `growth` times bigger than the last (up to `maxWave` units). Between waves a trickle of single units keeps the lane busy. Size = baseSize x Age density x stageSize[stage].",
+    "notes": "We Are Warriors-style pressure: the enemy is on the lane from the first second. Every `period` seconds a numbered WAVE arrives as one clump (units `clumpGap` apart) built from the stage's hand-made recipe letters. Waves stay about the same size (growth) but every bigEvery-th is a BIG wave (bigMul); sizes vary +-jitter per battle. From wave rampFrom on, waves grow by rampGrowth each (a long battle must end). Size = baseSize x Age density x stageSize[stage].",
     "stone": [
       {
         "groups": "8:m 20:m 32:mm 46:mm"
@@ -530,7 +541,7 @@
       "firstAt": 0.5,
       "clumpGap": 0.4,
       "baseSize": 2,
-      "growth": 1.22,
+      "growth": 1.0,
       "maxWave": 16,
       "trickle": 2,
       "waves": 15,
@@ -540,7 +551,50 @@
         1.3,
         1.45,
         1.2
-      ]
+      ],
+      "bigEvery": 3,
+      "bigMul": 3.0,
+      "jitter": 0.15,
+      "rampFrom": 7,
+      "rampGrowth": 1.25,
+      "bigFrom": 3,
+      "enragePerWave": 0.12
+    },
+    "sortie": {
+      "notes": "Garrison counterattacks: when the enemy fortress drops to each threshold (share of HP left) a clump charges out. size = base x Age density x stageSize, power = the stage's enemies x powerMul.",
+      "thresholds": [
+        0.4
+      ],
+      "sizes": [
+        3
+      ],
+      "powerMul": 1.25,
+      "gapSec": 0.3,
+      "firstBattle": {
+        "thresholds": [
+          0.4
+        ],
+        "sizes": [
+          1
+        ],
+        "towerMul": 0
+      }
+    },
+    "rally": {
+      "notes": "Your garrison: when your fortress drops to each threshold a clump of your own troops (the kinds you own) charges out at powerMul strength. This is the comeback: a breach costs fortress HP but throws the attackers back. The rally holds the lane up to `leash` (share of the lane from your gate); it never marches on to win for you.",
+      "thresholds": [
+        0.8,
+        0.5,
+        0.2
+      ],
+      "sizes": [
+        3,
+        4,
+        5
+      ],
+      "powerMul": 1.6,
+      "gapSec": 0.3,
+      "leash": 0.45
     }
   },
   "timeline": {
@@ -548,10 +602,15 @@
     "enemyFortressPerTimeline": 0.25,
     "spawnSpeedPerTimeline": 0.05,
     "enemyPower": 0.85,
-    "goldGrowthPerTimeline": 1.8
+    "goldGrowthPerTimeline": 1.8,
+    "star": {
+      "notes": "Each Prestige earns a permanent Star: every troop gets +power HP and damage, and every battle pays +gold. Stars are kept forever.",
+      "power": 0.1,
+      "gold": 0.15
+    }
   },
   "campaign": {
-    "notes": "Every Age has stagesPerAge stages; the last is the boss stage. Stage multipliers apply on top of the Age's enemyPower and fortressHp.",
+    "notes": "Every Age has stagesPerAge stages; the last is the boss stage. Stage multipliers apply on top of the Age's enemyPower and fortressHp. fortressScale multiplies every enemy fortress (longer sieges).",
     "stagesPerAge": 5,
     "stagePower": [
       1.0,
@@ -573,7 +632,8 @@
       1.06,
       1.1,
       0.9
-    ]
+    ],
+    "fortressScale": 1.0
   },
   "bosses": {
     "stone": {
@@ -711,7 +771,7 @@
       "notes": "Spend Food in battle to raise Food income. Cost = cheapest troop cost x costMul x growth^level.",
       "costMul": 2,
       "growth": 1.6,
-      "perLevel": 0.2,
+      "perLevel": 0.3,
       "maxLevel": 5,
       "unlockStage": 2
     }
@@ -745,26 +805,27 @@
       0,
       0,
       4000,
-      16000,
-      36000,
-      65000
+      14000,
+      30000,
+      50000
     ]
   },
   "combat": {
-    "notes": "Class matchups (attacker kind -> defender kind multiplier) make composition matter: melee rushes ranged, ranged picks off melee, tanks shrug off melee. Traits: cleave n (melee hits up to n), pierce n (shots pass through up to n), splash r (area hit, others take splashShare), armor x (damage taken from ranged).",
+    "notes": "Counter triangle (attacker kind -> defender kind multiplier): melee rushes ranged, ranged wears down tanks, tanks crush melee. Traits: cleave n (melee hits up to n), pierce n (shots pass through up to n), splash r (area hit, others take splashShare). damageScale multiplies every hit on a unit (not on fortresses): higher = faster fights.",
     "matchup": {
       "melee": {
         "ranged": 1.4
       },
       "ranged": {
-        "melee": 1.25
+        "tank": 1.4
       },
       "tank": {
-        "melee": 1.2
+        "melee": 1.4
       }
     },
     "splashShare": 0.6,
     "cleaveShare": 0.75,
-    "pierceShare": 0.7
+    "pierceShare": 0.7,
+    "damageScale": 1.0
   }
 }

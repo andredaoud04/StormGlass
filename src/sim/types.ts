@@ -31,6 +31,10 @@ export interface TroopStats {
   splash?: number;
   /** Damage taken from ranged attacks (0.5 = half). */
   armor?: number;
+  /** A fortress guard tower's shot (no class matchup). */
+  tower?: boolean;
+  /** Ticks before this card can be deployed again (player cards only). */
+  redeployTicks?: number;
 }
 
 /** How traits and class matchups scale damage. */
@@ -40,6 +44,8 @@ export interface CombatRules {
   splashShare: number;
   cleaveShare: number;
   pierceShare: number;
+  /** Multiplies every hit on a unit (not fortresses). */
+  damageScale?: number;
 }
 
 /**
@@ -101,6 +107,27 @@ export interface WaveScript {
   loopPeriod: number;
   /** Spawn indices that open a new wave (for the WAVE banner). Each loop repeat is a new wave too. */
   waveStarts?: number[];
+  /** Wave numbers (1-based) that are big waves: a surge well above the usual size. */
+  bigWaves?: number[];
+}
+
+/**
+ * Sorties: when the enemy fortress drops to each threshold (share of its HP left), its garrison
+ * charges out. This is what pushes a siege back down the lane and makes camping the gate risky.
+ */
+export interface SortieConfig {
+  thresholds: number[];
+  /** Units released per sortie, by kind, in order. */
+  units: TroopKind[][];
+  /** Garrison troops (tougher than the stage's ordinary enemies). */
+  troops: Record<TroopKind, TroopStats>;
+  /** Ticks between two garrison units leaving the gate. */
+  gapTicks: number;
+  /**
+   * How far the garrison will go, as a share of the lane from its own gate. Your rally holds the
+   * middle and does not march on to win the battle for you; the enemy's sortie has no leash.
+   */
+  leash?: number;
 }
 
 export interface StatusRules {
@@ -160,6 +187,21 @@ export interface BattleConfig {
   startFoodMilli?: number;
   /** In-battle Food upgrade, once unlocked. */
   kitchen?: KitchenConfig;
+  /** The enemy garrison's counterattacks as its fortress is worn down. */
+  sortie?: SortieConfig;
+  /** Your own garrison: it rallies out when your fortress is worn down, the same way. */
+  rally?: SortieConfig;
+  /** Late in a long battle the enemy's troops themselves grow stronger, so no battle can stall. */
+  enrage?: { fromWave: number; perWave: number };
+  /** Guard towers: each fortress shoots the nearest attacker in range ([player, enemy]). */
+  towers?: [TowerConfig, TowerConfig];
+}
+
+/** A fortress guard tower. It gives the defender an edge at its own gate, so sieges can be thrown back. */
+export interface TowerConfig {
+  dmg: number;
+  range: number;
+  intervalTicks: number;
 }
 
 /** The in-battle Food upgrade: spend Food to raise Food income for the rest of the battle. */
@@ -209,6 +251,8 @@ export interface Unit {
   burn: BurnState;
   cold: ColdState;
   boss?: BossState;
+  /** Garrison units stop advancing at this lane x and hold there. */
+  leashX?: number;
 }
 
 export const BASE_TARGET = -2;
@@ -243,7 +287,9 @@ export type SimEvent =
   | { type: 'shoot'; id: number; projectile: number }
   | { type: 'hit'; target: number; side: Side; dmg: number; x: number; heavy: boolean; ranged: boolean; area?: 'splash' | 'pierce' | 'cleave'; kill?: boolean }
   | { type: 'splash'; x: number; radius: number; side: Side }
-  | { type: 'wave'; n: number }
+  | { type: 'wave'; n: number; big?: boolean }
+  | { type: 'sortie'; n: number; size: number; side: Side }
+  | { type: 'towerShot'; side: Side; projectile: number }
   | { type: 'baseHit'; side: Side; dmg: number; heavy: boolean }
   | { type: 'dot'; target: number; kind: 'poison' | 'burn'; dmg: number; x: number }
   | { type: 'status'; target: number; kind: StatusKind }
@@ -261,7 +307,7 @@ export type SimEvent =
   | { type: 'skillFail'; reason: 'locked' | 'cooldown' | 'target' }
   | { type: 'wardHit'; dmg: number }
   | { type: 'wardBreak' }
-  | { type: 'deployFail'; slot: number; reason: 'food' | 'cap' | 'slot' }
+  | { type: 'deployFail'; slot: number; reason: 'food' | 'cap' | 'slot' | 'cooldown' }
   | { type: 'end'; result: Exclude<BattleResult, null> };
 
 export interface BattleState {
@@ -295,5 +341,15 @@ export interface BattleState {
   kills: number;
   tankKills: number;
   deployed: number;
+  /** Sorties already triggered, the garrison units still to leave the gate, and ticks until the next. */
+  sortiesDone: [number, number];
+  sortieQueue: [TroopKind[], TroopKind[]];
+  sortieWait: [number, number];
+  /** The wave now on the lane (0 before the first). */
+  waveNow: number;
+  /** Ticks until each card slot can be deployed again. */
+  cardWait: number[];
+  /** Ticks until each fortress tower may shoot again ([player, enemy]). */
+  towerWait: [number, number];
   events: SimEvent[];
 }

@@ -10,7 +10,7 @@ export function cyclePolicy(pattern: number[]): Policy {
   return (s) => {
     const slot = pattern[i % pattern.length];
     const def = s.config.playerTroops[slot];
-    if (def && food(s) >= def.cost) {
+    if (def && food(s) >= def.cost && (s.cardWait[slot] ?? 0) <= 0) {
       i++;
       return [{ type: 'deploy', slot }];
     }
@@ -59,19 +59,31 @@ export function smartPolicy(): Policy {
     const melee = troops.findIndex((t) => t.kind === 'melee');
     const ranged = troops.findIndex((t) => t.kind === 'ranged');
     const tank = troops.findIndex((t) => t.kind === 'tank');
-    // Grow the economy early while the lane is safe (two Kitchen levels, like a sensible player).
+    // Grow the economy while the lane is safe: this is how you out-build the enemy (D42).
     const kc = kitchenCost(s);
-    if (!threat && kc !== null && s.kitchenLevel < 2 && s.foodMilli >= kc) return [{ type: 'kitchen' }];
+    // Three levels early, the rest once an army is standing.
+    const mine = s.units.filter((u) => u.alive && u.side === 0).length;
+    if (!threat && kc !== null && s.foodMilli >= kc && (s.kitchenLevel < 3 || mine >= 3)) return [{ type: 'kitchen' }];
+    const ready = (i: number) => i >= 0 && f >= troops[i].cost && (s.cardWait[i] ?? 0) <= 0;
     if (threat) {
-      const pick = tank >= 0 && f >= troops[tank].cost ? tank : melee;
-      return pick >= 0 && f >= troops[pick].cost ? [{ type: 'deploy', slot: pick }] : [];
+      // Under attack: whatever is ready, heaviest first.
+      const pick = [tank, melee, ranged].find(ready);
+      return pick !== undefined ? [{ type: 'deploy', slot: pick }] : [];
     }
     if (plan.length === 0) plan = [tank, melee, ranged, melee].filter((i) => i >= 0);
     const next = plan[0];
     const groupCost = plan.reduce((a, i) => a + troops[i].cost, 0);
     if (f >= groupCost || (f >= troops[next].cost && s.units.filter((u) => u.alive && u.side === 0).length > 0)) {
-      plan.shift();
-      return [{ type: 'deploy', slot: next }];
+      if (ready(next)) {
+        plan.shift();
+        return [{ type: 'deploy', slot: next }];
+      }
+      // The next card is still reloading: send another that is ready rather than sit on Food.
+      const other = plan.slice(1).find(ready);
+      if (other !== undefined && f >= troops[next].cost + troops[other].cost) {
+        plan.splice(plan.indexOf(other, 1), 1);
+        return [{ type: 'deploy', slot: other }];
+      }
     }
     return [];
   };

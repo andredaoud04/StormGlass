@@ -5,11 +5,12 @@
  * Usage: npm run sim [-- --quiet] [-- --cycle] [-- --timelines=N]
  */
 import { ageDef } from '../../src/game/balance';
-import { buildBattleConfig, isBossStage } from '../../src/game/battleSetup';
+import { isBossStage } from '../../src/game/battleSetup';
+import { battleFor } from '../../src/game/session';
 import { cyclePolicy, runBattle, smartPolicy } from '../../src/game/bots';
-import { applyOutcome, canEvolve, canPrestige, evolve, evolveCost, evolveUnlocked, FINAL_AGE, frontier, fromIndex, kitchenUnlocked, loadout, prestige, stormcallUnlocked, toIndex } from '../../src/game/progress';
+import { applyOutcome, canEvolve, canPrestige, evolve, evolveCost, evolveUnlocked, FINAL_AGE, frontier, fromIndex, loadout, prestige, toIndex } from '../../src/game/progress';
 import { newSave, type SaveData } from '../../src/game/save';
-import { UPGRADE_IDS, buyUpgrade, canBuy, canUnlockSlot, fortressMul, foodRateMilli, unlockSlot, upgradeCost } from '../../src/game/upgrades';
+import { UPGRADE_IDS, buyUpgrade, canBuy, canUnlockSlot, unlockSlot, upgradeCost } from '../../src/game/upgrades';
 
 /** Seconds a player spends in menus between battles. */
 const MENU_SECONDS = 10;
@@ -97,7 +98,7 @@ export function simulatePacing(policy: 'cycle' | 'smart' = 'smart', timelines = 
     if (idx !== f) replays++;
     const l = loadout(s);
     const pattern = l.length === 1 ? [0] : l.length === 2 ? [0, 0, 1] : [0, 1, 0, 2];
-    const config = buildBattleConfig({ seed: battles + 1, loadout: l, enemyAge: ref.age, stage: ref.stage, armyAge: s.armyAge, timeline: s.timeline, foodRateMilli: foodRateMilli(s), fortressMul: fortressMul(s), campaign: true, stormcall: stormcallUnlocked(s), kitchen: kitchenUnlocked(s) });
+    const config = battleFor(s, ref, battles + 1);
     const r = runBattle(config, policy === 'smart' ? smartPolicy() : cyclePolicy(pattern), 300);
     const result = r.result === 'victory' ? 'victory' : 'defeat';
     applyOutcome(s, { result, gold: r.gold, kills: r.state.kills, enemyAge: ref.age, stage: ref.stage, campaign: true });

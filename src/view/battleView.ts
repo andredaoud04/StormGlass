@@ -76,6 +76,9 @@ export interface ViewHooks {
   onBaseHit?(side: 0 | 1): void;
 }
 
+/** The ranged troop of each Age: its missile and sound are used for that Age's guard tower. */
+const TOWER_TROOP: Record<string, string> = { stone: 'slinger', ancient: 'archer', crusader: 'crossbow', gunpowder: 'musketeer', industrial: 'rifleman', future: 'gunner' };
+
 export class BattleView {
   readonly env: EnvView;
   readonly fx: FxSystem;
@@ -183,6 +186,26 @@ export class BattleView {
             if (own && !u.def.bossDef) this.app.sfx(String(own), { vol: 0.55, minGapMs: 80 });
             else this.app.sfx(u.def.kind === 'tank' ? 'swing_heavy' : 'swing', { vol: 0.35, minGapMs: 60 });
           }
+          break;
+        }
+        case 'towerShot': {
+          // The fortress guard tower looses a shot from its battlements, in the Age's own missile.
+          const p = s.projectiles.find((q) => q.id === e.projectile);
+          const age = this.baseAge(e.side);
+          const ranged = this.app.assets.meta(`troop.${age}_${TOWER_TROOP[age] ?? ''}`);
+          const key = String(ranged.projectile ?? 'proj.stone');
+          const tv = p ? this.units.get(p.target) : undefined;
+          const bx = e.side === 0 ? this.layout.laneL - 8 : this.layout.laneR + 8;
+          this.projs.set(e.projectile, { id: e.projectile, side: e.side, key, sx: bx, sy: G - 46, ty: G + (tv?.depth ?? 0) - 12, t: 0 });
+          this.app.sfx(String(ranged.sfx ?? 'sling'), { vol: 0.3, minGapMs: 120 });
+          break;
+        }
+        case 'sortie': {
+          // The garrison charges out: dust at the gate and a horn.
+          const gx = e.side === 1 ? this.layout.laneR - 6 : this.layout.laneL + 6;
+          for (let k = -1; k <= 1; k++) this.fx.add('fx.dust', gx, G + k * 14, { behind: true, vx: (e.side === 1 ? -1 : 1) * 18 });
+          this.shake.add(2.5, 0.25);
+          this.app.sfx('roar', { vol: e.side === 1 ? 0.7 : 0.5, jitter: 0 });
           break;
         }
         case 'shoot': {

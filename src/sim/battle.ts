@@ -53,6 +53,12 @@ export function createBattle(config: BattleConfig): BattleState {
     kills: 0,
     tankKills: 0,
     deployed: 0,
+    sortiesDone: [0, 0],
+    sortieQueue: [[], []],
+    sortieWait: [0, 0],
+    towerWait: [0, 0],
+    cardWait: [0, 0, 0],
+    waveNow: 0,
     events: [],
   };
 }
@@ -167,10 +173,15 @@ function applyCommand(s: BattleState, cmd: Command): void {
     s.events.push({ type: 'deployFail', slot: cmd.slot, reason: 'food' });
     return;
   }
+  if ((s.cardWait[cmd.slot] ?? 0) > 0) {
+    s.events.push({ type: 'deployFail', slot: cmd.slot, reason: 'cooldown' });
+    return;
+  }
   if (aliveCount(s, 0) >= s.config.maxUnitsPerSide) {
     s.events.push({ type: 'deployFail', slot: cmd.slot, reason: 'cap' });
     return;
   }
+  s.cardWait[cmd.slot] = def.redeployTicks ?? 0;
   s.foodMilli -= costMilli;
   s.foodSpentMilli += costMilli;
   s.deployed++;
@@ -317,9 +328,10 @@ function separate(s: BattleState): void {
 
 /** Damage after class matchups and armor. */
 function dealt(s: BattleState, attacker: TroopStats, target: Unit, base: number, ranged: boolean): number {
-  const m = s.config.combat.matchup[attacker.kind]?.[target.def.kind] ?? 1;
+  // Tower shots are plain damage: no class matchup.
+  const m = attacker.tower ? 1 : (s.config.combat.matchup[attacker.kind]?.[target.def.kind] ?? 1);
   const armor = ranged && target.def.armor ? target.def.armor : 1;
-  return Math.max(1, Math.round(base * m * armor));
+  return Math.max(1, Math.round(base * m * armor * (s.config.combat.damageScale ?? 1)));
 }
 
 /** Living enemies of `side` within `radius` of x, nearest first (stable by id). */
@@ -437,9 +449,14 @@ function stepUnit(s: BattleState, u: Unit): void {
     return;
   }
 
-  u.walking = true;
   u.target = NO_TARGET;
   const dir = u.side === 0 ? 1 : -1;
+  // A leashed garrison unit holds its ground once it reaches the end of its leash.
+  if (u.leashX !== undefined && (u.x - u.leashX) * dir >= 0) {
+    u.walking = false;
+    return;
+  }
+  u.walking = true;
   u.x += dir * u.def.speed * dt * slow;
   // Never walk through the enemy base.
   if (u.side === 0) u.x = Math.min(u.x, s.config.laneLength);
@@ -497,10 +514,76 @@ function stepEnemySpawns(s: BattleState): void {
   const next = waveSpawnTime(s.config, s.waveIndex);
   if (next.time <= now + 1e-9 && aliveCount(s, 1) < s.config.maxUnitsPerSide) {
     const wave = waveNumberAt(s.config, s.waveIndex);
-    if (wave > 0) s.events.push({ type: 'wave', n: wave });
-    spawnUnit(s, 1, s.config.enemyTroops[next.kind]);
+    if (wave > 0) {
+      s.waveNow = wave;
+      s.events.push({ type: 'wave', n: wave, ...(s.config.wave.bigWaves?.includes(wave) ? { big: true } : {}) });
+    }
+    spawnUnit(s, 1, enraged(s, s.config.enemyTroops[next.kind]));
     s.waveIndex++;
   }
+}
+
+/**
+ * Sorties: each time a fortress drops to its next threshold its garrison charges out, one unit
+ * every few ticks. Side 1 is the enemy garrison (config.sortie); side 0 is yours (config.rally).
+ * A garrison always gets out (it may exceed the lane cap by a small margin).
+ */
+function stepSortie(s: BattleState): void {
+  for (const side of [0, 1] as Side[]) {
+    const so = side === 1 ? s.config.sortie : s.config.rally;
+    if (!so) continue;
+    const hp = side === 1 ? s.enemyBaseHp : s.playerBaseHp;
+    const max = side === 1 ? s.config.enemyBaseHp : s.config.playerBaseHp;
+    while (s.sortiesDone[side] < so.thresholds.length && hp / max <= so.thresholds[s.sortiesDone[side]] && hp > 0) {
+      const units = so.units[s.sortiesDone[side]] ?? [];
+      s.sortieQueue[side].push(...units);
+      s.sortiesDone[side]++;
+      s.events.push({ type: 'sortie', n: s.sortiesDone[side], size: units.length, side });
+    }
+    if (s.sortieWait[side] > 0) s.sortieWait[side]--;
+    if (s.sortieQueue[side].length > 0 && s.sortieWait[side] <= 0 && aliveCount(s, side) < s.config.maxUnitsPerSide + 8) {
+      const u = spawnUnit(s, side, so.troops[s.sortieQueue[side].shift()!]);
+      if (so.leash !== undefined) u.leashX = side === 0 ? s.config.laneLength * so.leash : s.config.laneLength * (1 - so.leash);
+      s.sortieWait[side] = so.gapTicks;
+    }
+  }
+}
+
+/** Guard towers: each fortress shoots the nearest enemy within range of its gate. */
+function stepTowers(s: BattleState): void {
+  const tw = s.config.towers;
+  if (!tw) return;
+  for (const side of [0, 1] as Side[]) {
+    if (s.towerWait[side] > 0) {
+      s.towerWait[side]--;
+      continue;
+    }
+    const t = tw[side];
+    if (t.dmg <= 0) continue;
+    const baseX = side === 0 ? 0 : s.config.laneLength;
+    let best: Unit | null = null;
+    for (const e of s.units) {
+      if (!e.alive || e.side === side) continue;
+      const d = Math.abs(e.x - baseX);
+      if (d > t.range) continue;
+      if (!best || d < Math.abs(best.x - baseX) || (d === Math.abs(best.x - baseX) && e.id < best.id)) best = e;
+    }
+    if (!best) continue;
+    const src: TroopStats = { id: 'tower', kind: 'ranged', cost: 0, hp: 0, dmg: t.dmg, interval: 1, range: t.range, speed: 0, tank: false, tower: true };
+    const p = { id: s.nextId++, side, x: baseX, prevX: baseX, target: best.id, targetX: best.x, dmg: t.dmg, attackerDmg: t.dmg, src, done: false };
+    s.projectiles.push(p);
+    s.towerWait[side] = t.intervalTicks;
+    s.events.push({ type: 'towerShot', side, projectile: p.id });
+  }
+}
+
+/** Enemy troops of a late wave: each wave past `fromWave` adds `perWave` to their HP and damage. */
+function enraged(s: BattleState, def: TroopStats): TroopStats {
+  const e = s.config.enrage;
+  const over = e ? s.waveNow - e.fromWave + 1 : 0;
+  if (!e || over <= 0) return def;
+  const k = 1 + e.perWave * over;
+  return { ...def, hp: Math.round(def.hp * k), dmg: Math.round(def.dmg * k) };
 }
 
 function stepFood(s: BattleState): void {
@@ -525,8 +608,11 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
 
   s.tick++;
   if (s.skillCooldown > 0) s.skillCooldown--;
+  for (let i = 0; i < s.cardWait.length; i++) if (s.cardWait[i] > 0) s.cardWait[i]--;
   stepFood(s);
   stepEnemySpawns(s);
+  stepSortie(s);
+  stepTowers(s);
   for (const u of s.units) if (u.alive) tickStatus(s, u);
   for (const u of s.units) if (u.alive) stepUnit(s, u);
   separate(s);
@@ -738,7 +824,7 @@ function stepBoss(s: BattleState, u: Unit): void {
 
 /** Stable digest of the battle state for determinism tests and replays. */
 export function stateHash(s: BattleState): string {
-  const parts: (string | number)[] = [s.tick, s.foodMilli, s.playerBaseHp, s.enemyBaseHp, s.waveIndex, s.result ?? '-', s.wardUp ? 1 : 0];
+  const parts: (string | number)[] = [s.tick, s.foodMilli, s.playerBaseHp, s.enemyBaseHp, s.waveIndex, s.result ?? '-', s.wardUp ? 1 : 0, s.sortiesDone.join(','), s.sortieQueue[0].length, s.sortieQueue[1].length];
   for (const u of s.units) parts.push(u.id, u.side, u.x.toFixed(6), u.lane.toFixed(6), u.hp.toFixed(6), u.alive ? 1 : 0);
   for (const p of s.projectiles) parts.push(p.id, p.x.toFixed(6));
   let h = 2166136261;

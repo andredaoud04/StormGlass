@@ -66,6 +66,25 @@ export interface WaveStream {
   trickle: number;
   waves: number;
   stageSize: number[];
+  /** Every bigEvery-th wave is a big wave, bigMul times the usual size; sizes vary by +-jitter per battle. */
+  bigEvery: number;
+  bigMul: number;
+  jitter: number;
+  /** From this wave on, waves grow by rampGrowth each, so no battle stalls forever. */
+  /** The first wave that may be a big wave. */
+  bigFrom: number;
+  /** Past rampFrom, enemy troops also gain this share of HP and damage per wave. */
+  enragePerWave: number;
+  rampFrom: number;
+  rampGrowth: number;
+}
+
+export interface SortieRules {
+  thresholds: number[];
+  sizes: number[];
+  powerMul: number;
+  gapSec: number;
+  firstBattle: { thresholds: number[]; sizes: number[]; towerMul: number };
 }
 
 export interface BossInfo extends Omit<BossDef, 'move'> {
@@ -81,17 +100,17 @@ export interface BossInfo extends Omit<BossDef, 'move'> {
 export interface Balance {
   version: number;
   sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number; band: BandRules };
-  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number } };
+  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number }; tower: { dmgMul: number; range: number; intervalSec: number; enemyMul?: number }; redeploy: Record<'melee' | 'ranged' | 'tank', number> };
   status: StatusRules;
   ages: AgeDef[];
-  waves: Record<AgeId, StageWave[]> & { density: number[]; stream: WaveStream };
+  waves: Record<AgeId, StageWave[]> & { density: number[]; stream: WaveStream; sortie: SortieRules; rally: { thresholds: number[]; sizes: number[]; powerMul: number; gapSec: number; leash: number } };
   combat: CombatRules;
   upgrades: UpgradeRules;
   evolution: { cost: number[] };
-  campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[] };
+  campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[]; fortressScale: number };
   bosses: Record<AgeId, BossInfo>;
   skills: { kitchen: { name: string; costMul: number; growth: number; perLevel: number; maxLevel: number; unlockStage: number }; stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
-  timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number; goldGrowthPerTimeline: number };
+  timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number; goldGrowthPerTimeline: number; star: { power: number; gold: number } };
 }
 
 export const BALANCE = raw as unknown as Balance;

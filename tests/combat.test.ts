@@ -98,19 +98,37 @@ describe('escalating waves', () => {
 
   it('later Ages field bigger enemy armies', () => {
     const inFirst = (w: ReturnType<typeof stageWave>, sec: number) => w.spawns.filter(([t]) => t <= sec).length;
-    expect(inFirst(stageWave(5, 1), 80)).toBeGreaterThan(inFirst(stageWave(0, 1), 80) * 2);
+    expect(inFirst(stageWave(5, 1, 3), 200)).toBeGreaterThan(inFirst(stageWave(0, 1, 3), 200) * 1.5);
   });
 
-  it('the enemy is on the lane from the first second, and every wave is at least as big as the last', () => {
+  it('the enemy is on the lane from the first second; big waves are surges; a long battle ramps up', () => {
+    const R = BALANCE.waves.stream;
     for (let age = 0; age < 6; age++) {
       for (let st = 0; st < 5; st++) {
-        const w = stageWave(age, st);
+        if (age === 0 && st === 0) continue;
+        const w = stageWave(age, st, 5);
         expect(w.spawns[0][0]).toBeLessThanOrEqual(1);
         const starts = w.waveStarts!;
         const size = (i: number) => w.spawns.slice(starts[i], i + 1 < starts.length ? starts[i + 1] : w.spawns.length).length;
-        for (let i = 2; i < starts.length; i++) expect(size(i)).toBeGreaterThanOrEqual(size(i - 1));
+        const big = w.bigWaves!;
+        expect(big.length).toBeGreaterThan(2);
+        expect(Math.min(...big)).toBeGreaterThanOrEqual(R.bigFrom);
+        // A big wave before the ramp is clearly larger than the ordinary wave before it.
+        const b = big.find((n) => n < R.rampFrom && !big.includes(n - 1))!;
+        expect(size(b - 1)).toBeGreaterThan(size(b - 2) * 1.5);
+        // The last waves dwarf the first ones.
+        expect(size(starts.length - 1)).toBeGreaterThanOrEqual(size(0) * 1.5);
       }
     }
+  });
+
+  it('every battle is a little different, but the same seed is the same battle; Battle 1 is always the same', () => {
+    const key = (w: ReturnType<typeof stageWave>) => JSON.stringify(w.spawns.slice(0, 60)) + w.bigWaves!.join(',');
+    expect(key(stageWave(2, 2, 11))).toBe(key(stageWave(2, 2, 11)));
+    const distinct = new Set([1, 2, 3, 4, 5, 6].map((seed) => key(stageWave(2, 2, seed))));
+    expect(distinct.size).toBeGreaterThan(3);
+    const first = (seed: number) => JSON.stringify(stageWave(0, 0, seed).spawns.slice(0, 20));
+    expect(first(1)).toBe(first(99));
   });
 
   it('wave numbers keep counting after the tail starts repeating', () => {

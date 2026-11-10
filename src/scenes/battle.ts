@@ -1,9 +1,9 @@
 /** Campaign battle: fixed-step sim, world view, HUD, ending sequence, result panel. */
 import type { App, Scene } from '../app';
 import { BALANCE, ageDef } from '../game/balance';
-import { buildBattleConfig, isBossStage } from '../game/battleSetup';
-import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, kitchenUnlocked, loadout, selected, speedUnlocked, STAGES, stormcallUnlocked, toIndex, type BattleOutcome } from '../game/progress';
-import { foodRateMilli, fortressMul } from '../game/upgrades';
+import { isBossStage } from '../game/battleSetup';
+import { battleFor } from '../game/session';
+import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, loadout, selected, speedUnlocked, STAGES, toIndex, type BattleOutcome } from '../game/progress';
 import { createBattle, food, foodRate, kitchenCost, stepBattle, totalGold, waveComposition } from '../sim/battle';
 import type { BattleState, Command } from '../sim/types';
 import { blocker, button, dim, fmt, iconButton } from '../ui/widgets';
@@ -61,7 +61,9 @@ export class BattleScene implements Scene {
   private readonly replay: boolean;
   private bossIntroT = -1;
   /** WAVE banner: number, what it brings, and how long it has shown. */
-  private wave = { n: 0, t: 9, text: '' };
+  private wave = { n: 0, t: 9, text: '', big: false };
+  /** Garrison callout: the enemy's COUNTERATTACK or your RALLY. */
+  private sortie = { t: 9, side: 1 as 0 | 1 };
   private bossBarShown = 0;
   private hudTop = 0;
   private deployedOnce = false;
@@ -80,19 +82,7 @@ export class BattleScene implements Scene {
     this.stage = sel.stage;
     this.replay = toIndex(sel) < frontier(s);
     this.bossName = BALANCE.bosses[ageDef(sel.age).id].name.toUpperCase();
-    const config = buildBattleConfig({
-      seed: (s.createdAt + s.battleNo * 7919) | 0,
-      loadout: this.troops,
-      enemyAge: sel.age,
-      stage: sel.stage,
-      armyAge: s.armyAge,
-      timeline: s.timeline,
-      foodRateMilli: foodRateMilli(s),
-      fortressMul: fortressMul(s),
-      campaign: true,
-      stormcall: stormcallUnlocked(s),
-      kitchen: kitchenUnlocked(s),
-    });
+    const config = battleFor(s, sel, (s.createdAt + s.battleNo * 7919) | 0);
     this.sim = createBattle(config);
     this.hudAge = app.assets.has(`ui.card_${ageDef(this.enemyAge).id}`) ? ageDef(this.enemyAge).id : 'stone';
     this.wallKey = `ui.wall_${this.hudAge}`;
@@ -261,6 +251,7 @@ export class BattleScene implements Scene {
     this.introT += dt;
     if (this.bossIntroT >= 0) this.bossIntroT += dt;
     this.wave.t += dt;
+    this.sortie.t += dt;
     if (this.sim.bossSpawned) this.bossBarShown = Math.min(1, this.bossBarShown + dt * 3);
     this.goldBump = Math.max(0, this.goldBump - dt);
     this.foodBump = Math.max(0, this.foodBump - dt);
@@ -295,10 +286,15 @@ export class BattleScene implements Scene {
           if (e.type === 'wave') {
             const c = waveComposition(this.sim.config, this.sim.waveIndex);
             const parts = [c.melee ? `${c.melee} MELEE` : '', c.ranged ? `${c.ranged} RANGED` : '', c.tank ? `${c.tank} TANK${c.tank > 1 ? 'S' : ''}` : ''].filter(Boolean);
-            this.wave = { n: e.n, t: 0, text: parts.join('  ') };
-            if (e.n >= 2) this.app.sfx('fight', { vol: 0.35, jitter: 0 });
+            this.wave = { n: e.n, t: 0, text: parts.join('  '), big: !!e.big };
+            if (e.n >= 2) this.app.sfx('fight', { vol: e.big ? 0.7 : 0.35, jitter: 0 });
           }
           if (e.type === 'kitchen') this.kitchenPop = 0.9;
+          if (e.type === 'sortie') this.sortie = { t: 0, side: e.side };
+          if (e.type === 'deployFail' && e.reason === 'cooldown') {
+            this.cardShake[e.slot] = 0.2;
+            this.app.sfx('nope', { vol: 0.4 });
+          }
           if (e.type === 'skill') this.stormPop = 0.5;
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
@@ -363,6 +359,7 @@ export class BattleScene implements Scene {
     this.drawCoins();
     if (this.phase === 'play' && this.introT < 1.3) this.drawIntro();
     else if (this.phase === 'play' && this.bossIntroT >= 0 && this.bossIntroT < 2.2) this.drawBossIntro();
+    else if (this.phase === 'play' && this.sortie.t < 2) this.drawSortieCall();
     else if (this.phase === 'play' && this.wave.n >= 2 && this.wave.t < 1.8) this.drawWaveCall();
     if (this.phase === 'result') this.drawResult();
     else if (this.paused) this.drawPause();
@@ -385,6 +382,19 @@ export class BattleScene implements Scene {
     d.text(boss ? 'BOSS BATTLE!' : 'FIGHT!', this.app.w / 2, y, { font: 'big', color: boss ? '#ff7a5a' : '#ffd03c', shadow: true, align: 'center', alpha: a });
   }
 
+  /** The garrison charges out: the enemy's COUNTERATTACK (red) or your own RALLY (green). */
+  private drawSortieCall(): void {
+    const d = this.app.draw;
+    const t = this.sortie.t;
+    const a = t > 1.6 ? (2 - t) / 0.4 : 1;
+    const mine = this.sortie.side === 0;
+    const label = mine ? 'RALLY!' : 'COUNTERATTACK!';
+    const y = this.eventY - 4 + (t < 0.12 ? -2 : 0);
+    const bw = Math.min(this.app.w - 8, d.measure(label, 'big') + 40);
+    d.nine(mine ? 'ui.ribbon_gold' : 'ui.ribbon_grey', Math.round(this.app.w / 2 - bw / 2), y, bw, 22, a);
+    d.text(label, this.app.w / 2, y + 7, { font: 'big', align: 'center', color: mine ? '#fff8ec' : '#ff9a7a', shadow: true, alpha: a });
+  }
+
   /** A new wave: what it brings, as unit icons (melee, ranged, tanks) rather than words. */
   private drawWaveCall(): void {
     const d = this.app.draw;
@@ -395,7 +405,8 @@ export class BattleScene implements Scene {
     const widths = parts.map(([, n]) => 12 + d.measure('X' + n, 'big'));
     const total = widths.reduce((x, y) => x + y, 0) + (parts.length - 1) * 8;
     let x = Math.round(this.app.w / 2 - total / 2);
-    const y = this.eventY + (t < 0.12 ? -2 : 0);
+    const y = this.eventY + (t < 0.12 ? -2 : 0) + (this.wave.big ? 10 : 0);
+    if (this.wave.big) d.text('BIG WAVE!', this.app.w / 2, y - 11, { font: 'big', align: 'center', color: '#ff7a5a', shadow: true, alpha: a });
     parts.forEach(([icon, n], i) => {
       d.image('icon.' + icon, x, y, { alpha: a });
       d.text('X' + n, x + 11, y + 1, { font: 'big', color: '#fff8ec', shadow: true, alpha: a });
@@ -449,8 +460,14 @@ export class BattleScene implements Scene {
     const period = BALANCE.waves.stream.period;
     const since = this.sim.tick / this.sim.config.tickRate - BALANCE.waves.stream.firstAt;
     const frac = since < 0 ? 0 : (since % period) / period;
+    // A big wave is next: the countdown runs red and a warning mark blinks beside the plaque.
+    const bigNext = !!this.sim.config.wave.bigWaves?.includes(this.wave.n + 1) && this.wave.n > 0;
     d.rect(x + 4, y + ph - 4, pw - 8, 1, '#120c18');
-    d.rect(x + 4, y + ph - 4, Math.round((pw - 8) * frac), 1, frac > 0.8 ? '#ff7a5a' : '#cfe0a0');
+    d.rect(x + 4, y + ph - 4, Math.round((pw - 8) * frac), 1, bigNext || frac > 0.8 ? '#ff5a4f' : '#cfe0a0');
+    if (bigNext && (frac < 0.6 || Math.floor(app.time * 5) % 2 === 0)) {
+      d.image('icon.skull', x + pw + 3, y + 7);
+      d.text('!', x + pw + 14, y + 8, { font: 'big', color: '#ff5a4f', shadow: true });
+    }
   }
 
   /** Banner when the boss walks out: its name on a ribbon in the callout slot. */
@@ -645,7 +662,8 @@ export class BattleScene implements Scene {
         continue;
       }
       const t = this.sim.config.playerTroops[i];
-      const ready = f >= t.cost && this.phase === 'play';
+      const wait = this.sim.cardWait[i] ?? 0;
+      const ready = f >= t.cost && wait <= 0 && this.phase === 'play';
       const regionId = 'card' + i;
       const pressed = app.input.isPressed(regionId);
       const sh = this.cardShake[i] > 0 ? Math.round(Math.sin(this.cardShake[i] * 80) * 2) : 0;
@@ -665,8 +683,18 @@ export class BattleScene implements Scene {
         d.rect(xx + 1, yy + 1, 1, 46, '#ffe68a', pulse);
         d.rect(xx + 38, yy + 1, 1, 46, '#ffe68a', pulse);
       }
+      if (wait > 0) {
+        // Reloading: a dark shutter lifts off the portrait as the card comes back.
+        const total = Math.max(1, t.redeployTicks ?? 1);
+        const hgt = Math.max(1, Math.round(28 * (wait / total)));
+        for (let yy2 = 0; yy2 < hgt; yy2++) d.rect(xx + 4 + (yy2 % 2), yy + 4 + yy2, 32 - (yy2 % 2), 1, '#1e1526', yy2 % 2 ? 1 : 0.75);
+      }
+      // What this card beats (the counter triangle), top-right of the portrait.
+      const beats = t.kind === 'melee' ? 'bow' : t.kind === 'ranged' ? 'shield' : 'sword';
+      d.rect(xx + 26, yy + 3, 10, 10, '#1e1526');
+      d.image('icon.' + beats, xx + 27, yy + 4);
       d.image('icon.food', xx + 5, yy + 35);
-      d.text(String(t.cost), xx + 34, yy + 36, { font: 'big', align: 'right', color: ready ? '#fff8ec' : '#ff6a5a' });
+      d.text(String(t.cost), xx + 34, yy + 36, { font: 'big', align: 'right', color: f >= t.cost ? '#fff8ec' : '#ff6a5a' });
       if (this.phase === 'play' && !this.paused) app.input.region({ id: regionId, x: x, y: cardY, w: cw + 2, h: 48, onTap: () => this.deploy(i), onDown: true });
     }
 

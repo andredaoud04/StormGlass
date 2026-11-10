@@ -75,6 +75,15 @@ export function fortressMul(s: SaveData): number {
   return trackMul('fortress', level(s, 'fortress'));
 }
 
+/** Prestige Stars: permanent troop power and Gold, one Star per Prestige (D42). */
+export function starPower(s: SaveData): number {
+  return 1 + BALANCE.timeline.star.power * Math.max(0, s.prestige);
+}
+
+export function starGold(s: SaveData): number {
+  return 1 + BALANCE.timeline.star.gold * Math.max(0, s.prestige);
+}
+
 /** Display value of an upgrade at a level: Food in Food/s, Base as a multiplier. */
 export function upgradeValue(s: SaveData, id: UpgradeId, lv: number): string {
   if (id === 'food') {

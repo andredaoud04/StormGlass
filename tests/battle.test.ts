@@ -192,13 +192,17 @@ describe('battle end', () => {
     expect(r.seconds).toBeLessThan(110);
   });
 
-  it('loses when the player does nothing', () => {
-    const r = runBattle(config(), () => [], 400);
+  it('loses when the player does nothing: the tower and the rally slow a siege, they never win one', () => {
+    const r = runBattle(config(), () => [], 600);
     expect(r.result).toBe('defeat');
+    // Later on it is quick.
+    const late = runBattle(buildBattleConfig({ seed: 7, loadout: ['future_blade', 'future_gunner', 'future_mech'], enemyAge: 5, stage: 2, armyAge: 5, timeline: 1 }), () => [], 400);
+    expect(late.result).toBe('defeat');
+    expect(late.seconds).toBeLessThan(200);
   });
 
   it('ignores steps after the battle ends', () => {
-    const r = runBattle(config(), () => [], 400);
+    const r = runBattle(config(), () => [], 600);
     const h = stateHash(r.state);
     stepN(r.state, 20, [{ type: 'deploy', slot: 0 }]);
     expect(stateHash(r.state)).toBe(h);
@@ -329,7 +333,7 @@ describe('Stormcall', () => {
 
 describe('path band', () => {
   it('a crowd spreads across the width of the path and stays inside it', () => {
-    const s = createBattle(config({ playerBaseHp: 1e9, wave: { spawns: [[999, 'melee']], loopFrom: 0, loopPeriod: 999 } }));
+    const s = createBattle(config({ playerBaseHp: 1e9, wave: { spawns: [[999, 'melee']], loopFrom: 0, loopPeriod: 999 }, playerTroops: config().playerTroops.map((t) => ({ ...t, redeployTicks: 0 })) }));
     s.foodMilli = 1_000_000;
     // Twelve Clubbers sent at once walk out of the same gate.
     for (let i = 0; i < 12; i++) stepBattle(s, [{ type: 'deploy', slot: 0 }]);
