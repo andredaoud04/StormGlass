@@ -4,7 +4,7 @@
  */
 import { BALANCE } from './balance';
 import { buildBattleConfig } from './battleSetup';
-import { loadout } from './progress';
+import { heroUnlocked, hornUnlocked, loadout } from './progress';
 import type { SaveData } from './save';
 import { foodRateMilli, fortressMul, starPower } from './upgrades';
 import type { BattleConfig, TroopKind } from '../sim/types';
@@ -117,6 +117,8 @@ export function survivalConfig(s: SaveData, seed: number): BattleConfig {
     campaign: false,
     stormcall: true,
     kitchen: true,
+    horn: hornUnlocked(s),
+    hero: heroUnlocked(s),
   });
   return { ...cfg, endless: true, sortie: undefined, enrage: { fromWave: m.enrageFrom, perWave: m.enragePerWave } };
 }

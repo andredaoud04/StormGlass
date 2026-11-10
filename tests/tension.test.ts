@@ -105,3 +105,54 @@ describe('counter triangle (D42)', () => {
     expect(m.tank!.melee).toBeGreaterThan(1);
   });
 });
+
+describe('War Horn and the Hero (D44)', () => {
+  const withSkills = (): BattleConfig => ({ ...buildBattleConfig({ seed: 5, loadout: ['crusader_footman', 'crusader_crossbow', 'crusader_knight'], enemyAge: 2, stage: 1, armyAge: 2, timeline: 1, horn: true, hero: true }), wave: QUIET, playerBaseHp: 1e9 });
+
+  it('the War Horn makes your troops faster for a few seconds, then reloads', () => {
+    const walk = (horn: boolean): number => {
+      const cfg = withSkills();
+      const s = createBattle(cfg);
+      s.foodMilli = 1_000_000;
+      s.hornCooldown = 0;
+      stepBattle(s, [{ type: 'deploy', slot: 0 }]);
+      if (horn) stepBattle(s, [{ type: 'horn' }]);
+      for (let i = 0; i < 60; i++) stepBattle(s);
+      return s.units[0].x;
+    };
+    expect(walk(true)).toBeGreaterThan(walk(false) * 1.2);
+    const cfg = withSkills();
+    const s = createBattle(cfg);
+    // Not ready at the start; a second use waits for the cooldown.
+    expect(stepBattle(s, [{ type: 'horn' }]).some((e) => e.type === 'skillFail')).toBe(true);
+    s.hornCooldown = 0;
+    expect(stepBattle(s, [{ type: 'horn' }]).some((e) => e.type === 'horn')).toBe(true);
+    expect(stepBattle(s, [{ type: 'horn' }]).some((e) => e.type === 'skillFail')).toBe(true);
+    for (let i = 0; i < cfg.horn!.durTicks + 2; i++) stepBattle(s);
+    expect(s.hasteTicks).toBe(0);
+  });
+
+  it('the Hero is one champion at a time; its cooldown runs only after it falls', () => {
+    const cfg = withSkills();
+    const s = createBattle(cfg);
+    s.heroCooldown = 0;
+    expect(stepBattle(s, [{ type: 'hero' }]).some((e) => e.type === 'hero')).toBe(true);
+    const hero = s.units.find((u) => u.id === s.heroId)!;
+    expect(hero.def.hp).toBeGreaterThan(cfg.playerTroops[2].hp * 2);
+    expect(stepBattle(s, [{ type: 'hero' }]).some((e) => e.type === 'skillFail')).toBe(true);
+    const cd = s.heroCooldown;
+    for (let i = 0; i < 40; i++) stepBattle(s);
+    expect(s.heroCooldown).toBe(cd);
+    hero.alive = false;
+    for (let i = 0; i < 40; i++) stepBattle(s);
+    expect(s.heroCooldown).toBeLessThan(cd);
+  });
+
+  it('both are locked until earned', () => {
+    const plain = buildBattleConfig({ seed: 5, loadout: ['stone_clubber'], enemyAge: 0, armyAge: 0, timeline: 1 });
+    expect(plain.horn).toBeUndefined();
+    expect(plain.hero).toBeUndefined();
+    const s = createBattle(plain);
+    expect(stepBattle(s, [{ type: 'hero' }]).some((e) => e.type === 'skillFail' && e.reason === 'locked')).toBe(true);
+  });
+});

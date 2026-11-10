@@ -540,3 +540,67 @@ export function omegaArm(): Limb {
   ball(img, 6, 23, 3.5, 2.5, { hl: 0xffffffff, base: 0xc4fbffff, shade: 0x5ce6ffff, deep: 0x2a9cf0ff });
   return limb(img, [6, 2], [6, 24]);
 }
+
+// ---------- The Hero: the Stormcaller ----------
+// Your champion (after the first Prestige): a hooded storm-knight in team blue with silver
+// pauldrons and a glaive tipped with a shard of storm glass. Larger than a troop, smaller than a boss.
+
+export function stormcallerRig(team: Ramp): RigParts {
+  const cloak = r4(team);
+  const silver = r4(STEEL);
+  const glass: R4 = { hl: 0xffffffff, base: 0xc4fbffff, shade: 0x5ce6ffff, deep: 0x2a9cf0ff };
+  const head = new Img(20, 20);
+  // Hood, with the face in its shadow looking right.
+  ball(head, 9, 10, 8.5, 8.5, cloak);
+  stroke(head, [[4, 4], [1, 9], [2, 15]], [4, 4, 3], cloak);
+  ball(head, 12, 12, 5.5, 5, r4(SKIN));
+  eye(head, 12, 11, HAIR.deep);
+  eye(head, 15, 11, HAIR.deep);
+  head.hline(12, 15, 15, MOUTH);
+  head.hline(7, 17, 6, team.deep);
+  head.set(10, 3, 0xc4fbffff);
+  const hurt = hurtOf(head, [[13, 11], [16, 11]]);
+
+  const torso = new Img(22, 18);
+  slab(torso, 11, 1, 15, 11, 17, 13, cloak);
+  ball(torso, 4, 4, 4.5, 4, silver);
+  ball(torso, 18, 4, 4.5, 4, silver);
+  box(torso, 5, 11, 12, 2, r4(LEATHER));
+  ball(torso, 11, 7, 2.5, 2.5, glass);
+  torso.vline(11, 13, 17, team.hl);
+
+  const front = arm(cloak, silver, 6, 12);
+  const fl = leg({ hl: 0x5e6688ff, base: 0x404668ff, shade: 0x2c304eff, deep: 0x1e2038ff }, silver, 7, 9);
+
+  // Glaive: a long haft with a storm-glass blade (points up at 0).
+  const glaive = new Img(12, 44);
+  box(glaive, 5, 12, 2, 32, r4(WOOD));
+  glaive.poly([[6, 0], [11, 9], [7, 15], [4, 9]], (x) => (x < 6 ? glass.base : glass.shade));
+  glaive.vline(6, 2, 12, 0xffffffff);
+  box(glaive, 4, 14, 4, 2, silver);
+
+  const cape = new Img(18, 24);
+  slab(cape, 13, 0, 8, 8, 23, 14, { hl: team.base, base: team.shade, shade: team.deep, deep: team.deep });
+  for (let x = 2; x < 15; x += 3) cape.set(x, 23, 0);
+
+  return {
+    frameW: 76,
+    frameH: 56,
+    hip: [36, 44],
+    footY: 8,
+    neck: [1, -15],
+    frontShoulder: [6, -12],
+    backShoulder: [-6, -12],
+    frontHip: [3, -1],
+    backHip: [-3, -1],
+    outline: INK,
+    torso: limb(torso, [11, 16]),
+    heads: { normal: limb(head, [10, 19]), hurt: limb(hurt, [10, 19]) },
+    frontArm: front,
+    backArm: far(front),
+    frontLeg: fl,
+    backLeg: far(fl),
+    weapon: limb(glaive, [6, 32]),
+    back: limb(cape, [13, 1]),
+  };
+}

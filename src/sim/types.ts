@@ -191,6 +191,10 @@ export interface BattleConfig {
   sortie?: SortieConfig;
   /** Your own garrison: it rallies out when your fortress is worn down, the same way. */
   rally?: SortieConfig;
+  /** War Horn, once unlocked: for a few seconds your whole army moves and attacks faster. */
+  horn?: HornConfig;
+  /** The Hero, once unlocked: a champion you summon, one at a time, on a long cooldown. */
+  hero?: HeroConfig;
   /** Survival: the enemy fortress can never be hurt; the run ends when yours falls. */
   endless?: boolean;
   /** Late in a long battle the enemy's troops themselves grow stronger, so no battle can stall. */
@@ -206,6 +210,20 @@ export interface TowerConfig {
   intervalTicks: number;
   /** Shots per volley: one at each of the nearest attackers (default 1). A volley punishes a crowd at the gate. */
   volley?: number;
+}
+
+export interface HornConfig {
+  /** Speed multiplier for moving and attacking. */
+  mul: number;
+  durTicks: number;
+  cooldownTicks: number;
+  firstTicks: number;
+}
+
+export interface HeroConfig {
+  stats: TroopStats;
+  cooldownTicks: number;
+  firstTicks: number;
 }
 
 /** The in-battle Food upgrade: spend Food to raise Food income for the rest of the battle. */
@@ -283,6 +301,8 @@ export type Command =
   | { type: 'deploy'; slot: number }
   | { type: 'skill' }
   | { type: 'kitchen' }
+  | { type: 'horn' }
+  | { type: 'hero' }
   | { type: 'retreat' };
 
 export type SimEvent =
@@ -308,6 +328,8 @@ export type SimEvent =
   | { type: 'bossBlink'; id: number; from: number; to: number }
   | { type: 'skill'; x: number; radius: number }
   | { type: 'kitchen'; level: number }
+  | { type: 'horn'; ticks: number }
+  | { type: 'hero'; id: number }
   | { type: 'skillFail'; reason: 'locked' | 'cooldown' | 'target' }
   | { type: 'wardHit'; dmg: number }
   | { type: 'wardBreak' }
@@ -349,6 +371,12 @@ export interface BattleState {
   sortiesDone: [number, number];
   sortieQueue: [TroopKind[], TroopKind[]];
   sortieWait: [number, number];
+  /** War Horn: ticks until ready, and ticks of haste left. */
+  hornCooldown: number;
+  hasteTicks: number;
+  /** Hero: ticks until it can be summoned again, and the living Hero's unit id (0 = none). */
+  heroCooldown: number;
+  heroId: number;
   /** The wave now on the lane (0 before the first). */
   waveNow: number;
   /** Ticks until each card slot can be deployed again. */

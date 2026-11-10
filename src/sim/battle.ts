@@ -59,6 +59,10 @@ export function createBattle(config: BattleConfig): BattleState {
     towerWait: [0, 0],
     cardWait: [0, 0, 0],
     waveNow: 0,
+    hornCooldown: config.horn?.firstTicks ?? 0,
+    hasteTicks: 0,
+    heroCooldown: config.hero?.firstTicks ?? 0,
+    heroId: 0,
     events: [],
   };
 }
@@ -161,6 +165,30 @@ function applyCommand(s: BattleState, cmd: Command): void {
   }
   if (cmd.type === 'kitchen') {
     buyKitchen(s);
+    return;
+  }
+  if (cmd.type === 'horn') {
+    const h = s.config.horn;
+    if (!h || s.hornCooldown > 0) {
+      s.events.push({ type: 'skillFail', reason: h ? 'cooldown' : 'locked' });
+      return;
+    }
+    s.hornCooldown = h.cooldownTicks;
+    s.hasteTicks = h.durTicks;
+    s.events.push({ type: 'horn', ticks: h.durTicks });
+    return;
+  }
+  if (cmd.type === 'hero') {
+    const h = s.config.hero;
+    const alive = s.units.some((u) => u.id === s.heroId && u.alive);
+    if (!h || s.heroCooldown > 0 || alive) {
+      s.events.push({ type: 'skillFail', reason: h ? 'cooldown' : 'locked' });
+      return;
+    }
+    const u = spawnUnit(s, 0, h.stats);
+    s.heroId = u.id;
+    s.heroCooldown = h.cooldownTicks;
+    s.events.push({ type: 'hero', id: u.id });
     return;
   }
   const def = s.config.playerTroops[cmd.slot];
@@ -418,7 +446,8 @@ function stepUnit(s: BattleState, u: Unit): void {
     return;
   }
   const dt = 1 / s.config.tickRate;
-  const slow = slowFactor(s, u);
+  // War Horn: your troops move and attack faster while it sounds.
+  const slow = slowFactor(s, u) * (u.side === 0 && s.hasteTicks > 0 ? (s.config.horn?.mul ?? 1) : 1);
   u.prevX = u.x;
   if (u.cooldown > 0) u.cooldown = Math.max(0, u.cooldown - slow);
 
@@ -607,6 +636,10 @@ export function stepBattle(s: BattleState, commands: readonly Command[] = []): B
   s.tick++;
   if (s.skillCooldown > 0) s.skillCooldown--;
   for (let i = 0; i < s.cardWait.length; i++) if (s.cardWait[i] > 0) s.cardWait[i]--;
+  if (s.hornCooldown > 0) s.hornCooldown--;
+  if (s.hasteTicks > 0) s.hasteTicks--;
+  // The Hero's cooldown runs only while no Hero is on the field.
+  if (s.heroCooldown > 0 && !s.units.some((u) => u.id === s.heroId && u.alive)) s.heroCooldown--;
   stepFood(s);
   stepEnemySpawns(s);
   stepSortie(s);

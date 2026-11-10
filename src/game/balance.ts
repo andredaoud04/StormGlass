@@ -109,7 +109,7 @@ export interface Balance {
   evolution: { cost: number[] };
   campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[]; fortressScale: number };
   bosses: Record<AgeId, BossInfo>;
-  skills: { kitchen: { name: string; costMul: number; growth: number; perLevel: number; maxLevel: number; unlockStage: number }; stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
+  skills: { kitchen: { name: string; costMul: number; growth: number; perLevel: number; maxLevel: number; unlockStage: number }; stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number; horn: { name: string; mul: number; durSec: number; cooldownSec: number; firstReadySec: number; unlockArmyAge: number }; hero: { name: string; hpMul: number; dmgMul: number; cleave: number; interval: number; range: number; speed: number; cooldownSec: number; firstReadySec: number } };
   meta: {
     survival: { unlockArmyAge: number; keysPerDay: number; gemsPerWave: number; recordGems: number; stage: number; enrageFrom: number; enragePerWave: number };
     cards: { perLevel: number; baseCost: number; costGrowth: number; maxLevel: number };

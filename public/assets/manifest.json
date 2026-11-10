@@ -1963,6 +1963,55 @@
     }
    }
   },
+  "troop.hero_stormcaller.blue": {
+   "kind": "sheet",
+   "file": "troops/hero_stormcaller_blue.png",
+   "frameW": 76,
+   "frameH": 56,
+   "anchor": [
+    36,
+    52
+   ],
+   "anims": {
+    "idle": {
+     "row": 0,
+     "frames": 4,
+     "fps": 5,
+     "loop": true
+    },
+    "walk": {
+     "row": 1,
+     "frames": 4,
+     "fps": 8,
+     "loop": true
+    },
+    "attack": {
+     "row": 2,
+     "frames": 6,
+     "fps": 10,
+     "loop": false,
+     "hitFrame": 3
+    },
+    "hit": {
+     "row": 3,
+     "frames": 1,
+     "fps": 8,
+     "loop": false
+    },
+    "death": {
+     "row": 4,
+     "frames": 4,
+     "fps": 10,
+     "loop": false
+    }
+   }
+  },
+  "portrait.hero_stormcaller": {
+   "kind": "image",
+   "file": "portraits/hero_stormcaller.png",
+   "w": 28,
+   "h": 24
+  },
   "env.stone.sky": {
    "kind": "image",
    "file": "env/stone/sky.png",
@@ -3219,6 +3268,12 @@
    "file": "icons/fist.png",
    "w": 7,
    "h": 7
+  },
+  "icon.horn": {
+   "kind": "image",
+   "file": "icons/horn.png",
+   "w": 11,
+   "h": 9
   },
   "icon.storm": {
    "kind": "image",
@@ -4511,6 +4566,9 @@
   "troop.boss_future": {
    "top": -59,
    "sfx": "zap_heavy"
+  },
+  "troop.hero_stormcaller": {
+   "top": -41
   },
   "env.stone": {
    "skyTop": "#2f6cc4",

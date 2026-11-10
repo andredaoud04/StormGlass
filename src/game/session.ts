@@ -1,6 +1,6 @@
 /** Builds the battle a save is about to fight: the one place that turns a save into a BattleConfig. */
 import { buildBattleConfig } from './battleSetup';
-import { kitchenUnlocked, loadout, stormcallUnlocked, type StageRef } from './progress';
+import { heroUnlocked, hornUnlocked, kitchenUnlocked, loadout, stormcallUnlocked, type StageRef } from './progress';
 import { cardMuls } from './meta';
 import type { SaveData } from './save';
 import { foodRateMilli, fortressMul, starGold, starPower } from './upgrades';
@@ -22,5 +22,7 @@ export function battleFor(s: SaveData, ref: StageRef, seed: number, goldBonus = 
     campaign: true,
     stormcall: stormcallUnlocked(s),
     kitchen: kitchenUnlocked(s),
+    horn: hornUnlocked(s),
+    hero: heroUnlocked(s),
   });
 }

@@ -95,6 +95,8 @@ const ICONS: Record<string, string[]> = {
   sword: ['......S', '.....Sp', '....Sp.', 'd..Sp..', '.dSp...', '.ld....', 'l.l....'],
   fist: ['.MMM.', 'MmmmM', 'mmmmr', 'mmmmr', '.rrr.'],
   // Stormcall: a lightning bolt.
+  // War Horn: a curved horn with a gold mouth band.
+  horn: ['.......yy', '.....wwyY', '...wwWwy.', '..wWWww..', '.wWww....', 'nwww.....', 'nNn......'],
   storm: ['....CCC', '...CCc.', '..CCc..', '.CCCCCc', '...CCc.', '..CCc..', '.Cc....', 'c......'],
   // Role icons for the Age Camp: bow (ranged) and shield (tank).
   bow: ['..dd...', '.d..w..', 'd...w..', 'd..Sw..', 'd...w..', '.d..w..', '..dd...'],

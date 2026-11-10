@@ -780,6 +780,27 @@
       "perLevel": 0.3,
       "maxLevel": 5,
       "unlockStage": 2
+    },
+    "horn": {
+      "name": "War Horn",
+      "notes": "For durSec your whole army moves and attacks mul times faster. Third Skill socket, from your first Evolution.",
+      "mul": 1.5,
+      "durSec": 6,
+      "cooldownSec": 30,
+      "firstReadySec": 10,
+      "unlockArmyAge": 1
+    },
+    "hero": {
+      "name": "The Stormcaller",
+      "notes": "The Hero (after the first Prestige, Locked Rule 4): a champion summoned from the Hero socket, one at a time. Stats = your Age's heavy troop x hpMul / dmgMul, with a wide cleave. The cooldown runs only while no Hero is on the field.",
+      "hpMul": 2.4,
+      "dmgMul": 1.7,
+      "cleave": 4,
+      "interval": 1.1,
+      "range": 120,
+      "speed": 62,
+      "cooldownSec": 40,
+      "firstReadySec": 8
     }
   },
   "upgrades": {

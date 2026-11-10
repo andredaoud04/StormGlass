@@ -10,6 +10,8 @@ import { INK, TEAM_BLUE, TEAM_RED, MOSS, GOLD, WOOD, STONE } from './palette';
 import { packSheet } from './rig';
 import { ALL_TROOPS } from './troops/catalog';
 import { BOSS_TROOPS } from './troops/bosses';
+import { stormcallerRig } from './troops/bossArt';
+import { humanoidAnims } from './troops/anims';
 import { stoneEnv, type EnvArt } from './env/stone';
 import { ancientEnv } from './env/ancient';
 import { BASE_FRONT, BASE_GROUND, flagFrames, stoneFortress } from './bases/stone';
@@ -261,6 +263,17 @@ export function buildAll(): void {
     const anchor: [number, number] = [r.hip[0], r.hip[1] + (r.footY ?? 4)];
     reg.sheet(`troop.${t.id}.red`, `troops/${t.id}_red.png`, sheet, r.frameW, r.frameH, anchor, rows, `${t.id}: boss at twice the troop scale, enemy team. Faces right; mirrored in game.`, t.muzzle);
     reg.manifest.meta[`troop.${t.id}`] = { top: anims[0].frames[0].bounds().y - anchor[1], ...(t.sfx ? { sfx: t.sfx } : {}) };
+  }
+
+  // The Hero (player side only).
+  {
+    const r = stormcallerRig(TEAM_BLUE);
+    const anims = humanoidAnims(r, 'swing', { weapon: 40, frontArm: -30 }, { roomyDeath: true });
+    const { sheet, rows } = packSheet(anims, r.frameW, r.frameH);
+    const anchor: [number, number] = [r.hip[0], r.hip[1] + (r.footY ?? 4)];
+    reg.sheet('troop.hero_stormcaller.blue', 'troops/hero_stormcaller_blue.png', sheet, r.frameW, r.frameH, anchor, rows, 'The Stormcaller, your Hero: hooded storm-knight with a storm-glass glaive. Player team only.');
+    reg.image('portrait.hero_stormcaller', 'portraits/hero_stormcaller.png', portrait(anims[0].frames[0], 28, 24), 'Hero portrait for the Hero socket.');
+    reg.manifest.meta['troop.hero_stormcaller'] = { top: anims[0].frames[0].bounds().y - anchor[1] };
   }
 
   // Environments

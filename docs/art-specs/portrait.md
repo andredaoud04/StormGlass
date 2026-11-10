@@ -161,3 +161,12 @@ future_mech card portrait (head and shoulders), fits the card window.
 - Size: 32 x 28
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (13): #1e1526 #8e9aae #f2f6fb #c6d0dc #4aa6ec #ffffff #5a6680 #c4fbff #a6e2ff #2d4c88 #82a4c4 #2d68c2 #4576aa
+
+## portrait.hero_stormcaller
+
+Hero portrait for the Hero socket.
+
+- File: `public/assets/portraits/hero_stormcaller.png`
+- Size: 28 x 24
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (21): #1e1526 #a6e2ff #1f3f80 #4aa6ec #5ce6ff #2d68c2 #ffd6ac #f2a97a #cc7a58 #2e1610 #94503f #4a2618 #fff8ec #d99a5c #60272d #b8c2cc #2a9cf0 #4e5864 #f2f6fa #52291b #7e8a96

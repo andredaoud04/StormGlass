@@ -74,6 +74,7 @@ export class BattleScene implements Scene {
   /** The battle's Age: every HUD piece is cut from its wall material (D39). */
   private hudAge = 'stone';
   private kitchenPop = 0;
+  private hornUsed = false;
   private stormPop = 0;
   private confirmRetreat = false;
 
@@ -142,6 +143,8 @@ export class BattleScene implements Scene {
     if (k === '1' || k === '2' || k === '3') this.deploy(Number(k) - 1);
     if (k === '4' || k === 'q') this.cast();
     if (k === '5' || k === 'w') this.buyKitchen();
+    if (k === '6' || k === 'e') this.simple('horn');
+    if (k === '7' || k === 'h') this.simple('hero');
     if (k === 'Escape' || k === 'p') {
       this.paused = !this.paused;
       this.confirmRetreat = false;
@@ -167,6 +170,41 @@ export class BattleScene implements Scene {
   }
 
   private skillShake = 0;
+
+  /** War Horn and Hero: queue the command once; the sim decides if it is ready. */
+  private simple(type: 'horn' | 'hero'): void {
+    if (this.phase !== 'play' || this.paused) return;
+    const ready = type === 'horn' ? !!this.sim.config.horn && this.sim.hornCooldown <= 0 : !!this.sim.config.hero && this.sim.heroCooldown <= 0 && !this.sim.units.some((u) => u.id === this.sim.heroId && u.alive);
+    if (!ready) {
+      this.app.sfx('nope', { vol: 0.5 });
+      return;
+    }
+    if (!this.pending.some((c) => c.type === type)) this.pending.push({ type });
+  }
+
+  /** A round socket control with an icon, a clockwise cooldown rim and a glow when ready. */
+  private socketControl(id: string, cx: number, cy: number, icon: string, wait: number, total: number, color: string, onTap: () => void, active = false): void {
+    const app = this.app;
+    const d = app.draw;
+    const frac = total > 0 ? Math.max(0, Math.min(1, wait / total)) : 0;
+    const ready = frac <= 0 && this.phase === 'play' && !active;
+    const ie = app.assets.image(icon);
+    d.image(icon, Math.round(cx - ie.w / 2), Math.round(cy - ie.h / 2) - (ready || active ? 0 : 4), { alpha: ready || active ? 1 : 0.5 });
+    if (active) {
+      this.ring(cx, cy, 12, color, 1);
+      this.ring(cx, cy, 11, color, Math.floor(app.time * 8) % 2 ? 1 : 0.4);
+    } else if (!ready) {
+      for (const r of [11, 12]) {
+        this.ring(cx, cy, r, color, 1, 0, 1 - frac);
+        this.ring(cx, cy, r, '#1e1526', 1, 1 - frac, 1);
+      }
+      d.text(String(Math.ceil(wait / this.sim.config.tickRate)), cx, cy + 2, { font: 'big', align: 'center', color: '#e8dcc8' });
+    } else {
+      this.ring(cx, cy, 12, color, 0.5 + 0.4 * Math.sin(app.time * 6));
+      this.ring(cx, cy, 15, color, 0.25 + 0.25 * Math.sin(app.time * 6));
+    }
+    if (this.phase === 'play' && !this.paused) app.input.region({ id, x: cx - 15, y: cy - 15, w: 30, h: 32, onTap, onDown: true });
+  }
 
   /** Kitchen: spend Food now to earn more Food for the rest of the battle (the WAW meat button). */
   private buyKitchen(): void {
@@ -311,6 +349,7 @@ export class BattleScene implements Scene {
             if (e.n >= 2) this.app.sfx('fight', { vol: e.big ? 0.7 : 0.35, jitter: 0 });
           }
           if (e.type === 'kitchen') this.kitchenPop = 0.9;
+          if (e.type === 'horn') this.hornUsed = true;
           if (e.type === 'sortie') this.sortie = { t: 0, side: e.side };
           if (e.type === 'deployFail' && e.reason === 'cooldown') {
             this.cardShake[e.slot] = 0.2;
@@ -613,21 +652,33 @@ export class BattleScene implements Scene {
     d.image(this.wallKey, Math.floor(w / 2), barTop);
 
     // Hero niche, raised on the left: a carved, empty niche until the first Hero exists.
-    // The Hero has not shipped yet: a solid, empty niche, never a lit socket with nothing in it.
+    // Hero socket, raised on the left: the Stormcaller once you have Prestiged, else a carved niche.
+    const hero = this.sim.config.hero;
     d.image(`ui.hero_niche_${age}`, 24, top + 8);
+    if (hero) {
+      const out = this.sim.units.some((u) => u.id === this.sim.heroId && u.alive);
+      const total = this.sim.heroId === 0 ? hero.firstTicks : hero.cooldownTicks;
+      this.socketControl('hero', 24, top + 8, 'portrait.hero_stormcaller', this.sim.heroCooldown, total, '#ffd03c', () => this.simple('hero'), out);
+    }
 
-    // Three Skill sockets in a row on the right: Stormcall (left), Kitchen (middle), one empty niche.
+    // Three Skill sockets in a row on the right: Stormcall (left), Kitchen (middle), War Horn (right).
     const cy = top + 20;
     for (let i = 0; i < 3; i++) {
       const cx = w - 18 - i * 30;
       const storm = i === 2 && !!this.sim.config.skill;
       const kitchen = i === 1 && !!this.sim.config.kitchen;
       const sh = storm && this.skillShake > 0 ? Math.round(Math.sin(this.skillShake * 80) * 2) : 0;
-      if (!storm && !kitchen) {
+      const horn = i === 0 ? this.sim.config.horn : undefined;
+      if (!storm && !kitchen && !horn) {
         d.image(`ui.niche_${age}`, cx, cy);
         continue;
       }
       d.image(`ui.socket_${age}`, cx + sh, cy);
+      if (horn) {
+        const total = this.hornUsed ? horn.cooldownTicks : horn.firstTicks;
+        this.socketControl('horn', cx, cy, 'icon.horn', this.sim.hornCooldown, total, '#ffd03c', () => this.simple('horn'), this.sim.hasteTicks > 0);
+        continue;
+      }
       if (kitchen) {
         this.drawKitchen(cx, cy);
         continue;

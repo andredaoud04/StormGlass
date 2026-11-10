@@ -1,4 +1,4 @@
-import type { BattleConfig, KitchenConfig, SkillConfig, SortieConfig, TroopKind, TroopStats, WaveScript } from '../sim/types';
+import type { BattleConfig, HeroConfig, HornConfig, KitchenConfig, SkillConfig, SortieConfig, TroopKind, TroopStats, WaveScript } from '../sim/types';
 import { BALANCE, ageDef, troopDef, type TroopDef } from './balance';
 
 const KIND: Record<string, TroopKind> = { m: 'melee', r: 'ranged', t: 'tank' };
@@ -163,6 +163,9 @@ export interface BattleSetupInput {
   kitchen?: boolean;
   /** Extra Gold multiplier (Prestige Stars, daily bonus). */
   goldBonus?: number;
+  /** War Horn and the Hero are unlocked. */
+  horn?: boolean;
+  hero?: boolean;
 }
 
 export function troopStats(d: TroopDef, hpMul = 1, dmgMul = 1): TroopStats {
@@ -198,6 +201,24 @@ export function stormcallConfig(armyAge: number, mul: number): SkillConfig {
   return { dmg: Math.round(tank.dmg * sk.dmgMul * mul), radius: sk.radius, cooldownTicks: Math.round(sk.cooldownSec * tr), firstTicks: Math.round(sk.firstReadySec * tr), bossMul: sk.bossMul };
 }
 
+export function hornConfig(): HornConfig {
+  const h = BALANCE.skills.horn;
+  const tr = BALANCE.sim.tickRate;
+  return { mul: h.mul, durTicks: Math.round(h.durSec * tr), cooldownTicks: Math.round(h.cooldownSec * tr), firstTicks: Math.round(h.firstReadySec * tr) };
+}
+
+/** The Hero: scaled from your Age's heavy troop, so it grows with every Evolution, Star and Card. */
+export function heroConfig(armyAge: number, mul: number): HeroConfig {
+  const h = BALANCE.skills.hero;
+  const tank = ageDef(armyAge).troops.find((t) => t.kind === 'tank')!;
+  const tr = BALANCE.sim.tickRate;
+  return {
+    stats: { id: 'hero_stormcaller', kind: 'tank', cost: 0, hp: Math.round(tank.hp * h.hpMul * mul), dmg: Math.round(tank.dmg * h.dmgMul * mul), interval: h.interval, range: h.range, speed: h.speed, tank: true, cleave: h.cleave },
+    cooldownTicks: Math.round(h.cooldownSec * tr),
+    firstTicks: Math.round(h.firstReadySec * tr),
+  };
+}
+
 export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
   const b = BALANCE;
   const enemy = ageDef(input.enemyAge);
@@ -230,6 +251,8 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     enemyTroops,
     wave: stageWave(input.enemyAge, stage, input.seed),
     sortie: stageSortie(input.enemyAge, stage, input.seed, enemyTroops),
+    horn: input.horn ? hornConfig() : undefined,
+    hero: input.hero ? heroConfig(input.armyAge, kindMul('tank')) : undefined,
     enrage: { fromWave: b.waves.stream.rampFrom, perWave: b.waves.stream.enragePerWave },
     rally: playerRally(input.loadout.slice(0, 3).map((id) => troopStats(troopDef(id), kindMul(troopDef(id).kind), kindMul(troopDef(id).kind))), input.armyAge),
     towers: [

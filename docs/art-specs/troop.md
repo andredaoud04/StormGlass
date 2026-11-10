@@ -683,3 +683,19 @@ boss_future: boss at twice the troop scale, enemy team. Faces right; mirrored in
   - row 4 `death`: 4 frames @ 10 fps
 - Outline: 1 px #1e1526 where the art has an outline
 - Colors (22): #1e1526 #fff3a8 #e09a1e #404668 #ffd03c #a35f16 #1e2038 #5e6688 #2c304e #e64d4d #ffffff #c4fbff #2a9cf0 #5ce6ff #fff8ec #52291b #4b4e6b #363754 #282842 #1e1d33 #ae2a40 #ffe68a
+
+## troop.hero_stormcaller.blue
+
+The Stormcaller, your Hero: hooded storm-knight with a storm-glass glaive. Player team only.
+
+- File: `public/assets/troops/hero_stormcaller_blue.png`
+- Frame: 76 x 56, facing right, one animation per row
+- Anchor (feet on ground): (36, 52)
+- Rows:
+  - row 0 `idle`: 4 frames @ 5 fps, loops
+  - row 1 `walk`: 4 frames @ 8 fps, loops
+  - row 2 `attack`: 6 frames @ 10 fps, hit on frame 3
+  - row 3 `hit`: 1 frames @ 8 fps
+  - row 4 `death`: 4 frames @ 10 fps
+- Outline: 1 px #1e1526 where the art has an outline
+- Colors (30): #1e1526 #a6e2ff #4aa6ec #2d68c2 #1f3f80 #5ce6ff #c4fbff #ffd6ac #f2a97a #ffffff #cc7a58 #2e1610 #94503f #4a2618 #fff8ec #2a9cf0 #d99a5c #60272d #b8c2cc #4e5864 #7e8a96 #f2f6fa #52291b #472214 ...

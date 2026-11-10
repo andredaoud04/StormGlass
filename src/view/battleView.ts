@@ -200,6 +200,20 @@ export class BattleView {
           this.app.sfx(String(ranged.sfx ?? 'sling'), { vol: 0.3, minGapMs: 120 });
           break;
         }
+        case 'horn': {
+          // The War Horn sounds: a ring bursts from every one of your troops.
+          for (const v of this.units.values()) if (v.side === 0 && !v.dying) this.fx.add('fx.ring', v.px, G + v.depth - 2);
+          this.app.sfx('roar', { vol: 0.6, rate: 1.5, jitter: 0 });
+          break;
+        }
+        case 'hero': {
+          const gx = this.layout.laneL + 6;
+          for (let k = -1; k <= 1; k++) this.fx.add('fx.dust', gx, G + k * 10, { behind: true, vx: 16 });
+          this.fx.add('fx.ring', gx + 6, G - 2);
+          this.shake.add(2, 0.2);
+          this.app.sfx('unlock', { vol: 0.8, jitter: 0 });
+          break;
+        }
         case 'sortie': {
           // The garrison charges out: dust at the gate and a horn.
           const gx = e.side === 1 ? this.layout.laneR - 6 : this.layout.laneL + 6;
@@ -593,6 +607,8 @@ export class BattleView {
       if (v.dying && v.deathT > 0.75) alpha = 0;
       d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, alpha });
       if (v.flash > 0) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, white: true, alpha: 0.85 });
+      // War Horn: your troops glow gold while it sounds.
+      else if (v.side === 0 && this.sim.hasteTicks > 0 && !v.dying && Math.floor(this.t * 10) % 2 === 0) d.frame(v.sheet, anim, idx, x, y, { tint: '#ffd03c', alpha: 0.35 });
       // Poisoned, burning or chilled: a soft pulse so status effects are visible.
       if (v.status > 0 && !v.dying) d.frame(v.sheet, anim, idx, x, y, { flip: v.side === 1, tint: v.statusColor, alpha: 0.4 + 0.15 * Math.sin(this.t * 12) });
       // HP bar when hurt (the boss has its own bar in the HUD).
