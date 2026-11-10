@@ -561,19 +561,17 @@ function stepTowers(s: BattleState): void {
     const t = tw[side];
     if (t.dmg <= 0) continue;
     const baseX = side === 0 ? 0 : s.config.laneLength;
-    let best: Unit | null = null;
-    for (const e of s.units) {
-      if (!e.alive || e.side === side) continue;
-      const d = Math.abs(e.x - baseX);
-      if (d > t.range) continue;
-      if (!best || d < Math.abs(best.x - baseX) || (d === Math.abs(best.x - baseX) && e.id < best.id)) best = e;
-    }
-    if (!best) continue;
+    const inRange: Unit[] = [];
+    for (const e of s.units) if (e.alive && e.side !== side && Math.abs(e.x - baseX) <= t.range) inRange.push(e);
+    if (inRange.length === 0) continue;
+    inRange.sort((p, q) => Math.abs(p.x - baseX) - Math.abs(q.x - baseX) || p.id - q.id);
     const src: TroopStats = { id: 'tower', kind: 'ranged', cost: 0, hp: 0, dmg: t.dmg, interval: 1, range: t.range, speed: 0, tank: false, tower: true };
-    const p = { id: s.nextId++, side, x: baseX, prevX: baseX, target: best.id, targetX: best.x, dmg: t.dmg, attackerDmg: t.dmg, src, done: false };
-    s.projectiles.push(p);
+    for (const best of inRange.slice(0, Math.max(1, t.volley ?? 1))) {
+      const p = { id: s.nextId++, side, x: baseX, prevX: baseX, target: best.id, targetX: best.x, dmg: t.dmg, attackerDmg: t.dmg, src, done: false };
+      s.projectiles.push(p);
+      s.events.push({ type: 'towerShot', side, projectile: p.id });
+    }
     s.towerWait[side] = t.intervalTicks;
-    s.events.push({ type: 'towerShot', side, projectile: p.id });
   }
 }
 

@@ -36,11 +36,12 @@
     "startFood": 1,
     "tankKillMul": 5,
     "tower": {
-      "notes": "Guard tower on each fortress: shoots the nearest attacker within range. Damage = that side's melee troop damage x dmgMul (yours also grows with the Base upgrade). The enemy tower is enemyMul as strong, so a siege is slowed, not stopped.",
+      "notes": "Guard tower on each fortress: shoots the nearest attacker within range. Damage = that side's melee troop damage x dmgMul (yours also grows with the Base upgrade). The enemy tower is enemyMul as strong, so a siege is slowed, not stopped. Your tower looses `volley` shots at once (one per nearest attacker), so a crowd at your gate is worn down.",
       "dmgMul": 1.0,
       "range": 170,
       "intervalSec": 1.0,
-      "enemyMul": 0.5
+      "enemyMul": 0.5,
+      "volley": 3
     },
     "redeploy": {
       "notes": "Seconds before a card can be sent again, by kind. Stops one card being spammed; the heavy is the long one.",
@@ -560,10 +561,10 @@
       "bigEvery": 3,
       "bigMul": 3.0,
       "jitter": 0.15,
-      "rampFrom": 7,
-      "rampGrowth": 1.25,
+      "rampFrom": 8,
+      "rampGrowth": 1.2,
       "bigFrom": 3,
-      "enragePerWave": 0.12
+      "enragePerWave": 0.1
     },
     "sortie": {
       "notes": "Garrison counterattacks: when the enemy fortress drops to each threshold (share of HP left) a clump charges out. size = base x Age density x stageSize, power = the stage's enemies x powerMul.",

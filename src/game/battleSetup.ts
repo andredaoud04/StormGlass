@@ -233,7 +233,7 @@ export function buildBattleConfig(input: BattleSetupInput): BattleConfig {
     enrage: { fromWave: b.waves.stream.rampFrom, perWave: b.waves.stream.enragePerWave },
     rally: playerRally(input.loadout.slice(0, 3).map((id) => troopStats(troopDef(id), kindMul(troopDef(id).kind), kindMul(troopDef(id).kind))), input.armyAge),
     towers: [
-      { dmg: Math.round(ageDef(input.armyAge).troops.find((t) => t.kind === 'melee')!.dmg * b.economy.tower.dmgMul * (input.fortressMul ?? 1)), range: b.economy.tower.range, intervalTicks: Math.round(b.economy.tower.intervalSec * b.sim.tickRate) },
+      { dmg: Math.round(ageDef(input.armyAge).troops.find((t) => t.kind === 'melee')!.dmg * b.economy.tower.dmgMul * (input.fortressMul ?? 1)), range: b.economy.tower.range, intervalTicks: Math.round(b.economy.tower.intervalSec * b.sim.tickRate), volley: b.economy.tower.volley ?? 1 },
       { dmg: Math.round(enemyTroops.melee.dmg * b.economy.tower.dmgMul * (b.economy.tower.enemyMul ?? 1) * (input.enemyAge === 0 && stage === 0 ? b.waves.sortie.firstBattle.towerMul : 1)), range: b.economy.tower.range, intervalTicks: Math.round(b.economy.tower.intervalSec * b.sim.tickRate) },
     ],
     waveSpeed: (1 + b.timeline.spawnSpeedPerTimeline * tl) * c.stagePace[stage],

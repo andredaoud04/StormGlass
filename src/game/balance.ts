@@ -100,7 +100,7 @@ export interface BossInfo extends Omit<BossDef, 'move'> {
 export interface Balance {
   version: number;
   sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number; band: BandRules };
-  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number }; tower: { dmgMul: number; range: number; intervalSec: number; enemyMul?: number }; redeploy: Record<'melee' | 'ranged' | 'tank', number>; daily: { wins: number; mul: number } };
+  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number }; tower: { dmgMul: number; range: number; intervalSec: number; enemyMul?: number; volley?: number }; redeploy: Record<'melee' | 'ranged' | 'tank', number>; daily: { wins: number; mul: number } };
   status: StatusRules;
   ages: AgeDef[];
   waves: Record<AgeId, StageWave[]> & { density: number[]; stream: WaveStream; sortie: SortieRules; rally: { thresholds: number[]; sizes: number[]; powerMul: number; gapSec: number; leash: number } };

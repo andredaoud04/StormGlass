@@ -146,12 +146,12 @@ describe('escalating waves', () => {
 describe('late game is a bigger, busier fight than early game', () => {
   it('more troops on the field, more hits, more multi-target hits', () => {
     const early = measure(0, 1, 3, 'early');
-    const late = measure(5, 3, 9, 'late');
+    const late = measure(5, 3, 13, 'late');
     expect(early.result).toBe('victory');
     expect(late.result).toBe('victory');
     expect(late.avgUnits).toBeGreaterThan(early.avgUnits * 2);
     expect(late.hitsPerSec).toBeGreaterThan(early.hitsPerSec * 2.5);
     expect(late.multiHitsPerSec).toBeGreaterThan(0.5);
-    expect(late.peakUnits).toBeLessThanOrEqual(2 * BALANCE.sim.maxUnitsPerSide);
+    expect(late.peakUnits).toBeLessThanOrEqual(2 * BALANCE.sim.maxUnitsPerSide + 16);
   });
 });

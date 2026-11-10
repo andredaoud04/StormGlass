@@ -204,6 +204,8 @@ export interface TowerConfig {
   dmg: number;
   range: number;
   intervalTicks: number;
+  /** Shots per volley: one at each of the nearest attackers (default 1). A volley punishes a crowd at the gate. */
+  volley?: number;
 }
 
 /** The in-battle Food upgrade: spend Food to raise Food income for the rest of the battle. */

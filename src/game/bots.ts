@@ -59,11 +59,12 @@ export function smartPolicy(): Policy {
     const melee = troops.findIndex((t) => t.kind === 'melee');
     const ranged = troops.findIndex((t) => t.kind === 'ranged');
     const tank = troops.findIndex((t) => t.kind === 'tank');
-    // Grow the economy while the lane is safe: this is how you out-build the enemy (D42).
     const kc = kitchenCost(s);
-    // Three levels early, the rest once an army is standing.
+    // Grow the economy while the lane is safe: this is how you out-build the enemy (D42).
     const mine = s.units.filter((u) => u.alive && u.side === 0).length;
-    if (!threat && kc !== null && s.foodMilli >= kc && (s.kitchenLevel < 3 || mine >= 3)) return [{ type: 'kitchen' }];
+    if (!threat && kc !== null) {
+      if (s.foodMilli >= kc && (s.kitchenLevel < 1 || mine >= 2)) return [{ type: 'kitchen' }];
+    }
     const ready = (i: number) => i >= 0 && f >= troops[i].cost && (s.cardWait[i] ?? 0) <= 0;
     if (threat) {
       // Under attack: whatever is ready, heaviest first.
