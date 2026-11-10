@@ -2,6 +2,7 @@ import { App } from './app';
 import { Assets } from './engine/assets';
 import { Audio } from './engine/audio';
 import { Input } from './engine/input';
+import { Music } from './engine/music';
 import { Screen } from './engine/screen';
 import { BattleScene } from './scenes/battle';
 import { MenuScene, type Tab } from './scenes/menu';
@@ -26,7 +27,7 @@ async function boot(): Promise<void> {
   app.go(app.save.stats.battles === 0 ? 'battle' : 'menu');
 
   // Test and screenshot hook (no gameplay effect unless called).
-  (window as unknown as { __sg: unknown }).__sg = { app, MenuScene, BattleScene };
+  (window as unknown as { __sg: unknown }).__sg = { app, MenuScene, BattleScene, Music };
 
   let last = performance.now();
   const loop = (now: number) => {

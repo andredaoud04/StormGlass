@@ -1,6 +1,11 @@
-/** Sound effects through Web Audio. Files come from the manifest's `sounds` map. */
+import { Music } from './music';
+
+/** Sound effects and music through Web Audio. Files come from the manifest's `sounds` map. */
 export class Audio {
   private ctx: AudioContext | null = null;
+  /** Master limiter: everything goes through it, so a pile of loud hits cannot clip. */
+  private master: AudioNode | null = null;
+  readonly music = new Music();
   private buffers = new Map<string, AudioBuffer>();
   private files: Record<string, string> = {};
   private base = './assets/';
@@ -19,6 +24,15 @@ export class Audio {
       const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!Ctor) return;
       this.ctx = new Ctor();
+      const limiter = this.ctx.createDynamicsCompressor();
+      limiter.threshold.value = -10;
+      limiter.knee.value = 6;
+      limiter.ratio.value = 12;
+      limiter.attack.value = 0.003;
+      limiter.release.value = 0.12;
+      limiter.connect(this.ctx.destination);
+      this.master = limiter;
+      this.music.attach(this.ctx, limiter);
       void this.loadAll();
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume();
@@ -55,7 +69,7 @@ export class Audio {
     src.playbackRate.value = (opts.rate ?? 1) * (1 + (Math.random() * 2 - 1) * jitter);
     const g = this.ctx.createGain();
     g.gain.value = this.volume * (opts.vol ?? 1);
-    src.connect(g).connect(this.ctx.destination);
+    src.connect(g).connect(this.master ?? this.ctx.destination);
     src.start();
   }
 }

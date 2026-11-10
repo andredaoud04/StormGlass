@@ -111,6 +111,7 @@ export class BattleScene implements Scene {
     }, ageDef(s.armyAge).id);
     this.deployedOnce = s.seen.includes('deploy');
     app.sfx('fight', { vol: 0.8, jitter: 0 });
+    app.audio.music.play(ageDef(this.enemyAge).id);
   }
 
   /** Layout in world pixels; the HUD (UI pixels) sits under the ground line. */
@@ -316,6 +317,9 @@ export class BattleScene implements Scene {
             this.app.sfx('nope', { vol: 0.4 });
           }
           if (e.type === 'skill') this.stormPop = 0.5;
+          // The boss has its own, heavier take on the Age's theme; it ends when the boss falls.
+          if (e.type === 'bossSpawn') this.app.audio.music.play(ageDef(this.enemyAge).id, true);
+          if (e.type === 'wardBreak') this.app.audio.music.play(ageDef(this.enemyAge).id);
           if (e.type === 'bossSpawn') {
             this.bossIntroT = 0;
             if (!this.app.reducedMotion) this.slowmo = 0.6;
@@ -779,12 +783,18 @@ export class BattleScene implements Scene {
     d.text('PAUSED', app.w / 2, y + 10, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
     button(app, 'resume', x + 12, y + 26, pw - 24, 30, 'RESUME', () => (this.paused = false), { style: 'green', icon: 'play' });
     const s = app.save.settings;
-    button(app, 'snd', x + 12, y + 64, 61, 24, s.sound ? 'SOUND' : 'MUTED', () => {
+    const bw3 = Math.floor((pw - 24 - 8) / 3);
+    button(app, 'snd', x + 12, y + 64, bw3, 24, '', () => {
       s.sound = !s.sound;
       app.audio.muted = !s.sound;
       app.persist();
     }, { style: 'wood', icon: s.sound ? 'sound' : 'mute', font: 'small' });
-    button(app, 'motion', x + pw - 73, y + 64, 61, 24, s.reducedMotion ? 'CALM' : 'SHAKE', () => {
+    button(app, 'music', x + 12 + bw3 + 4, y + 64, bw3, 24, 'MUSIC', () => {
+      s.music = !s.music;
+      app.audio.music.enabled = s.music;
+      app.persist();
+    }, { style: 'wood', font: 'small', textColor: s.music ? undefined : '#9a8a90' });
+    button(app, 'motion', x + pw - 12 - bw3, y + 64, bw3, 24, s.reducedMotion ? 'CALM' : 'SHAKE', () => {
       s.reducedMotion = !s.reducedMotion;
       this.view.shake.enabled = !s.reducedMotion;
       app.persist();

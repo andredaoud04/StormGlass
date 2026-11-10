@@ -13,6 +13,7 @@ export interface Settings {
   reducedMotion: boolean;
   /** Battles run at double speed (once unlocked). */
   fast: boolean;
+  music: boolean;
 }
 
 export interface Stats {
@@ -80,7 +81,7 @@ export function newSave(now = 0): SaveData {
     upgrades: {},
     battleNo: 0,
     stats: { battles: 0, wins: 0, losses: 0, retreats: 0, goldEarned: 0, kills: 0 },
-    settings: { sound: true, reducedMotion: false, fast: false },
+    settings: { sound: true, reducedMotion: false, fast: false, music: true },
     seen: [],
     cards: { melee: 0, ranged: 0, tank: 0 },
     daily: { day: 0, wins: 0, keysUsed: 0 },
@@ -207,7 +208,7 @@ export function repair(s: AnySave): SaveData {
       goldEarned: int(stats.goldEarned, 0, 0, 1e12),
       kills: int(stats.kills, 0, 0, 1e12),
     },
-    settings: { sound: settings.sound !== false, reducedMotion: settings.reducedMotion === true, fast: settings.fast === true },
+    settings: { sound: settings.sound !== false, reducedMotion: settings.reducedMotion === true, fast: settings.fast === true, music: settings.music !== false },
     seen: Array.isArray(s.seen) ? (s.seen as unknown[]).filter((x): x is string => typeof x === 'string') : [],
     cards: { melee: int(cards.melee, 0, 0, 999), ranged: int(cards.ranged, 0, 0, 999), tank: int(cards.tank, 0, 0, 999) },
     daily: { day: int(daily.day, 0, 0, 1e7), wins: int(daily.wins, 0, 0, 1e6), keysUsed: int(daily.keysUsed, 0, 0, 1e6) },

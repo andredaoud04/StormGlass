@@ -33,6 +33,7 @@ export class App {
     this.store = safeStorage();
     this.save = loadSave(this.store);
     audio.muted = !this.save.settings.sound;
+    audio.music.enabled = this.save.settings.music;
     input.keys = (k) => this.scene?.key?.(k);
     screen.onResize = () => this.scene?.resize?.();
   }
@@ -99,6 +100,7 @@ export class App {
     this.screen.useWorld = false;
     this.scene.draw();
     this.input.end();
+    this.audio.music.update();
     this.screen.present();
   }
 

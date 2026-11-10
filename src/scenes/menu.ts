@@ -49,6 +49,7 @@ export class MenuScene implements Scene {
     this.tab = tab;
     this.env = new EnvView(app, ageDef(selected(app.save).age).id);
     this.fx = new FxSystem((k) => app.assets.strip(k).frames);
+    app.audio.music.play('menu');
   }
 
   key(k: string): void {
@@ -600,7 +601,7 @@ export class MenuScene implements Scene {
     dim(app);
     blocker(app, 'settings-block', () => (this.settings = false));
     const pw = 150;
-    const ph = 136;
+    const ph = 162;
     const x = Math.round(app.w / 2 - pw / 2);
     const y = Math.round(app.h / 2 - ph / 2);
     d.nine('ui.panel', x, y, pw, ph);
@@ -612,11 +613,16 @@ export class MenuScene implements Scene {
       app.audio.muted = !s.sound;
       app.persist();
     }, { icon: s.sound ? 'sound' : 'mute', font: 'small' });
-    button(app, 'set-motion', x + 14, y + 52, pw - 28, 22, s.reducedMotion ? 'SHAKE: OFF' : 'SHAKE: ON', () => {
+    button(app, 'set-music', x + 14, y + 52, pw - 28, 22, s.music ? 'MUSIC: ON' : 'MUSIC: OFF', () => {
+      s.music = !s.music;
+      app.audio.music.enabled = s.music;
+      app.persist();
+    }, { font: 'small' });
+    button(app, 'set-motion', x + 14, y + 78, pw - 28, 22, s.reducedMotion ? 'SHAKE: OFF' : 'SHAKE: ON', () => {
       s.reducedMotion = !s.reducedMotion;
       app.persist();
     }, { font: 'small' });
-    button(app, 'set-close', x + 14, y + 80, pw - 28, 26, 'CLOSE', () => {
+    button(app, 'set-close', x + 14, y + 106, pw - 28, 26, 'CLOSE', () => {
       this.settings = false;
       this.confirmReset = 0;
     }, { style: 'green' });
