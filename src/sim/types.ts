@@ -191,6 +191,8 @@ export interface BattleConfig {
   sortie?: SortieConfig;
   /** Your own garrison: it rallies out when your fortress is worn down, the same way. */
   rally?: SortieConfig;
+  /** Survival: the enemy fortress can never be hurt; the run ends when yours falls. */
+  endless?: boolean;
   /** Late in a long battle the enemy's troops themselves grow stronger, so no battle can stall. */
   enrage?: { fromWave: number; perWave: number };
   /** Guard towers: each fortress shoots the nearest attacker in range ([player, enemy]). */

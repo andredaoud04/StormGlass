@@ -2,6 +2,7 @@
 import type { App, Scene } from '../app';
 import { BALANCE, ageDef } from '../game/balance';
 import { isBossStage } from '../game/battleSetup';
+import { applySurvival, claimDaily, dayOf, survivalConfig } from '../game/meta';
 import { battleFor } from '../game/session';
 import { applyOutcome, battleNumber, evolveCost, evolveUnlocked, frontier, loadout, selected, speedUnlocked, STAGES, toIndex, type BattleOutcome } from '../game/progress';
 import { createBattle, food, foodRate, kitchenCost, stepBattle, totalGold, waveComposition } from '../sim/battle';
@@ -10,6 +11,8 @@ import { blocker, button, dim, fmt, iconButton } from '../ui/widgets';
 import { BattleView } from '../view/battleView';
 
 const MAX_STEPS_PER_FRAME = 6;
+/** Today's day number in the player's time zone. */
+export const today = (): number => dayOf(Date.now(), new Date().getTimezoneOffset());
 /** World pixels of each fortress left on screen in front of its anchor (the rest is off the edge). */
 const BASE_INSET = 26;
 /** UI heights: the thin top bar and the slim bottom bar that holds Food and the cards. */
@@ -74,15 +77,25 @@ export class BattleScene implements Scene {
   private stormPop = 0;
   private confirmRetreat = false;
 
-  constructor(private app: App) {
+  /** Survival run (Dungeons): endless waves, Gems for waves survived, no Gold. */
+  private readonly survival: boolean;
+  private dailyBonus = 0;
+  private run = { gems: 0, record: false, waves: 0 };
+
+  constructor(
+    private app: App,
+    mode: 'campaign' | 'survival' = 'campaign',
+  ) {
     const s = app.save;
+    this.survival = mode === 'survival';
     this.troops = loadout(s);
-    const sel = selected(s);
+    const sel = this.survival ? { age: s.armyAge, stage: BALANCE.meta.survival.stage } : selected(s);
     this.enemyAge = sel.age;
     this.stage = sel.stage;
-    this.replay = toIndex(sel) < frontier(s);
+    this.replay = !this.survival && toIndex(sel) < frontier(s);
     this.bossName = BALANCE.bosses[ageDef(sel.age).id].name.toUpperCase();
-    const config = battleFor(s, sel, (s.createdAt + s.battleNo * 7919) | 0);
+    const seed = (s.createdAt + s.battleNo * 7919 + s.stats.battles * 104729) | 0;
+    const config = this.survival ? survivalConfig(s, seed) : battleFor(s, sel, seed);
     this.sim = createBattle(config);
     this.hudAge = app.assets.has(`ui.card_${ageDef(this.enemyAge).id}`) ? ageDef(this.enemyAge).id : 'stone';
     this.wallKey = `ui.wall_${this.hudAge}`;
@@ -238,8 +251,15 @@ export class BattleScene implements Scene {
     this.resultT = 0;
     if (this.outcome) return;
     const s = this.sim;
-    this.outcome = { result: this.result as BattleOutcome['result'], gold: totalGold(s), kills: s.kills, enemyAge: this.enemyAge, stage: this.stage, campaign: true };
-    applyOutcome(this.app.save, this.outcome);
+    this.outcome = { result: this.result as BattleOutcome['result'], gold: totalGold(s), kills: s.kills, enemyAge: this.enemyAge, stage: this.stage, campaign: !this.survival };
+    if (this.survival) {
+      this.run = { ...applySurvival(this.app.save, s.waveNow), waves: s.waveNow };
+      this.app.save.stats.kills += s.kills;
+    } else {
+      applyOutcome(this.app.save, this.outcome);
+      // The first wins of the day pay double.
+      if (this.outcome.result === 'victory') this.dailyBonus = claimDaily(this.app.save, today(), this.outcome.gold);
+    }
     this.app.persist();
     // Any coins still in the air count now.
     this.goldShown = totalGold(s);
@@ -454,7 +474,8 @@ export class BattleScene implements Scene {
       }
     } else {
       d.text(`WAVE ${n}`, app.w / 2, y + 4, { font: 'big', align: 'center', color: fresh ? '#ffd03c' : '#fff8ec', shadow: true });
-      this.drawPips(app.w / 2, y + 14);
+      if (this.survival) d.text(`BEST ${app.save.survivalBest}`, app.w / 2, y + 14, { align: 'center', color: n > app.save.survivalBest ? '#ffd03c' : '#cfe0a0' });
+      else this.drawPips(app.w / 2, y + 14);
     }
     // Countdown to the next wave along the plaque's lip.
     const period = BALANCE.waves.stream.period;
@@ -494,10 +515,16 @@ export class BattleScene implements Scene {
     const top0 = app.safeTop;
     d.image(`ui.beam_${this.hudAge}`, Math.floor(app.w / 2), top0 + TOP_BAR);
     const bump = this.goldBump > 0 ? -1 : 0;
-    d.image('icon.gold', 6, top0 + 6 + bump);
-    d.text(fmt(this.goldShown), 18, top0 + 6 + bump, { font: 'big', color: '#ffe68a', shadow: true });
+    if (this.survival) {
+      // Survival pays Gems for waves, never Gold.
+      d.image('icon.gem', 6, top0 + 6);
+      d.text(fmt(this.sim.waveNow * BALANCE.meta.survival.gemsPerWave), 18, top0 + 6, { font: 'big', color: '#9fe8ff', shadow: true });
+    } else {
+      d.image('icon.gold', 6, top0 + 6 + bump);
+      d.text(fmt(this.goldShown), 18, top0 + 6 + bump, { font: 'big', color: '#ffe68a', shadow: true });
+    }
     const n = battleNumber({ age: this.enemyAge, stage: this.stage });
-    d.text(`BATTLE ${n}`, app.w / 2, top0 + 6, { font: 'big', align: 'center', color: '#fff8ec', shadow: true });
+    d.text(this.survival ? 'SURVIVAL' : `BATTLE ${n}`, app.w / 2, top0 + 6, { font: 'big', align: 'center', color: '#fff8ec', shadow: true });
     if (this.phase === 'play') {
       iconButton(app, 'pause', app.w - 25, top0 + 1, 22, 'pause', () => {
         this.paused = true;
@@ -582,8 +609,8 @@ export class BattleScene implements Scene {
     d.image(this.wallKey, Math.floor(w / 2), barTop);
 
     // Hero niche, raised on the left: a carved, empty niche until the first Hero exists.
-    const heroUnlocked = app.save.prestige > 0;
-    d.image(heroUnlocked ? 'ui.hero_socket' : `ui.hero_niche_${age}`, 24, top + 8);
+    // The Hero has not shipped yet: a solid, empty niche, never a lit socket with nothing in it.
+    d.image(`ui.hero_niche_${age}`, 24, top + 8);
 
     // Three Skill sockets in a row on the right: Stormcall (left), Kitchen (middle), one empty niche.
     const cy = top + 20;
@@ -738,7 +765,7 @@ export class BattleScene implements Scene {
     d.nine(`ui.food_${this.hudAge}`, x, y, pw, ph);
     if (this.confirmRetreat) {
       d.text('RETREAT?', app.w / 2, y + 14, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-      d.text('GOLD EARNED SO FAR IS KEPT', app.w / 2, y + 32, { align: 'center', color: '#cfe0a0' });
+      d.text(this.survival ? 'GEMS EARNED SO FAR ARE KEPT' : 'GOLD EARNED SO FAR IS KEPT', app.w / 2, y + 32, { align: 'center', color: '#cfe0a0' });
       button(app, 'retreat-yes', x + 12, y + 52, pw - 24, 28, 'RETREAT', () => {
         this.paused = false;
         this.confirmRetreat = false;
@@ -766,6 +793,38 @@ export class BattleScene implements Scene {
     button(app, 'retreat', x + 36, y + ph - 32, pw - 72, 22, 'RETREAT', () => (this.confirmRetreat = true), { style: 'wood', icon: 'flag', font: 'small', textColor: '#ffb08c' });
   }
 
+  /** End of a Survival run: waves held, Gems earned, a new record. */
+  private drawRunResult(): void {
+    const app = this.app;
+    const d = app.draw;
+    const pw = 160;
+    const ph = 124;
+    const x = Math.round(app.w / 2 - pw / 2);
+    const slide = Math.max(0, 1 - this.resultT / 0.25);
+    const y = Math.round(app.h / 2 - ph / 2 + 10 + slide * 40);
+    d.nine(`ui.food_${this.hudAge}`, x, y, pw, ph);
+    const title = this.run.record ? 'NEW RECORD!' : 'RUN OVER';
+    const rw = d.measure(title, 'big') + 40;
+    d.nine(this.run.record ? 'ui.ribbon_gold' : 'ui.ribbon_grey', Math.round(app.w / 2 - rw / 2), y - 12, rw, 24);
+    d.text(title, app.w / 2, y - 4, { font: 'big', align: 'center', color: '#fff8ec', shadow: true });
+    d.image('icon.skull', x + 10, y + 23);
+    d.text(`WAVES HELD`, x + 23, y + 25);
+    d.text(String(this.run.waves), x + pw - 12, y + 24, { font: 'big', align: 'right', color: '#fff8ec', shadow: true });
+    d.image('icon.star', x + 10, y + 42);
+    d.text('BEST', x + 23, y + 44);
+    d.text(String(app.save.survivalBest), x + pw - 12, y + 43, { font: 'big', align: 'right', color: this.run.record ? '#ffd03c' : '#fff8ec', shadow: true });
+    d.rect(x + 8, y + 58, pw - 16, 1, '#4a3a48');
+    const shown = Math.round(this.run.gems * Math.min(1, Math.max(0, (this.resultT - 0.5) / 0.6)));
+    d.text('GEMS', x + 10, y + 65, { font: 'big', color: '#fff1c0', shadow: true });
+    d.text('+' + fmt(shown), x + pw - 22, y + 65, { font: 'big', align: 'right', color: '#9fe8ff', shadow: true });
+    d.image('icon.gem', x + pw - 19, y + 64);
+    if (this.resultT > 0.9) {
+      const half = Math.floor((pw - 34) / 2);
+      button(app, 'cards', x + 12, y + ph - 34, half, 28, 'CARDS', () => app.go('menu', 'cards'), { style: 'gold', font: 'small' });
+      button(app, 'continue', x + pw - 12 - half, y + ph - 34, half, 28, 'BACK', () => app.go('menu', 'dungeons'), { style: 'wood', font: 'small' });
+    }
+  }
+
   private drawResult(): void {
     const app = this.app;
     const d = app.draw;
@@ -773,6 +832,10 @@ export class BattleScene implements Scene {
     const s = this.sim;
     dim(app, Math.min(0.6, this.resultT * 2));
     blocker(app, 'result-block');
+    if (this.survival) {
+      this.drawRunResult();
+      return;
+    }
     const win = o.result === 'victory';
     // Only rows that earned something.
     const rows: [string, string, number][] = (
@@ -781,6 +844,7 @@ export class BattleScene implements Scene {
         ['shield', `TANKS X${s.tankKills}`, s.gold.tanks],
         ['hp', 'FORTRESS', s.gold.base],
         ...(s.config.boss ? [['star', 'BOSS', s.gold.boss]] : []),
+        ['star', 'DAILY BONUS X2', this.dailyBonus],
       ] as [string, string, number][]
     ).filter(([, , g]) => g > 0);
     const pw = 160;
@@ -804,7 +868,7 @@ export class BattleScene implements Scene {
       d.image('icon.gold', x + pw - 19, ry + 3, { alpha: a });
       ry += 19;
     });
-    const total = totalGold(s);
+    const total = totalGold(s) + this.dailyBonus;
     const ta = Math.min(1, Math.max(0, (this.resultT - 0.75) / 0.2));
     const shown = Math.round(total * Math.min(1, Math.max(0, (this.resultT - 0.75) / 0.6)));
     if (ta > 0) {

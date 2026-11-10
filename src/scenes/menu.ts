@@ -6,8 +6,10 @@ import type { App, Scene } from '../app';
 import { BALANCE, ageDef, type UpgradeId } from '../game/balance';
 import { battleNumber, canEvolve, canPrestige, evolve, evolveCost, evolveUnlocked, frontier, loadout, pickBattle, prestige, selected, STAGES, toIndex } from '../game/progress';
 import { UPGRADE_IDS, affordableCount, buyUpgrade, canBuy, canUnlockSlot, hasSlot, level, maxLevel, slotCost, unlockSlot, upgradeCost, upgradeValue, type SlotId } from '../game/upgrades';
+import { CARD_KINDS, buyCard, cardCost, cardLevel, cardsAffordable, dailyLeft, keysLeft, survivalUnlocked, useKey } from '../game/meta';
 import { newSave } from '../game/save';
-import { blocker, button, counter, counterBig, dim, fmt, iconButton } from '../ui/widgets';
+import { today } from './battle';
+import { blocker, button, counterBig, dim, fmt, iconButton } from '../ui/widgets';
 import { EnvView } from '../view/environment';
 import { FxSystem } from '../view/fx';
 
@@ -21,8 +23,9 @@ function tabRevealed(app: App, t: Tab): boolean {
   const s = app.save;
   if (t === 'battle') return true;
   if (t === 'upgrades') return s.stats.battles >= 1;
-  // Dungeons stay hidden until a mode is actually playable ("nothing pretends to work", D18).
-  void s.prestige;
+  // Dungeons appear once Survival is playable; Cards once you have earned a Gem (D43).
+  if (t === 'dungeons') return survivalUnlocked(s);
+  if (t === 'cards') return s.gems > 0 || s.survivalBest > 0 || CARD_KINDS.some((k) => cardLevel(s, k) > 0);
   return false;
 }
 
@@ -142,6 +145,12 @@ export class MenuScene implements Scene {
     const top0 = app.safeTop;
     this.goldCounter(top0 + 5);
     iconButton(app, 'settings', w - 26, top0 + 3, 22, 'gear', () => (this.settings = true));
+    // Prestige Stars: permanent power and Gold, one per Prestige.
+    if (app.save.prestige > 0) {
+      const sx = 18 + Math.max(40, d.measure(fmt(app.save.gold), 'big') + 20);
+      d.image('icon.star', sx, top0 + 9);
+      d.text(`X${app.save.prestige}`, sx + 11, top0 + 10, { font: 'big', color: '#ffe68a', shadow: true });
+    }
 
     // Title logo in the sky, then the stage plaque just above the battlefield.
     const logo = app.assets.image('ui.logo');
@@ -196,7 +205,7 @@ export class MenuScene implements Scene {
           this.ceremonyText = `TIMELINE ${save.timeline}`;
           this.ceremony = 2.6;
         }
-      }, { style: 'gold', sub: 'BACK TO STONE AGE' });
+      }, { style: 'gold', sub: '+1 STAR: POWER AND GOLD' });
     } else if (canEvolve(save)) {
       const cost = evolveCost(save) ?? 0;
       button(app, 'battle-go', bx + 16, wallTop + 10, bw - 32, 26, boss ? 'BOSS' : 'BATTLE', battleGo, { style: 'wood', font: 'small', icon: boss ? 'skull' : 'sword' });
@@ -213,7 +222,8 @@ export class MenuScene implements Scene {
         d.image('icon.gold', lx + 4, wallTop + 9);
         d.text(label, w / 2 + 5, wallTop + 10, { align: 'center', color: '#ffe68a' });
       }
-      button(app, 'battle-go', bx, by, bw, bh, boss ? 'BOSS' : 'BATTLE', battleGo, { style: boss ? 'red' : 'green', icon: boss ? 'skull' : 'sword' });
+      const left = dailyLeft(save, today());
+      button(app, 'battle-go', bx, by, bw, bh, boss ? 'BOSS' : 'BATTLE', battleGo, { style: boss ? 'red' : 'green', icon: boss ? 'skull' : 'sword', ...(left > 0 ? { sub: `DAILY GOLD X2: ${left} LEFT` } : {}) });
     }
   }
 
@@ -288,7 +298,8 @@ export class MenuScene implements Scene {
     const y = this.drawBackdrop(TAB_LABEL[this.tab]);
     if (this.tab === 'upgrades') this.drawUpgrades(y);
     else if (this.tab === 'dungeons') this.drawDungeons(y);
-    else this.drawSoon(y, this.tab === 'cards' ? 'tab_cards' : 'tab_shop', this.tab === 'cards' ? ['CARDS AND SKILLS', 'ARRIVE IN A LATER UPDATE'] : ['NO ADS. NO PURCHASES.', 'GEM SHOP ARRIVES LATER']);
+    else if (this.tab === 'cards') this.drawCards(y);
+    else this.drawSoon(y, 'tab_shop', ['NO ADS. NO PURCHASES.', 'GEM SHOP ARRIVES LATER']);
   }
 
   private section(y: number, label: string): number {
@@ -370,7 +381,7 @@ export class MenuScene implements Scene {
       const icon = 'icon.' + tr.icon;
       const ie = app.assets.image(icon);
       d.image(icon, Math.round(rx + 10 - ie.w / 2), Math.round(ry + rowH / 2 - ie.h / 2 - 1));
-      const name = id === 'food' ? 'FOOD RATE' : 'BASE HP';
+      const name = id === 'food' ? 'FOOD RATE' : 'BASE + TOWER';
       d.text(`${name}  LV ${lv}`, rx + 20, ry + 6);
       // Now > next, so the purchase shows what it buys.
       const now = upgradeValue(s, id, lv);
@@ -421,32 +432,95 @@ export class MenuScene implements Scene {
     const app = this.app;
     const d = app.draw;
     const s = app.save;
-    counter(app, app.w - 58, app.safeTop + 5, 48, 'key', fmt(s.keys));
-    const modes: [string, string, number][] = [
-      ['RUSH', 'tab_battle', 1],
-      ['LEGENDS', 'tab_cards', 2],
-      ['BOSSES', 'skull', 3],
-      ['SURVIVAL', 'tab_dungeons', 0],
+    const day = today();
+    const keys = keysLeft(s, day);
+    counterBig(app, app.w - 50, app.safeTop + 4, 40, 'key', String(keys));
+    const modes: [string, string, string][] = [
+      ['SURVIVAL', 'skull', 'HOLD THE GATE'],
+      ['RUSH', 'tab_battle', ''],
+      ['LEGENDS', 'tab_cards', ''],
+      ['BOSSES', 'star', ''],
     ];
     const gap = 6;
     const tw = Math.floor((app.w - 20 - gap) / 2);
-    const avail = this.tabY - y0 - 20;
-    const th = Math.min(86, Math.floor((avail - gap) / 2));
-    modes.forEach(([name, icon, need], i) => {
+    const avail = this.tabY - y0 - 30;
+    const th = Math.min(96, Math.floor((avail - gap) / 2));
+    modes.forEach(([name, icon, line], i) => {
       const x = 10 + (i % 2) * (tw + gap);
       const y = y0 + 4 + Math.floor(i / 2) * (th + gap);
       d.nine('ui.panel', x, y, tw, th);
       const ie = app.assets.image('icon.' + icon);
-      d.image('icon.' + icon, Math.round(x + tw / 2 - ie.w / 2), y + 12);
-      d.text(name, x + tw / 2, y + 34, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
-      const locked = need > 0 ? s.prestige < need : true;
-      if (locked) {
-        d.rect(x + 3, y + 3, tw - 6, th - 7, '#1e1526', 0.45);
-        d.image('icon.lock', Math.round(x + tw / 2 - 4), y + th - 30);
-        d.text(need > 0 ? `PRESTIGE ${need}` : 'SOON', x + tw / 2, y + th - 18, { align: 'center', color: '#e8dcc8' });
+      d.image('icon.' + icon, Math.round(x + tw / 2 - ie.w / 2), y + 10);
+      d.text(name, x + tw / 2, y + 24, { font: 'big', align: 'center', color: '#fff1c0', shadow: true });
+      if (i === 0) {
+        // Survival: endless waves of your own Age. Gems for every wave held. One Key per run.
+        d.text(line, x + tw / 2, y + 36, { align: 'center', color: '#3a2a30', outline: null });
+        d.text(`BEST ${s.survivalBest}`, x + tw / 2, y + 46, { align: 'center', color: '#3e7a2a', outline: null });
+        button(app, 'survival-go', x + 6, y + th - 30, tw - 12, 24, keys > 0 ? 'ENTER' : 'NO KEYS', () => {
+          if (useKey(s, day)) {
+            app.persist();
+            app.go('battle', 'survival');
+          } else {
+            app.sfx('nope', { vol: 0.5 });
+            this.say('KEYS RETURN TOMORROW');
+          }
+        }, { style: keys > 0 ? 'green' : 'wood', icon: 'key', font: 'small', textColor: keys > 0 ? undefined : '#ff8a7a' });
+      } else {
+        d.image('icon.lock', Math.round(x + tw / 2 - 4), y + th - 32);
+        d.text('LATER', x + tw / 2, y + th - 18, { align: 'center', color: '#3a2a30', outline: null });
       }
     });
-    d.text('KEYS DROP ONLY IN DUNGEONS', app.w / 2, y0 + 4 + 2 * (th + gap) + 2, { align: 'center', color: '#e8dcc8' });
+    const ny = y0 + 4 + 2 * (th + gap) + 4;
+    d.image('icon.gem', Math.round(app.w / 2 - 44), ny - 2);
+    d.text('GEMS BUY CARDS', app.w / 2 + 6, ny, { align: 'center', color: '#e8dcc8' });
+  }
+
+  /** Cards: permanent power for each troop kind, bought with Gems. Kept through Evolution and Prestige. */
+  private drawCards(y0: number): void {
+    const app = this.app;
+    const d = app.draw;
+    const s = app.save;
+    const { w } = app;
+    counterBig(app, w - 60, app.safeTop + 4, 50, 'gem', fmt(s.gems), '#9fe8ff');
+    const age = ageDef(s.armyAge);
+    const rw = Math.min(w - 16, 182);
+    const rx = Math.round((w - rw) / 2);
+    const rowH = 46;
+    const per = Math.round(BALANCE.meta.cards.perLevel * 100);
+    CARD_KINDS.forEach((kind, i) => {
+      const y = y0 + 4 + i * (rowH + 5);
+      d.nine('ui.panel', rx, y, rw, rowH);
+      d.nine('ui.inset', rx + 5, y + 5, 36, 36);
+      const t = age.troops.find((q) => q.kind === kind)!;
+      const key = `troop.${t.id}.blue`;
+      if (app.assets.has(key)) {
+        const a = app.assets.sheet(key).anims.idle;
+        d.frame(key, 'idle', Math.floor(app.time * a.fps + i) % a.frames, rx + 23, y + 38);
+      }
+      const lv = cardLevel(s, kind);
+      const name = kind === 'tank' ? 'HEAVY' : kind.toUpperCase();
+      d.text(`${name} CARD`, rx + 46, y + 7, { font: 'big', color: '#fff1c0', shadow: true });
+      d.text(`LV ${lv}`, rx + 46, y + 19, { color: '#3a2a30', outline: null });
+      const c = cardCost(s, kind);
+      d.text(c === null ? `+${lv * per}% POWER` : `+${lv * per}% > +${(lv + 1) * per}% POWER`, rx + 46, y + 29, { color: '#3e7a2a', outline: null });
+      if (c === null) d.text('MAX', rx + rw - 28, y + 18, { align: 'center', color: '#ffe68a' });
+      else {
+        const ok = s.gems >= c;
+        button(app, 'card-' + kind, rx + rw - 52, y + 5, 46, 22, fmt(c), () => {
+          if (buyCard(s, kind)) {
+            app.persist();
+            app.sfx('upgrade', { jitter: 0.02 });
+            this.say(`${name} +${cardLevel(s, kind) * per}% POWER`);
+          } else {
+            app.sfx('nope', { vol: 0.5 });
+            this.say(`NEED ${fmt(c - s.gems)} MORE GEMS`);
+          }
+        }, { style: ok ? 'green' : 'wood', icon: 'gem', font: 'small', textColor: ok ? undefined : '#ff8a7a' });
+      }
+    });
+    const ny = y0 + 4 + 3 * (rowH + 5) + 4;
+    d.text('CARDS ARE KEPT FOREVER', w / 2, ny, { align: 'center', color: '#e8dcc8' });
+    d.text('EARN GEMS IN SURVIVAL', w / 2, ny + 10, { align: 'center', color: '#e8dcc8' });
   }
 
   private drawSoon(y0: number, icon: string, lines: string[]): void {
@@ -491,7 +565,7 @@ export class MenuScene implements Scene {
         d.text(TAB_LABEL[t], lx, y + 16, { align: 'center', color: '#fff1c0' });
       }
       // Badges: NEW on a freshly revealed tab, else what you can afford.
-      const count = t === 'upgrades' ? (evolveUnlocked(app.save) ? (canEvolve(app.save) ? 1 : 0) : affordableCount(app.save)) : 0;
+      const count = t === 'upgrades' ? (evolveUnlocked(app.save) ? (canEvolve(app.save) ? 1 : 0) : affordableCount(app.save)) : t === 'cards' ? cardsAffordable(app.save) : t === 'dungeons' ? keysLeft(app.save, today()) : 0;
       if (!sel && (fresh || count > 0)) {
         const label = fresh ? 'NEW' : String(count);
         const bwid = d.measure(label) + 6;

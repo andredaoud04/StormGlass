@@ -100,7 +100,7 @@ export interface BossInfo extends Omit<BossDef, 'move'> {
 export interface Balance {
   version: number;
   sim: { tickRate: number; laneLength: number; spawnOffset: number; maxUnitsPerSide: number; projectileSpeed: number; band: BandRules };
-  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number }; tower: { dmgMul: number; range: number; intervalSec: number; enemyMul?: number }; redeploy: Record<'melee' | 'ranged' | 'tank', number> };
+  economy: { startingGold: number; killGold: number[]; tankKillMul: number; startFood: number; baseGoldSteps: number; playerBaseHpMul: number; slotUnlock: { ranged: number; tank: number }; tower: { dmgMul: number; range: number; intervalSec: number; enemyMul?: number }; redeploy: Record<'melee' | 'ranged' | 'tank', number>; daily: { wins: number; mul: number } };
   status: StatusRules;
   ages: AgeDef[];
   waves: Record<AgeId, StageWave[]> & { density: number[]; stream: WaveStream; sortie: SortieRules; rally: { thresholds: number[]; sizes: number[]; powerMul: number; gapSec: number; leash: number } };
@@ -110,6 +110,10 @@ export interface Balance {
   campaign: { stagesPerAge: number; stagePower: number[]; stageFortress: number[]; stagePace: number[]; fortressScale: number };
   bosses: Record<AgeId, BossInfo>;
   skills: { kitchen: { name: string; costMul: number; growth: number; perLevel: number; maxLevel: number; unlockStage: number }; stormcall: { name: string; dmgMul: number; radius: number; cooldownSec: number; firstReadySec: number; bossMul: number; unlockStage: number }; speedUnlockStage: number };
+  meta: {
+    survival: { unlockArmyAge: number; keysPerDay: number; gemsPerWave: number; recordGems: number; stage: number; enrageFrom: number; enragePerWave: number };
+    cards: { perLevel: number; baseCost: number; costGrowth: number; maxLevel: number };
+  };
   timeline: { enemyPower: number; enemyStatPerTimeline: number; enemyFortressPerTimeline: number; spawnSpeedPerTimeline: number; goldGrowthPerTimeline: number; star: { power: number; gold: number } };
 }
 

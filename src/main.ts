@@ -21,7 +21,7 @@ async function boot(): Promise<void> {
   input.onFirstGesture = () => audio.unlock();
   const app = new App(screen, assets, input, audio);
   app.register('menu', (tab) => new MenuScene(app, (tab as Tab) ?? 'battle'));
-  app.register('battle', () => new BattleScene(app));
+  app.register('battle', (mode) => new BattleScene(app, mode === 'survival' ? 'survival' : 'campaign'));
   // A brand-new player drops straight into Battle 1: the fight starts seamlessly, no menu first (D39).
   app.go(app.save.stats.battles === 0 ? 'battle' : 'menu');
 

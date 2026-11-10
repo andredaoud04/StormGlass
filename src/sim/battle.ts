@@ -42,7 +42,7 @@ export function createBattle(config: BattleConfig): BattleState {
     waveIndex: 0,
     result: null,
     gold: { kills: 0, tanks: 0, base: 0, boss: 0 },
-    wardUp: !!config.boss,
+    wardUp: !!config.boss || !!config.endless,
     bossId: 0,
     bossSpawned: false,
     bossMilestonesPaid: 0,

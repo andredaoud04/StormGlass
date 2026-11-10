@@ -4,7 +4,7 @@
  */
 import { BALANCE, troopDef } from './balance';
 
-export const SAVE_SCHEMA = 4;
+export const SAVE_SCHEMA = 5;
 export const SAVE_KEY = 'stormglass.save';
 
 export interface Settings {
@@ -53,6 +53,12 @@ export interface SaveData {
   settings: Settings;
   /** One-time hints already shown. */
   seen: string[];
+  /** Card levels by troop kind (permanent troop power, bought with Gems). */
+  cards: { melee: number; ranged: number; tank: number };
+  /** Daily state: the day it belongs to, campaign wins that day, Dungeon Keys used that day. */
+  daily: { day: number; wins: number; keysUsed: number };
+  /** Best Survival run (waves). */
+  survivalBest: number;
 }
 
 export function newSave(now = 0): SaveData {
@@ -76,6 +82,9 @@ export function newSave(now = 0): SaveData {
     stats: { battles: 0, wins: 0, losses: 0, retreats: 0, goldEarned: 0, kills: 0 },
     settings: { sound: true, reducedMotion: false, fast: false },
     seen: [],
+    cards: { melee: 0, ranged: 0, tank: 0 },
+    daily: { day: 0, wins: 0, keysUsed: 0 },
+    survivalBest: 0,
   };
 }
 
@@ -134,6 +143,8 @@ export const MIGRATIONS: Record<number, (s: AnySave) => AnySave> = {
     }
     return { ...s, schema: 4, gold: num(s.gold, 0) + refund, upgrades: {}, camp: undefined, enemyAge, stage, pick: -1 };
   },
+  // v4 -> v5: Cards, the daily bonus and Survival. Nothing is lost.
+  4: (s) => ({ ...s, schema: 5, cards: { melee: 0, ranged: 0, tank: 0 }, daily: { day: 0, wins: 0, keysUsed: 0 }, survivalBest: 0 }),
 };
 
 function num(v: unknown, d: number): number {
@@ -164,6 +175,8 @@ export function repair(s: AnySave): SaveData {
   const maxAge = BALANCE.ages.length - 1;
   const stats = (s.stats ?? {}) as AnySave;
   const settings = (s.settings ?? {}) as AnySave;
+  const cards = (s.cards ?? {}) as AnySave;
+  const daily = (s.daily ?? {}) as AnySave;
   const upgrades: Record<string, number> = {};
   if (s.upgrades && typeof s.upgrades === 'object') for (const [k, v] of Object.entries(s.upgrades)) if (k in BALANCE.upgrades.tracks) upgrades[k] = int(v, 0, 0, 999);
   const slotList = Array.isArray(s.slots) ? (s.slots as unknown[]).filter((x): x is string => x === 'ranged' || x === 'tank') : [];
@@ -196,6 +209,9 @@ export function repair(s: AnySave): SaveData {
     },
     settings: { sound: settings.sound !== false, reducedMotion: settings.reducedMotion === true, fast: settings.fast === true },
     seen: Array.isArray(s.seen) ? (s.seen as unknown[]).filter((x): x is string => typeof x === 'string') : [],
+    cards: { melee: int(cards.melee, 0, 0, 999), ranged: int(cards.ranged, 0, 0, 999), tank: int(cards.tank, 0, 0, 999) },
+    daily: { day: int(daily.day, 0, 0, 1e7), wins: int(daily.wins, 0, 0, 1e6), keysUsed: int(daily.keysUsed, 0, 0, 1e6) },
+    survivalBest: int(s.survivalBest, 0, 0, 1e6),
   };
 }
 

@@ -47,6 +47,11 @@
       "melee": 0.3,
       "ranged": 2,
       "tank": 6
+    },
+    "daily": {
+      "notes": "The first `wins` campaign victories of each day pay `mul` times their Gold.",
+      "wins": 3,
+      "mul": 2
     }
   },
   "status": {
@@ -827,5 +832,23 @@
     "cleaveShare": 0.75,
     "pierceShare": 0.7,
     "damageScale": 1.0
+  },
+  "meta": {
+    "notes": "Dungeons and Cards. Dungeons never pay Gold (Locked Rule 5). Survival: hold out against endless waves; Gems for every wave survived, more for a new record. Cards: permanent troop power bought with Gems, kept through Evolution and Prestige.",
+    "survival": {
+      "unlockArmyAge": 1,
+      "keysPerDay": 3,
+      "gemsPerWave": 2,
+      "recordGems": 5,
+      "stage": 3,
+      "enrageFrom": 2,
+      "enragePerWave": 0.2
+    },
+    "cards": {
+      "perLevel": 0.06,
+      "baseCost": 10,
+      "costGrowth": 1.3,
+      "maxLevel": 30
+    }
   }
 }
